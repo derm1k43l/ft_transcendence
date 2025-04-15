@@ -2,24 +2,15 @@ import { Router } from './core/router.js';
 import { ProfileView } from './views/Profile.js';
 import { AboutView } from './views/About.js';
 
-// Import mock data
-import { UserProfile, findUserByUsername } from './data/mock_data.js';
-
-// --- State ---
-let isLoggedIn = false;
-let currentUser: UserProfile | null = null;
-
 // --- DOM Elements ---
 let loginViewElement: HTMLElement | null;
 let appViewElement: HTMLElement | null;
 let appContentRoot: HTMLElement | null;
-let mainNav: HTMLElement | null;
 let sidebarLinks: NodeListOf<HTMLAnchorElement>;
-let logoutButton: HTMLAnchorElement | null;
 let sidebarUsernameElement: HTMLElement | null;
 let sidebarAvatarElement: HTMLImageElement | null;
 let socialButtons: NodeListOf<HTMLButtonElement>;
-// Add missing elements for the about functionality
+// About modal elements
 let aboutLink: HTMLElement | null;
 let registerAboutLink: HTMLElement | null;
 let aboutModal: HTMLElement | null;
@@ -36,12 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     appViewElement = document.getElementById('app-view');
     appContentRoot = document.getElementById('app-content-root');
 
-    // Get header elements
-    mainNav = document.querySelector('.main-nav');
-
     // Get sidebar elements
     sidebarLinks = document.querySelectorAll('.sidebar-nav a[data-view]');
-    logoutButton = document.getElementById('logout-button') as HTMLAnchorElement;
     sidebarUsernameElement = document.querySelector('.sidebar .user-profile .username');
     sidebarAvatarElement = document.querySelector('.sidebar .user-profile .avatar');
     
@@ -55,8 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     aboutContent = document.getElementById('about-content');
     closeAboutButton = document.querySelector('.close-about');
 
-    if (!loginViewElement || !appViewElement || !appContentRoot || 
-        !logoutButton || !sidebarUsernameElement || !sidebarAvatarElement) {
+    if (!loginViewElement || !appViewElement || !appContentRoot) {
         console.error('Essential layout elements not found!');
         return;
     }
@@ -67,15 +53,103 @@ document.addEventListener('DOMContentLoaded', () => {
     router = new Router(appContentRoot);
 
     // --- Define Routes for the main app content area ---
-    router.addRoute('/', ProfileView); // Changed default to profile
-
+    router.addRoute('/', ProfileView);          // Changed default to profile
+    router.addRoute('/profile', ProfileView);
+    
+    // Setup event listeners
+    setupEventListeners();
+    setupAboutModal();
 });
 
-function showAboutModal(): void {
-    if (!aboutModal || !aboutContent) return;
+// --- Functions ---
+function setupAboutModal(): void {
+    // Set up click handlers for about links
+    aboutLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAboutModal();
+    });
     
-    // Create and render the AboutView
-    const aboutView = new AboutView(router);
+    registerAboutLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAboutModal();
+    });
+    
+    // Set up close button
+    closeAboutButton?.addEventListener('click', () => {
+        if (aboutModal) {
+            aboutModal.style.display = 'none';
+        }
+    });
+    
+    // Close when clicking outside the modal content
+    aboutModal?.addEventListener('click', (e) => {
+        if (e.target === aboutModal) {
+            // This is where the error occurs - let's fix it
+            if (aboutModal) {
+                aboutModal.style.display = 'none';
+            }
+        }
+    });
+    
+    // Close with ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && aboutModal && aboutModal.style.display === 'flex') {
+            aboutModal.style.display = 'none';
+        }
+    });
+}
+
+function setupEventListeners(): void {
+    // About modal handlers
+    aboutLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAboutModal();
+    });
+    
+    registerAboutLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAboutModal();
+    });
+    
+    closeAboutButton?.addEventListener('click', () => {
+        if (aboutModal) {
+            aboutModal.style.display = 'none';
+        }
+    });
+    
+    // Close modal when clicking outside
+    aboutModal?.addEventListener('click', (e) => {
+        if (e.target === aboutModal) {
+            if (aboutModal) {
+                aboutModal.style.display = 'none';
+            }
+        }
+    });
+    
+    // Close with ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && aboutModal && aboutModal.style.display === 'flex') {
+            aboutModal.style.display = 'none';
+        }
+    });
+    
+    // Login form handling
+    const loginForm = document.getElementById('login-form') as HTMLFormElement;
+    loginForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        // Handle login logic here
+        console.log('Login submitted');
+    });
+}
+
+function showAboutModal(): void {
+    if (!aboutModal || !aboutContent) {
+        console.error('About modal elements not found');
+        return;
+    }
+    
+    // Create and render the AboutView - remove the router parameter
+    const aboutView = new AboutView();
     aboutContent.innerHTML = ''; // Clear previous content
     aboutView.render(aboutContent);
     

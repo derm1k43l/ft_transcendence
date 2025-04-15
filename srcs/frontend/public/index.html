@@ -25,47 +25,74 @@
 
         <main class="login-main">
             <div class="background-container">
-            <div class="background-image"></div>
-            <div class="bouncing-ball"></div>
-        </div>
-        <div class="login-form-container">
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="button login-button">Login</button>
-            </form>
-            <div class="social-login">
-                <p>Or:</p>
-                <button class="social-button 42">
-                    <img src="https://42.fr/wp-content/uploads/2021/05/42-Final-sigle-seul.svg" alt="42" style="width: 24px; height: 24px;">
-                    <span>42</span>
-                </button>
-                <button class="social-button google">
-                    <i class="fab fa-google"></i>
-                    <span>Google</span>
-                </button>
-                <button class="social-button facebook">
-                    <i class="fab fa-facebook-f"></i>
-                    <span>Facebook</span>
-                </button>
+                <div class="background-image"></div>
+                <div class="bouncing-ball"></div>
             </div>
-            <p class="register-link">Don't have an account? <a href="#/register">Register here</a></p>
-        </div>
-    </main>
-</div>
-<div id="about-modal" class="about-overlay" style="display: none;">
-    <div class="about-modal-content">
-        <span class="close-about">&times;</span>
-        <div id="about-content"></div>
+            <div class="login-form-container">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="button login-button">Login</button>
+                </form>
+                <div class="social-login">
+                    <p>Or:</p>
+                    <button class="social-button 42">
+                        <img src="https://42.fr/wp-content/uploads/2021/05/42-Final-sigle-seul.svg" alt="42" style="width: 24px; height: 24px;">
+                        <span>42</span>
+                    </button>
+                    <button class="social-button google">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </button>
+                    <button class="social-button facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </button>
+                </div>
+                <p class="register-link">Don't have an account? <a href="#/register">Register here</a></p>
+            </div>
+        </main>
     </div>
-</div>
 
-        <script type="module" src="/dist/main.js"></script>
+    <div id="app-view" class="view">
+        <div class="app-layout-container">
+            <div class="app-layout">
+                <aside class="sidebar">
+                    <div class="user-profile">
+                        <img src="https://placehold.co/80x80/1d1f21/ffffff?text=User" alt="User Avatar" class="avatar">
+                        <span class="username">User Name</span>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <ul>
+                            <li><a href="#/profile" data-view="profile"><i class="fas fa-user"></i> Profile</a></li>
+                        </ul>
+                        <div class="sidebar-bottom">
+                            <ul>
+                                <li><a href="#/settings" data-view="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </nav>
+                </aside>
+                <main class="main-content" id="app-content-root"> 
+                    <!-- Dynamic content will go here -->
+                </main>
+            </div>
+        </div>
+    </div>
+    <div id="about-modal" class="about-overlay" style="display: none;">
+        <div class="about-modal-content">
+            <span class="close-about">&times;</span>
+            <div id="about-content"></div>
+        </div>
+    </div>
+    <script type="module" src="/dist/main.js"></script>
+    <div id="notification-container"></div>
 </body>
 </html>
