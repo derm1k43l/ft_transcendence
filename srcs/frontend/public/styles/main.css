@@ -257,3 +257,28 @@ body {
 .register-link a:hover {
     text-decoration: underline;
 }
+
+/* Bouncing Ball Animation */
+.bouncing-ball {
+    width: 25px;
+    height: 25px;
+    background-color: #fff;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 35%;
+    left: 40%;
+    z-index: 2;
+    animation: bounce 2s infinite ease-in-out alternate,
+              moveAcross 15s infinite linear;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-342px) scale(1.1); }
+}
+
+@keyframes moveAcross {
+    0% { left: 40%; }
+    50% { left: 60%; }
+    100% { left: 40%; }
+}
