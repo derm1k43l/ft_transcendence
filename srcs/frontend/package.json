@@ -1,0 +1,19 @@
+{
+    "name": "ft_transcendence_frontend",
+    "version": "0.1.0",
+    "description": "Frontend for ft_transcendence",
+    "main": "dist/main.js",
+    "scripts": {
+      "build": "tsc",
+      "watch": "tsc -w",
+      "serve:local": "npx http-server ./public -p 8080 -c-1 --cors",
+      "start": "npm run build && npm run serve:local"
+    },
+    "author": "Mihai Rusu",
+    "license": "ISC",
+    "devDependencies": {
+      "http-server": "^14.1.1",
+      "typescript": "^5.0.0"
+    }
+}
+

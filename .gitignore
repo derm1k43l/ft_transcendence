@@ -1,0 +1,43 @@
+# Node dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+cli/node_modules/
+
+# Build Output Folders
+dist/
+frontend/dist/
+backend/dist/
+
+# Build artifacts
+build/
+dist/
+
+# Log files
+*.log
+logs
+*.logs
+
+# Environment variables file
+.env
+*.env.*
+!.env.template
+!.env.example
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE settings folders
+.idea/
+.vscode/
+
+# Docker cache / state (optional)
+docker-data/
+
+# Coverage output
+coverage/
+*.lcov
+
+# Typescript cache
+*.tsbuildinfo
