@@ -6,6 +6,7 @@ import { FriendsView } from './views/Friends.js';
 import { SettingsView } from './views/Settings.js';
 import { AboutView } from './views/About.js';
 import { TournamentView } from './views/Tournament.js';
+import { NotificationManager } from './components/Notification.js';
 // Import mock data 
 import { UserProfile, findUserByUsername } from './data/mock_data.js';
 
@@ -189,6 +190,47 @@ function setupEventListeners(): void {
             currentUser = foundUser;
             updateUI();
             router.navigate('/profile'); // Navigate to profile after successful login
+
+            NotificationManager.show({
+                title: 'Welcome',
+                message: `Welcome back, ${foundUser.displayName}!`,
+                type: 'info',
+                duration: 5000
+            });
+            
+            // Show success notification after 2 seconds
+            setTimeout(() => {
+                NotificationManager.show({
+                    title: 'Login Successful',
+                    message: 'You have successfully logged in.',
+                    type: 'success',
+                    duration: 5000
+                });
+            }, 2000);
+            
+            // Show warning notification after 4 seconds
+            setTimeout(() => {
+                NotificationManager.show({
+                    title: 'Tournament Soon',
+                    message: 'Your scheduled tournament starts in 10 minutes!',
+                    type: 'warning',
+                    duration: 5000
+                });
+            }, 4000);
+            
+            // Show error notification after 6 seconds
+            setTimeout(() => {
+                NotificationManager.show({
+                    title: 'Connection Warning',
+                    message: 'Your internet connection is unstable.',
+                    type: 'error',
+                    duration: 5000
+                });
+            }, 6000);
+
+
+
+
         } else {
             console.log('Login failed: Invalid username or password');
             alert('Login failed: Invalid username or password');

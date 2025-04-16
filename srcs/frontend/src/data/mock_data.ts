@@ -1,7 +1,5 @@
-// Define a structure for user data
-
 // will delete this whe back is ready
-
+// Define a structure for user data
 export interface UserProfile {
     id: number;
     username: string;
