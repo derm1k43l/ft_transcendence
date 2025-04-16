@@ -55,6 +55,7 @@ export class NotificationManager {
       // Create close button
       const closeBtn = document.createElement('button');
       closeBtn.innerHTML = '&times;';
+      closeBtn.style.paddingTop = '10px';
       closeBtn.addEventListener('click', () => {
           toast.remove();
       });
