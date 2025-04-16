@@ -385,3 +385,121 @@ body {
     line-height: 1.5;
     color: white;
 }
+
+/* --- Main App Layout Styles (After Login) --- */
+.app-layout-container {
+    width: 100%;
+    max-width: 100%;
+    flex-grow: 1;
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-color-dark);
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-color-medium);
+    padding: 1.5rem 1.5rem; /* --  sidebar space ing*/
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.user-profile {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-profile .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 0.8rem;
+    border: 3px solid white;
+    object-fit: cover;
+}
+
+.user-profile .username {
+    display: block;
+    font-weight: 500;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; 
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    flex-grow: 1;
+    margin-bottom: 2rem; /* Space for the logo or not.. no logo but a bit of space */
+}
+
+.sidebar-nav li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    color: white;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
+    position: relative;
+    font-weight: 400;
+}
+
+.sidebar-nav a i {
+    margin-right: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav a.active {
+    background-color: var(--active-color);
+}
+
+.sidebar-nav a.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 3px;
+    background-color: #7c00e3;
+}
+
+.sidebar-nav li.sidebar-bottom {
+    margin-top: auto;
+}
+
+.sidebar-nav li.sidebar-bottom:first-of-type {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto; 
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    width: 100%;
+}
