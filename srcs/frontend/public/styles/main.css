@@ -509,14 +509,14 @@ body {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 1000;
-    width: 380px; /* Adjusted width */
+    z-index: 422;
+    width: 380px; 
 }
 
 .toast {
     width: 100%;
     height: 80px;
-    padding: 20px;
+    padding: 10px;
     background-color: #ffffff;
     border-radius: var(--border-radius);
     display: grid;
@@ -525,6 +525,7 @@ body {
     margin-bottom: 20px; /* Space between notifications */
 }
 
+/* need to remove border in from the icon but keep at container*/
 .success {
     border-left: 8px solid #47D764;
 }
@@ -549,6 +550,22 @@ body {
     font-size: 35px;
 }
 
+.container-1 i.success {
+    color: #47D764;
+}
+
+.container-1 i.error {
+    color: #ff355b;
+}
+
+.container-1 i.info {
+    color: #2F86EB;
+}
+
+.container-1 i.warning {
+    color: #FFC021;
+}
+
 .container-2 p:first-child {
     color: #101020;
     font-weight: 600;
@@ -568,4 +585,85 @@ body {
     color: #656565;
     line-height: 0;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    margin-left: 10px;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .member-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .header-content {
+        max-width: 100%;
+        padding: 0.5rem 1rem;
+    }
+
+    .main-header {
+        padding: 0 1rem;
+    }
+
+    .main-nav {
+        position: fixed;
+        top: 60px;
+        right: 0;
+        width: 250px;
+        height: calc(100vh - 60px);
+        background-color: var(--bg-color-medium);
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        padding-top: 1rem;
+        z-index: 42;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .main-nav.active {
+        transform: translateX(0);
+    }
+
+    .main-nav .nav-links {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .main-nav .nav-links li {
+        margin: 1rem 0;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .main-nav .nav-links a {
+        display: block;
+        padding: 1rem;
+        width: 90%;
+        margin: 0 auto;
+    }
+    
+    .main-nav .nav-links a:hover,
+    .main-nav .nav-links a.active {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .login-form-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .app-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 }

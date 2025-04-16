@@ -4,7 +4,7 @@ export interface NotificationOptions {
   duration?: number; // in milliseconds
   type?: 'info' | 'success' | 'warning' | 'error';
 }
-  
+
 export class NotificationManager {
   private static container: HTMLElement | null = null;
 
@@ -36,10 +36,10 @@ export class NotificationManager {
       const container1 = document.createElement('div');
       container1.className = 'container-1';
       const icon = document.createElement('i');
-      icon.className = settings.type === 'success' ? 'fas fa-check-circle' :
-                      settings.type === 'error' ? 'fas fa-exclamation-circle' :
-                      settings.type === 'info' ? 'fas fa-info-circle' :
-                      'fas fa-exclamation-triangle'; // Default to warning icon
+      icon.className = settings.type === 'success' ? 'fas fa-check-circle success' :
+                      settings.type === 'error' ? 'fas fa-exclamation-circle error' :
+                      settings.type === 'info' ? 'fas fa-info-circle info' :
+                      'fas fa-exclamation-triangle warning'; // Default to warning icon
       container1.appendChild(icon);
 
       // Create container for text

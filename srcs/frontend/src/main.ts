@@ -195,7 +195,7 @@ function setupEventListeners(): void {
                 title: 'Welcome',
                 message: `Welcome back, ${foundUser.displayName}!`,
                 type: 'info',
-                duration: 5000
+                duration: 500000
             });
             
             // Show success notification after 2 seconds
