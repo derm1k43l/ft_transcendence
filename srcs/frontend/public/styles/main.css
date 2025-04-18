@@ -3,6 +3,7 @@
 @import url('./components.css');
 @import url('./chat.css');
 @import url('./profile.css');
+@import url('./friends.css');
 
 * {
     margin: 0;

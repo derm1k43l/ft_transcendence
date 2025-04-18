@@ -279,7 +279,6 @@ export class FriendsView {
         });
         
         searchResults.innerHTML = resultsHTML;
-        
     }
 
     destroy(): void {
