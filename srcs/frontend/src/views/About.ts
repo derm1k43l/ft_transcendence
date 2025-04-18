@@ -3,7 +3,7 @@ export class AboutView {
 
     render(rootElement: HTMLElement): void {
         this.element = document.createElement('div');
-        this.element.classList.add('view', 'active');
+        this.element.classList.add('about-content-container');
         this.element.innerHTML = `
         <div class="about-container">
             <h2>About Our Team</h2>

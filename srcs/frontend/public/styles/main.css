@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
+@import url('./components.css');
+@import url('./chat.css');
+@import url('./profile.css');
 
 * {
     margin: 0;
@@ -303,7 +306,7 @@ body {
     border-radius: var(--border-radius);
     width: 90%;
     max-width: 900px;
-    max-height: 90vh;
+    max-height: 80vh;
     overflow-y: auto;
     position: relative;
     padding: 2rem;
@@ -364,7 +367,7 @@ body {
 
 .member-image img {
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     object-fit: cover;
 }
 
@@ -517,7 +520,14 @@ body {
     margin-bottom: 20px; /* Space between notifications */
 }
 
-/* need to remove border in from the icon but keep at container*/
+/* Override border for icons */
+.container-1 i.success,
+.container-1 i.error,
+.container-1 i.info,
+.container-1 i.warning {
+    border: none; /* Remove border from the icon */
+}
+
 .success {
     border-left: 8px solid #47D764;
 }
@@ -582,12 +592,70 @@ body {
     margin-left: 10px;
 }
 
+/* Registration Form Styles */
+.register-view {
+    padding: 1rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.register-view h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.auth-form {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-hint {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.25rem;
+}
+
+.error-message {
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.auth-alternate {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.auth-alternate a {
+    color: white;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+}
+
+.auth-alternate a:hover {
+    opacity: 0.8;
+}
+
+
 /* --- Responsive Design --- */
 @media (max-width: 768px) {
-    .team-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
+
+    .about-modal-content {
+        max-height: 70vh;
+        width: 90%;
+        padding: 1rem;
+        margin: 1rem;
     }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
     
     .member-image {
         width: 120px;

@@ -6,9 +6,11 @@ import { FriendsView } from './views/Friends.js';
 import { SettingsView } from './views/Settings.js';
 import { AboutView } from './views/About.js';
 import { TournamentView } from './views/Tournament.js';
+import { RegisterView } from './views/Register.js';
 import { NotificationManager } from './components/Notification.js';
+import { findUserByUsername } from './data/UserService.js';
 // Import mock data 
-import { UserProfile, findUserByUsername } from './data/mock_data.js';
+import { UserProfile } from './data/mock_data.js';
 
 // --- State ---
 let isLoggedIn = false;
@@ -18,15 +20,14 @@ let currentUser: UserProfile | null = null; // Store logged-in user details
 let loginViewElement: HTMLElement | null;
 let appViewElement: HTMLElement | null;
 let appContentRoot: HTMLElement | null;
-let mainNav: HTMLElement | null;
 let sidebarLinks: NodeListOf<HTMLAnchorElement>;
 let logoutButton: HTMLAnchorElement | null;
 let sidebarUsernameElement: HTMLElement | null;
 let sidebarAvatarElement: HTMLImageElement | null;
-let socialButtons: NodeListOf<HTMLButtonElement>;
-// Add missing elements for the about functionality
+let loginFormContainer: HTMLElement | null;
+
+// About modal elements
 let aboutLink: HTMLElement | null;
-let registerAboutLink: HTMLElement | null;
 let aboutModal: HTMLElement | null;
 let aboutContent: HTMLElement | null;
 let closeAboutButton: HTMLElement | null;
@@ -40,22 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
     loginViewElement = document.getElementById('login-view');
     appViewElement = document.getElementById('app-view');
     appContentRoot = document.getElementById('app-content-root');
-
-    // Get header elements
-    mainNav = document.querySelector('.main-nav');
+    loginFormContainer = document.querySelector('.login-form-container');
 
     // Get sidebar elements
     sidebarLinks = document.querySelectorAll('.sidebar-nav a[data-view]');
     logoutButton = document.getElementById('logout-button') as HTMLAnchorElement;
     sidebarUsernameElement = document.querySelector('.sidebar .user-profile .username');
     sidebarAvatarElement = document.querySelector('.sidebar .user-profile .avatar');
-    
-    // Get social buttons
-    socialButtons = document.querySelectorAll('.social-button');
 
     // Get about elements
     aboutLink = document.getElementById('about-link');
-    registerAboutLink = document.querySelector('.register-link a');
     aboutModal = document.getElementById('about-modal');
     aboutContent = document.getElementById('about-content');
     closeAboutButton = document.querySelector('.close-about');
@@ -72,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     router = new Router(appContentRoot);
 
     // --- Define Routes for the main app content area ---
-    router.addRoute('/', ProfileView); // Changed default to profile
+    router.addRoute('/', ProfileView); // Default IS profile
     router.addRoute('/profile', ProfileView);
     router.addRoute('/chat', ChatView);
     router.addRoute('/friends', FriendsView);
@@ -86,6 +81,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial UI State ---
     updateUI(); // Show login or app view based on initial state
+
+    // Check for register route
+    if (window.location.hash === '#/register' && loginFormContainer) {
+        // Create and render register view
+        const registerView = new RegisterView(router);
+        
+        // Hide login form elements first
+        const loginFormElements = loginFormContainer.querySelectorAll(':not(.register-view)');
+        loginFormElements.forEach(el => {
+            (el as HTMLElement).style.display = 'none';
+        });
+        
+        // Render register view
+        registerView.render(loginFormContainer);
+    }
 
     // Handle initial deep linking or back/forward navigation if logged in
     if (isLoggedIn) {
@@ -105,6 +115,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLoggedIn) {
             router.handleRouteChange();
             updateSidebarLinks(window.location.hash);
+        } else if (hash === '#/register' && loginFormContainer) {
+            // Handle register route
+            
+            // Clear existing content
+            while (loginFormContainer.firstChild) {
+                loginFormContainer.removeChild(loginFormContainer.firstChild);
+            }
+            
+            // Create and render register view
+            const registerView = new RegisterView(router);
+            registerView.render(loginFormContainer);
+        } else if (hash === '' || hash === '#/') {
+            // Reset to login form
+            window.location.reload(); // Simple approach to reset the login form
         }
     });
 });
@@ -116,12 +140,7 @@ function setupAboutModal(): void {
         e.preventDefault();
         showAboutModal();
     });
-    
-    registerAboutLink?.addEventListener('click', (e) => {
-        e.preventDefault();
-        showAboutModal();
-    });
-    
+
     // Set up close button
     closeAboutButton?.addEventListener('click', () => {
         if (aboutModal) {
@@ -132,7 +151,6 @@ function setupAboutModal(): void {
     // Close when clicking outside the modal content
     aboutModal?.addEventListener('click', (e) => {
         if (e.target === aboutModal) {
-            // This is where the error occurs - let's fix it
             if (aboutModal) {
                 aboutModal.style.display = 'none';
             }
@@ -191,6 +209,7 @@ function setupEventListeners(): void {
             updateUI();
             router.navigate('/profile'); // Navigate to profile after successful login
 
+            // delete this later or keep 1
             NotificationManager.show({
                 title: 'Welcome',
                 message: `Welcome back, ${foundUser.displayName}!`,
@@ -198,7 +217,6 @@ function setupEventListeners(): void {
                 duration: 500000
             });
             
-            // Show success notification after 2 seconds
             setTimeout(() => {
                 NotificationManager.show({
                     title: 'Login Successful',
@@ -208,7 +226,6 @@ function setupEventListeners(): void {
                 });
             }, 2000);
             
-            // Show warning notification after 4 seconds
             setTimeout(() => {
                 NotificationManager.show({
                     title: 'Tournament Soon',
@@ -218,7 +235,6 @@ function setupEventListeners(): void {
                 });
             }, 4000);
             
-            // Show error notification after 6 seconds
             setTimeout(() => {
                 NotificationManager.show({
                     title: 'Connection Warning',
@@ -229,13 +245,80 @@ function setupEventListeners(): void {
             }, 6000);
 
 
-
-
         } else {
             console.log('Login failed: Invalid username or password');
-            alert('Login failed: Invalid username or password');
-            passwordInput.value = ''; // Clear password field on failure
+            // alert('Login failed: Invalid username or password');
+            NotificationManager.show({
+                title: 'Login Failed',
+                message: 'Invalid username or password.',
+                type: 'error',
+                duration: 5000
+            });
+            passwordInput.value = '';
         }
+    });
+
+    // Register link
+    const registerLink = document.querySelector('.register-link a');
+    if (registerLink) {
+        // Remove any existing event listeners
+        const newRegisterLink = registerLink.cloneNode(true);
+        if (registerLink.parentNode) {
+            registerLink.parentNode.replaceChild(newRegisterLink, registerLink);
+        }
+        
+        // Add our new event listener
+        newRegisterLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Register link clicked, navigating to register view");
+            
+            // Get the login form elements to hide
+            const loginForm = document.getElementById('login-form');
+            const socialLogin = document.querySelector('.social-login');
+            const registerLinkContainer = document.querySelector('.register-link');
+            
+            // Hide them
+            if (loginForm) (loginForm as HTMLElement).style.display = 'none';
+            if (socialLogin) (socialLogin as HTMLElement).style.display = 'none';
+            if (registerLinkContainer) (registerLinkContainer as HTMLElement).style.display = 'none';
+            
+            // Clear existing content from the container
+            if (loginFormContainer) {
+                // Clear all content
+                loginFormContainer.innerHTML = '';
+                
+                // Create and render register view
+                const registerView = new RegisterView(router);
+                registerView.render(loginFormContainer);
+            }
+            
+            // Update URL without triggering another reload
+            history.pushState(null, document.title, '#/register');
+        });
+    }
+
+    // Social login buttons
+    const fortytwoButton = document.querySelector('.social-button.fortytwo');
+    fortytwoButton?.addEventListener('click', () => {
+        console.log('fortytwoButton was pressed');
+        NotificationManager.show({
+            title: '42 Login',
+            message: '42 is not implemented.',
+            type: 'info',
+            duration: 3000
+        });
+    });
+    const googleButton = document.querySelector('.social-button.google');
+    googleButton?.addEventListener('click', () => {
+        // this will redirect to Google OAuth
+        console.log('Google login clicked');
+        NotificationManager.show({
+            title: 'Google Login',
+            message: 'Google login would be implemented here. ',
+            type: 'info',
+            duration: 3000
+        });
     });
 
     // Logout Button
@@ -245,6 +328,14 @@ function setupEventListeners(): void {
         isLoggedIn = false;
         currentUser = null;
         updateUI();
+
+        NotificationManager.show({
+            title: 'Logged Out',
+            message: 'You have successfully logged out.',
+            type: 'success',
+            duration: 3000
+        });
+
     });
 }
 
@@ -253,7 +344,7 @@ function updateUI(): void {
         loginViewElement?.classList.remove('active');
         appViewElement?.classList.add('active');
 
-        // Update sidebar profile info
+        // Update sidebar profile info we should asig at the registariton this
         if (sidebarUsernameElement) {
             sidebarUsernameElement.textContent = currentUser.displayName;
         }
@@ -266,9 +357,11 @@ function updateUI(): void {
         loginViewElement?.classList.add('active');
         appViewElement?.classList.remove('active');
         if (window.location.hash && window.location.hash !== '#/') {
-            history.pushState("", document.title, window.location.pathname + window.location.search);
+            if (window.location.hash !== '#/register') {
+                history.pushState("", document.title, window.location.pathname + window.location.search);
+            }
         }
-        if (appContentRoot) appContentRoot.innerHTML = ''; // Clear app content
+        if (appContentRoot) appContentRoot.innerHTML = '';
         if (sidebarUsernameElement) sidebarUsernameElement.textContent = 'User Name';
         if (sidebarAvatarElement) sidebarAvatarElement.src = 'https://placehold.co/80x80/1d1f21/ffffff?text=User';
     }
