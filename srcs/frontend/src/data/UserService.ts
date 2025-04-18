@@ -2,7 +2,12 @@ import {
     UserProfile,
     mockUsers,
     mockMessages,
-    ChatMessage, 
+    ChatMessage,
+    mockNotifications,
+    FriendRequest,
+    Notification,
+    GameInvite,
+    mockGameInvites,
 } from './mock_data.js';
 
 // User lookup functions
@@ -131,3 +136,180 @@ export const NotificationManager = {
         console.log("Mock NotificationManager initialized");
     }
 };
+
+// Friend-related functions
+export function sendFriendRequest(fromUserId: number, toUserId: number): boolean {
+    const toUser = getUserById(toUserId);
+    if (!toUser) return false;
+    
+    if (!toUser.friendRequests) {
+        toUser.friendRequests = [];
+    }
+    
+    const existingRequest = toUser.friendRequests.find(
+        req => req.from === fromUserId && req.status === 'pending'
+    );
+    
+    if (existingRequest) return false;
+    
+    // Add new request
+    const newRequest: FriendRequest = {
+        id: Math.max(0, ...toUser.friendRequests.map(r => r.id)) + 1,
+        from: fromUserId,
+        to: toUserId,
+        status: 'pending',
+        date: new Date().toISOString().split('T')[0]
+    };
+    
+    toUser.friendRequests.push(newRequest);
+    
+    // Create notification for recipient
+    const fromUser = getUserById(fromUserId);
+    if (fromUser) {
+        const newNotification: Notification = {
+            id: mockNotifications.length + 1,
+            userId: toUserId,
+            type: 'friendRequest',
+            message: `${fromUser.displayName} sent you a friend request`,
+            read: false,
+            timestamp: new Date(),
+            relatedUserId: fromUserId
+        };
+        mockNotifications.push(newNotification);
+    }
+    
+    return true;
+}
+
+// Function to accept a friend request
+export function acceptFriendRequest(userId: number, requestId: number): boolean {
+    const user = getUserById(userId);
+    if (!user || !user.friendRequests) return false;
+    
+    const request = user.friendRequests.find(r => r.id === requestId && r.status === 'pending');
+    if (!request) return false;
+    
+    // Update request status
+    request.status = 'accepted';
+    
+    // Add each user to the other's friends list
+    const fromUser = getUserById(request.from);
+    if (!fromUser) return false;
+    
+    if (!user.friends) user.friends = [];
+    if (!fromUser.friends) fromUser.friends = [];
+    
+    if (!user.friends.includes(fromUser.id)) {
+        user.friends.push(fromUser.id);
+    }
+    
+    if (!fromUser.friends.includes(user.id)) {
+        fromUser.friends.push(user.id);
+    }
+    
+    // Create notification for the sender
+    const newNotification: Notification = {
+        id: mockNotifications.length + 1,
+        userId: fromUser.id,
+        type: 'friendRequest',
+        message: `${user.displayName} accepted your friend request`,
+        read: false,
+        timestamp: new Date()
+    };
+    mockNotifications.push(newNotification);
+    
+    return true;
+}
+
+// Notification functions
+export function getUnreadNotifications(userId: number): Notification[] {
+    return mockNotifications.filter(notification => 
+        notification.userId === userId && !notification.read
+    );
+}
+
+export function markNotificationAsRead(notificationId: number): boolean {
+    const notification = mockNotifications.find(n => n.id === notificationId);
+    if (notification) {
+        notification.read = true;
+        return true;
+    }
+    return false;
+}
+
+
+// Game invite functions
+export function sendGameInvite(fromUserId: number, toUserId: number, gameMode: string = 'classic'): boolean {
+    const fromUser = getUserById(fromUserId);
+    const toUser = getUserById(toUserId);
+    
+    if (!fromUser || !toUser) {
+        return false;
+    }
+    
+    const newInvite: GameInvite = {
+        id: mockGameInvites.length + 1,
+        from: fromUserId,
+        to: toUserId,
+        status: 'pending',
+        timestamp: new Date(),
+        gameMode
+    };
+    
+    mockGameInvites.push(newInvite);
+    
+    // Create notification
+    const newNotification: Notification = {
+        id: mockNotifications.length + 1,
+        userId: toUserId,
+        type: 'gameInvite',
+        message: `${fromUser.displayName} invited you to play a game`,
+        read: false,
+        timestamp: new Date(),
+        relatedUserId: fromUserId
+    };
+    mockNotifications.push(newNotification);
+    
+    return true;
+}
+
+
+// Simulates notifications after login
+export function simulateLoginNotifications(userId: number): void {
+    setTimeout(() => {
+        NotificationManager.show({
+            title: 'Welcome Back',
+            message: `You have ${getUnreadMessageCount(userId)} unread messages`,
+            type: 'info',
+            duration: 5000
+        });
+    }, 1000);
+    
+    setTimeout(() => {
+        const user = getUserById(userId);
+        NotificationManager.show({
+            title: 'Login Successful',
+            message: `Welcome back, ${user?.displayName || 'User'}!`,
+            type: 'success',
+            duration: 5000
+        });
+    }, 3000);
+    
+    setTimeout(() => {
+        NotificationManager.show({
+            title: 'Tournament Reminder',
+            message: 'The weekly tournament starts in 30 minutes',
+            type: 'warning',
+            duration: 5000
+        });
+    }, 5000);
+    
+    setTimeout(() => {
+        NotificationManager.show({
+            title: 'Connection Warning',
+            message: 'Your internet connection seems unstable',
+            type: 'error',
+            duration: 5000
+        });
+    }, 7000);
+}
