@@ -1,0 +1,278 @@
+/* ===== PROFILE VIEW ===== */
+.profile-view {
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.profile-header {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.profile-cover {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--border-radius);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-avatar-container {
+    position: absolute;
+    bottom: -50px;
+    left: 2rem;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--bg-color-medium);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+}
+
+.profile-info {
+    margin-top: 60px;
+    padding: 0 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.profile-info-main {
+    flex: 1;
+}
+
+.profile-info h2 {
+    margin-bottom: 0.2rem;
+    color: white;
+    font-weight: 600;
+}
+
+.profile-info .username {
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0;
+    font-size: 0.9rem;
+}
+
+.profile-info .bio {
+    max-width: 600px;
+    margin-top: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.profile-info .member-since {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 0.8rem;
+}
+
+.profile-edit-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-edit-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-content {
+    padding: 0 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.8rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #7c5cff;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.3rem;
+}
+
+.match-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.match-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.match-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.match-item.win {
+    border-left: 4px solid #47D764;
+}
+
+.match-item.loss {
+    border-left: 4px solid #ff355b;
+}
+
+.match-item.draw {
+    border-left: 4px solid #FFC021;
+}
+
+.match-result-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.win .match-result-indicator {
+    background-color: #47D764;
+}
+
+.loss .match-result-indicator {
+    background-color: #ff355b;
+}
+
+.draw .match-result-indicator {
+    background-color: #FFC021;
+}
+
+.match-opponent {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.match-score {
+    font-weight: 600;
+    color: white;
+}
+
+.match-date {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+/* Redesigned achievements with overlay */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-item:hover {
+    transform: translateY(-2px);
+}
+
+.achievement-item.incomplete::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.achievement-icon {
+    background-color: #7c5cff;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4rem;
+    z-index: 1;
+}
+
+.achievement-info {
+    flex: 1;
+    z-index: 1;
+}
+
+.achievement-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.achievement-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.achievement-info small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+}
+
+.achievement-status {
+    font-size: 1.2rem;
+    z-index: 1;
+}
+
+.achievement-status.completed {
+    color: #47D764;
+}
+
+.achievement-status.incomplete {
+    color: rgba(255, 255, 255, 0.4);
+}
