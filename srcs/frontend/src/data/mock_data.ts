@@ -9,6 +9,7 @@ export interface UserProfile {
     coverPhotoUrl?: string;
     bio?: string;
     email?: string;
+    hasTwoFactorAuth?: boolean;
     joinDate?: string;
     stats?: {
         wins: number;
