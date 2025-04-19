@@ -1,0 +1,510 @@
+/* Dashboard Styles */
+.dashboard-view {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.last-login {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+/* Quick Stats - Single Row */
+.quick-stats {
+    grid-column: span 12;
+    display: flex;
+    justify-content: space-between;
+    /* flex-wrap: wrap; */
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.quick-stat {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    /* min-width: 200px; */
+    flex: 0 1 calc(25% - 1rem); /* Each item takes up 25% of the row minus the gap */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-width: 0; /* Prevent flex items from overflowing */
+}
+
+.quick-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 1.8rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    min-width: 0; /* Prevent text overflow */
+}
+
+.stat-icon.rank {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #FFC107;
+}
+
+.stat-icon.wins {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.stat-icon.losses {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+}
+
+.stat-icon.winrate {
+    background-color: rgba(124, 92, 255, 0.2);
+    color: #7c5cff;
+}
+
+.stat-info h4 {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.3rem;
+    font-weight: 400;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* Game Statistics */
+.game-stats {
+    grid-column: span 6;
+    padding: 1.5rem;
+}
+
+/* Stats Charts Container */
+.stats-charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.donut-chart-container {
+    flex: 1;
+    min-width: 180px;
+    text-align: center;
+}
+
+.progress-chart-container {
+    flex: 1;
+    min-width: 250px;
+}
+
+.donut-chart-container h4,
+.progress-chart-container h4 {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Chart Legend */
+.chart-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 0.5rem;
+}
+
+.color-box.win {
+    background-color: #4CAF50;
+}
+
+.color-box.loss {
+    background-color: #F44336;
+}
+
+/* Progress Bar */
+.progress-container {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    height: 30px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #4CAF50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 1s ease;
+}
+
+.progress-text {
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.progress-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+/* Stat Cards */
+.stat-cards {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-card-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: #ffffff;
+}
+
+.stat-card-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Performance Overview */
+.activity-chart {
+    grid-column: span 6;
+    padding: 1.5rem;
+}
+
+.chart-container {
+    height: 250px;
+    position: relative;
+}
+
+/* Recent Activity */
+.recent-activity {
+    grid-column: span 12;
+    padding: 1.5rem;
+}
+
+.activity-list {
+    margin-top: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.8rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.activity-item.win {
+    border-left: 3px solid #4CAF50;
+}
+
+.activity-item.loss {
+    border-left: 3px solid #F44336;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.activity-item.win .activity-icon {
+    color: #4CAF50;
+}
+
+.activity-item.loss .activity-icon {
+    color: #F44336;
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-primary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+}
+
+.game-result {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.game-score {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.activity-meta {
+    display: flex;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.game-date {
+    margin-right: 1rem;
+}
+
+.view-all-link {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    color: #7c5cff;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+}
+
+.view-all-link:hover {
+    background-color: rgba(124, 92, 255, 0.1);
+}
+
+/* Top Players */
+.top-players {
+    grid-column: span 12;
+    padding: 1.5rem;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.tab {
+    background: none;
+    border: none;
+    padding: 0.8rem 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.tab:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tab.active {
+    color: white;
+    border-bottom: 2px solid #7c5cff;
+}
+
+.tab-content {
+    position: relative;
+    min-height: 200px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Leaderboard Table */
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.leaderboard-table th {
+    text-align: left;
+    padding: 0.75rem 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: normal;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-table td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-table tr:last-child td {
+    border-bottom: none;
+}
+
+.leaderboard-table tr.current-user {
+    background-color: rgba(124, 92, 255, 0.2);
+}
+
+.leaderboard-table .rank {
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.9);
+    width: 40px;
+}
+
+.leaderboard-table .player {
+    display: table-cell;
+}
+
+.leaderboard-table .player-link {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.leaderboard-table .player-link:hover {
+    color: #7c5cff;
+}
+
+.leaderboard-table .player-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 0.7rem;
+}
+
+.leaderboard-table .stat {
+    font-weight: 500;
+    color: #4CAF50;
+}
+
+.leaderboard-table .total {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+/* Loading and No Data States */
+.leaderboard-loading,
+.no-activity,
+.no-data {
+    text-align: center;
+    padding: 2rem 0;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+    .dashboard-view {
+        padding: 1rem;
+    }
+    
+    .quick-stats {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .quick-stat {
+        flex: 0 1 calc(50% - 1rem); /* need more ajusmtent but later */
+        margin-bottom: 1rem;
+    }
+    
+    .stats-charts-container {
+        flex-direction: column;
+    }
+    
+    .donut-chart-container,
+    .progress-chart-container {
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-cards {
+        flex-direction: column;
+    }
+    
+    .stat-card {
+        margin-bottom: 0.8rem;
+    }
+    
+    .activity-primary {
+        flex-direction: column;
+    }
+    
+    .game-score {
+        margin-top: 0.3rem;
+    }
+    
+    .leaderboard-table {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
