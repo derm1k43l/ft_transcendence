@@ -273,43 +273,45 @@ export function sendGameInvite(fromUserId: number, toUserId: number, gameMode: s
     return true;
 }
 
+// will need to update to take from database this 
+export function getTopPlayers(sortBy: 'wins' | 'winrate', limit: number = 10): UserProfile[] {
+    // Make a copy to avoid modifying the original array
+    const players = [...mockUsers];
+    
+    // Sort based on criteria / 2 tabel
+    if (sortBy === 'wins') {
+        players.sort((a, b) => (b.stats?.wins || 0) - (a.stats?.wins || 0));
+    } else if (sortBy === 'winrate') {
+        players.sort((a, b) => {
+            const aTotal = (a.stats?.wins || 0) + (a.stats?.losses || 0);
+            const bTotal = (b.stats?.wins || 0) + (b.stats?.losses || 0);
+            
+            const aRate = aTotal > 0 ? (a.stats?.wins || 0) / aTotal : 0;
+            const bRate = bTotal > 0 ? (b.stats?.wins || 0) / bTotal : 0;
+            
+            return bRate - aRate;
+        });
+    }
+    
+    // Return only the requested number of players
+    return players.slice(0, limit);
+}
 
-// Simulates notifications after login
-export function simulateLoginNotifications(userId: number): void {
-    setTimeout(() => {
-        NotificationManager.show({
-            title: 'Welcome Back',
-            message: `You have ${getUnreadMessageCount(userId)} unread messages`,
-            type: 'info',
-            duration: 5000
-        });
-    }, 1000);
+export function getRankIcon(rank: string): string {
+    // Extract numeric rank if possible
+    const rankNum = parseInt(rank?.replace(/\D/g, '') || '0');
     
-    setTimeout(() => {
-        const user = getUserById(userId);
-        NotificationManager.show({
-            title: 'Login Successful',
-            message: `Welcome back, ${user?.displayName || 'User'}!`,
-            type: 'success',
-            duration: 5000
-        });
-    }, 3000);
+    if (rankNum <= 10) return '<i class="fas fa-crown" style="color: gold;"></i>';
+    if (rankNum <= 50) return '<i class="fas fa-medal" style="color: silver;"></i>';
+    if (rankNum <= 100) return '<i class="fas fa-award" style="color: #cd7f32;"></i>';
+    return '<i class="fas fa-chess-pawn"></i>';
+}
+
+export function getRankTitle(rank: string): string {
+    const rankNum = parseInt(rank?.replace(/\D/g, '') || '0');
     
-    setTimeout(() => {
-        NotificationManager.show({
-            title: 'Tournament Reminder',
-            message: 'The weekly tournament starts in 30 minutes',
-            type: 'warning',
-            duration: 5000
-        });
-    }, 5000);
-    
-    setTimeout(() => {
-        NotificationManager.show({
-            title: 'Connection Warning',
-            message: 'Your internet connection seems unstable',
-            type: 'error',
-            duration: 5000
-        });
-    }, 7000);
+    if (rankNum <= 10) return 'Grandmaster';
+    if (rankNum <= 50) return 'Master';
+    if (rankNum <= 100) return 'Expert';
+    return 'Amateur';
 }

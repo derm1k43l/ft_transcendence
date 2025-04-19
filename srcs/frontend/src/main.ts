@@ -7,6 +7,7 @@ import { SettingsView } from './views/Settings.js';
 import { AboutView } from './views/About.js';
 import { TournamentView } from './views/Tournament.js';
 import { RegisterView } from './views/Register.js';
+import { DashboardView } from './views/Dashboard.js';
 import { NotificationManager } from './components/Notification.js';
 import { findUserByUsername } from './data/UserService.js';
 // Import mock data 
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     router = new Router(appContentRoot);
 
     // --- Define Routes for the main app content area ---
-    router.addRoute('/', ProfileView); // Default IS profile
+    router.addRoute('/', DashboardView); // Default IS profile
     router.addRoute('/profile', ProfileView);
     router.addRoute('/chat', ChatView);
     router.addRoute('/friends', FriendsView);
@@ -207,7 +208,7 @@ function setupEventListeners(): void {
             isLoggedIn = true;
             currentUser = foundUser;
             updateUI();
-            router.navigate('/profile'); // Navigate to profile after successful login
+            router.navigate('/'); // Navigate to Dashboard (root now..) after successful login
 
             // delete this later or keep 1
             NotificationManager.show({
@@ -225,26 +226,6 @@ function setupEventListeners(): void {
                     duration: 5000
                 });
             }, 2000);
-            
-            setTimeout(() => {
-                NotificationManager.show({
-                    title: 'Tournament Soon',
-                    message: 'Your scheduled tournament starts in 10 minutes!',
-                    type: 'warning',
-                    duration: 5000
-                });
-            }, 4000);
-            
-            setTimeout(() => {
-                NotificationManager.show({
-                    title: 'Connection Warning',
-                    message: 'Your internet connection is unstable.',
-                    type: 'error',
-                    duration: 5000
-                });
-            }, 6000);
-
-
         } else {
             console.log('Login failed: Invalid username or password');
             // alert('Login failed: Invalid username or password');
