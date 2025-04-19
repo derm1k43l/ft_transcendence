@@ -91,12 +91,6 @@
     padding: 0 2rem;
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
-}
-
 .stat-item {
     text-align: center;
     padding: 0.8rem;
@@ -193,6 +187,39 @@
 .match-date {
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.8rem;
+}
+
+/* Profile Specific Overrides */
+.profile-view .dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+.profile-view .quick-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.profile-view .stat-icon.level {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.profile-view .stat-icon.games {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #FFC107;
+}
+
+/* Match History Adaptations */
+.profile-view .activity-item {
+    cursor: default;
+}
+
+.profile-view .activity-item:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 /* Redesigned achievements with overlay */
@@ -398,3 +425,42 @@
     margin-top: 1rem;
 }
 
+.profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0.42rem;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+}
+
+.profile-meta span {
+    display: flex;
+    align-items: center;
+}
+
+.profile-meta i {
+    margin-right: 0.4rem;
+}
+
+.profile-section-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.card-header h3 {
+    margin: 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
