@@ -4,6 +4,7 @@
 @import url('./chat.css');
 @import url('./profile.css');
 @import url('./friends.css');
+@import url('./dashboard.css');
 
 * {
     margin: 0;
