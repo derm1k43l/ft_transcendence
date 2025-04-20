@@ -1,13 +1,15 @@
-export interface NotificationOptions {
-  title?: string;
-  message: string;
-  duration?: number; // in milliseconds
-  type?: 'info' | 'success' | 'warning' | 'error';
-}
+// components/Notification.ts
+import { NotificationOptions } from '../data/Types.js';
 
+/**
+ * NotificationManager class for displaying toast notifications
+ */
 export class NotificationManager {
   private static container: HTMLElement | null = null;
 
+  /**
+   * Initialize the notification container
+   */
   static initialize(): void {
       this.container = document.getElementById('notification-container');
       if (!this.container) {
@@ -17,6 +19,10 @@ export class NotificationManager {
       }
   }
 
+  /**
+   * Show a notification toast
+   * @param options Notification options
+   */
   static show(options: NotificationOptions): void {
       if (!this.container) this.initialize();
 
@@ -57,7 +63,8 @@ export class NotificationManager {
       closeBtn.innerHTML = '&times;';
       closeBtn.style.paddingTop = '10px';
       closeBtn.addEventListener('click', () => {
-          toast.remove();
+          toast.classList.add('closing');
+          setTimeout(() => toast.remove(), 300); // Wait for animation to complete
       });
 
       // Assemble toast
@@ -67,14 +74,23 @@ export class NotificationManager {
 
       // Add to container
       this.container?.appendChild(toast);
+      
+      // Add enter animation
+      setTimeout(() => toast.classList.add('show'), 10);
 
       // Remove after duration
-      setTimeout(() => {
-          toast.remove();
-      }, settings.duration);
+      if (settings.duration !== 0) {
+          setTimeout(() => {
+              toast.classList.add('closing');
+              setTimeout(() => toast.remove(), 300); // Wait for animation to complete
+          }, settings.duration);
+      }
   }
 }
 
+/**
+ * Helper function to capitalize the first letter of a string
+ */
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

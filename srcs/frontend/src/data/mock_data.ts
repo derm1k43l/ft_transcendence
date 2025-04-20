@@ -1,30 +1,22 @@
-// will delete this whe back is ready
-// Define a structure for user data
-export interface UserProfile {
-    id: number;
-    username: string;
-    password?: string;
-    displayName: string;
-    avatarUrl?: string;
-    coverPhotoUrl?: string;
-    bio?: string;
-    email?: string;
-    hasTwoFactorAuth?: boolean;
-    joinDate?: string;
-    stats?: {
-        wins: number;
-        losses: number;
-        rank?: string;
-        level?: number;
-    };
-    friends?: number[];
-    friendRequests?: FriendRequest[];
-    matchHistory?: MatchRecord[];
-    achievements?: Achievement[];
-    notifications?: Notification[];
-    status?: 'online' | 'offline' | 'in-game';
-    lastActive?: Date;
-}
+// data/mock_data.ts
+import { 
+    UserProfile, 
+    ChatMessage, 
+    GameInvite, 
+    AppNotification,
+    Achievement,
+    GameSettings
+} from './Types.js';
+
+// Default game settings
+export const DEFAULT_GAME_SETTINGS: GameSettings = {
+    boardColor: '#000000',
+    paddleColor: '#FFFFFF',
+    ballColor: '#FFFFFF',
+    scoreColor: '#FFFFFF',
+    soundEnabled: true,
+    vibrationEnabled: true
+};
 
 // Mock achievements data for both users
 const commonAchievements: Achievement[] = [
@@ -122,6 +114,10 @@ export const mockUsers: UserProfile[] = [
             }
         ],
         achievements: commonAchievements,
+        // Add game settings for this user
+        gameSettings: {
+            ...DEFAULT_GAME_SETTINGS
+        },
         status: 'online',
         lastActive: new Date()
     },
@@ -186,69 +182,18 @@ export const mockUsers: UserProfile[] = [
                 completed: false
             }
         ],
+        // Custom game settings for this user
+        gameSettings: {
+            ...DEFAULT_GAME_SETTINGS,
+            boardColor: '#0a0a0a',
+            ballColor: '#ff5555'
+        },
         status: 'online',
         lastActive: new Date()
     }
 ];
 
-export interface FriendRequest {
-    id: number;
-    from: number;
-    to: number;
-    status: 'pending' | 'accepted' | 'rejected';
-    date: string;
-}
-
-export interface MatchRecord {
-    id: number;
-    opponentId: number;
-    opponent: string;
-    result: 'win' | 'loss' | 'draw';
-    score: string;
-    date: string;
-    duration?: string;
-    gameMode?: string;
-}
-
-export interface Achievement {
-    id: number;
-    name: string;
-    description: string;
-    icon: string;
-    completed: boolean;
-    dateCompleted?: string;
-}
-
-export interface Notification {
-    id: number;
-    userId: number;
-    type: 'friendRequest' | 'gameInvite' | 'achievement' | 'system';
-    message: string;
-    read: boolean;
-    timestamp: Date;
-    actionUrl?: string;
-    relatedUserId?: number;
-}
-
-export interface ChatMessage {
-    id: number;
-    senderId: number;
-    receiverId: number;
-    content: string;
-    timestamp: Date;
-    read: boolean;
-}
-
-export interface GameInvite {
-    id: number;
-    from: number;
-    to: number;
-    status: 'pending' | 'accepted' | 'rejected' | 'expired';
-    timestamp: Date;
-    gameMode?: string;
-}
-
-// Mock chat messages
+// Mock chat messages - now exported
 export const mockMessages: ChatMessage[] = [
     {
         id: 1,
@@ -289,7 +234,7 @@ export const mockGameInvites: GameInvite[] = [
 ];
 
 // Mock notifications
-export const mockNotifications: Notification[] = [
+export const mockNotifications: AppNotification[] = [
     {
         id: 1,
         userId: 1, // test user

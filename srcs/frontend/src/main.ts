@@ -9,9 +9,8 @@ import { TournamentView } from './views/Tournament.js';
 import { RegisterView } from './views/Register.js';
 import { DashboardView } from './views/Dashboard.js';
 import { NotificationManager } from './components/Notification.js';
-import { findUserByUsername } from './data/UserService.js';
-// Import mock data 
-import { UserProfile } from './data/mock_data.js';
+import { findUserByUsername, getUserById } from './data/UserService.js';
+import { UserProfile } from './data/Types.js';
 
 // --- State ---
 let isLoggedIn = false;
@@ -79,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners ---
     setupEventListeners();
     setupAboutModal();
+     NotificationManager.initialize();
 
     // --- Initial UI State ---
     updateUI(); // Show login or app view based on initial state

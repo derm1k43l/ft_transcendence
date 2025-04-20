@@ -1,14 +1,24 @@
 import { 
     UserProfile,
+    ChatMessage, 
+    AppNotification,
+    FriendRequest,
+    GameInvite,
+    GameSettings,
+    NotificationOptions
+} from './Types.js';
+
+import {
     mockUsers,
     mockMessages,
-    ChatMessage,
     mockNotifications,
-    FriendRequest,
-    Notification,
-    GameInvite,
     mockGameInvites,
+    DEFAULT_GAME_SETTINGS
 } from './mock_data.js';
+
+import { NotificationManager } from '../components/Notification.js';
+
+// ===== User Management Functions =====
 
 // User lookup functions
 export function findUserByUsername(username: string): UserProfile | undefined {
@@ -39,6 +49,8 @@ export function createUser(userData: Partial<UserProfile>): UserProfile {
         avatarUrl: userData.avatarUrl || `https://placehold.co/150x150/7c00e3/ffffff?text=${(userData.displayName || userData.username || '?').charAt(0).toUpperCase()}`,
         joinDate: new Date().toISOString().split('T')[0],
         stats: { wins: 0, losses: 0 },
+        // Initialize with default game settings
+        gameSettings: { ...DEFAULT_GAME_SETTINGS },
         status: 'online',
         lastActive: new Date()
     };
@@ -47,7 +59,79 @@ export function createUser(userData: Partial<UserProfile>): UserProfile {
     return newUser;
 }
 
-// Chat-related functions
+export function updateUserProfile(userId: number, updates: Partial<UserProfile>): boolean {
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    if (userIndex === -1) return false;
+    
+    // Don't allow updating certain fields directly
+    const { id, username, password, ...allowedUpdates } = updates;
+    
+    mockUsers[userIndex] = {
+        ...mockUsers[userIndex],
+        ...allowedUpdates
+    };
+    
+    return true;
+}
+
+// Update user password separately for security
+export function updateUserPassword(userId: number, currentPassword: string, newPassword: string): boolean {
+    const user = getUserById(userId);
+    if (!user || user.password !== currentPassword) return false;
+    
+    user.password = newPassword;
+    return true;
+}
+
+// ===== Game Settings Management =====
+
+/**
+ * Gets the game settings for a user
+ * @param userId The ID of the user
+ * @returns The user's game settings or the default settings if not found
+ */
+export function getUserGameSettings(userId: number): GameSettings {
+    const user = getUserById(userId);
+    
+    // Return user's game settings if they exist, otherwise return default settings
+    return user?.gameSettings || {...DEFAULT_GAME_SETTINGS};
+}
+
+/**
+ * Updates the game settings for a user
+ * @param userId The ID of the user
+ * @param settings The new settings to save
+ * @returns true if successful, false if user not found
+ */
+export function updateUserGameSettings(userId: number, settings: GameSettings): boolean {
+    const userIndex = mockUsers.findIndex(user => user.id === userId);
+    if (userIndex === -1) return false;
+    
+    // In a real app with a database, you'd make an API call here
+    mockUsers[userIndex].gameSettings = {...settings};
+    
+    // Also store in localStorage for persistence between page refreshes
+    // In a real app, this would be handled server-side
+    try {
+        localStorage.setItem(`gameSettings_${userId}`, JSON.stringify(settings));
+    } catch (e) {
+        console.error('Failed to save game settings to localStorage', e);
+    }
+    
+    return true;
+}
+
+/**
+ * Resets a user's game settings to default values
+ * @param userId The ID of the user
+ * @returns true if successful, false if user not found
+ */
+export function resetUserGameSettings(userId: number): boolean {
+    return updateUserGameSettings(userId, {...DEFAULT_GAME_SETTINGS});
+}
+
+// ===== Chat-related Functions =====
+
 export function sendMessage(fromUserId: number, toUserId: number, content: string): ChatMessage | null {
     const fromUser = getUserById(fromUserId);
     const toUser = getUserById(toUserId);
@@ -122,20 +206,65 @@ export function getUserConversations(userId: number): any[] {
     }).filter(Boolean);
 }
 
-// Notification Manager
-export const NotificationManager = {
-    show: (options: {
-        title?: string;
-        message: string;
-        duration?: number;
-        type?: 'info' | 'success' | 'warning' | 'error';
-    }) => {
-        console.log("Mock notification:", options);
-    },
-    initialize: () => {
-        console.log("Mock NotificationManager initialized");
+// ===== Notification Functions =====
+
+// Notification functions
+export function getUnreadNotifications(userId: number): AppNotification[] {
+    return mockNotifications.filter(notification => 
+        notification.userId === userId && !notification.read
+    );
+}
+
+export function markNotificationAsRead(notificationId: number): boolean {
+    const notification = mockNotifications.find(n => n.id === notificationId);
+    if (notification) {
+        notification.read = true;
+        return true;
     }
-};
+    return false;
+}
+
+export function markAllNotificationsAsRead(userId: number): boolean {
+    let updated = false;
+    mockNotifications.forEach(notification => {
+        if (notification.userId === userId && !notification.read) {
+            notification.read = true;
+            updated = true;
+        }
+    });
+    return updated;
+}
+
+export function deleteNotification(notificationId: number): boolean {
+    const index = mockNotifications.findIndex(n => n.id === notificationId);
+    if (index !== -1) {
+        mockNotifications.splice(index, 1);
+        return true;
+    }
+    return false;
+}
+
+export function createNotification(
+    userId: number, 
+    type: AppNotification['type'], 
+    message: string, 
+    options?: Partial<Omit<AppNotification, 'id' | 'userId' | 'type' | 'message' | 'read' | 'timestamp'>>
+): AppNotification {
+    const newNotification: AppNotification = {
+        id: mockNotifications.length + 1,
+        userId,
+        type,
+        message,
+        read: false,
+        timestamp: new Date(),
+        ...options
+    };
+    
+    mockNotifications.push(newNotification);
+    return newNotification;
+}
+
+// ===== Friend Management =====
 
 // Friend-related functions
 export function sendFriendRequest(fromUserId: number, toUserId: number): boolean {
@@ -166,16 +295,12 @@ export function sendFriendRequest(fromUserId: number, toUserId: number): boolean
     // Create notification for recipient
     const fromUser = getUserById(fromUserId);
     if (fromUser) {
-        const newNotification: Notification = {
-            id: mockNotifications.length + 1,
-            userId: toUserId,
-            type: 'friendRequest',
-            message: `${fromUser.displayName} sent you a friend request`,
-            read: false,
-            timestamp: new Date(),
-            relatedUserId: fromUserId
-        };
-        mockNotifications.push(newNotification);
+        createNotification(
+            toUserId, 
+            'friendRequest',
+            `${fromUser.displayName} sent you a friend request`,
+            { relatedUserId: fromUserId }
+        );
     }
     
     return true;
@@ -208,35 +333,16 @@ export function acceptFriendRequest(userId: number, requestId: number): boolean 
     }
     
     // Create notification for the sender
-    const newNotification: Notification = {
-        id: mockNotifications.length + 1,
-        userId: fromUser.id,
-        type: 'friendRequest',
-        message: `${user.displayName} accepted your friend request`,
-        read: false,
-        timestamp: new Date()
-    };
-    mockNotifications.push(newNotification);
+    createNotification(
+        fromUser.id,
+        'friendRequest',
+        `${user.displayName} accepted your friend request`
+    );
     
     return true;
 }
 
-// Notification functions
-export function getUnreadNotifications(userId: number): Notification[] {
-    return mockNotifications.filter(notification => 
-        notification.userId === userId && !notification.read
-    );
-}
-
-export function markNotificationAsRead(notificationId: number): boolean {
-    const notification = mockNotifications.find(n => n.id === notificationId);
-    if (notification) {
-        notification.read = true;
-        return true;
-    }
-    return false;
-}
-
+// ===== Game Management =====
 
 // Game invite functions
 export function sendGameInvite(fromUserId: number, toUserId: number, gameMode: string = 'classic'): boolean {
@@ -259,26 +365,24 @@ export function sendGameInvite(fromUserId: number, toUserId: number, gameMode: s
     mockGameInvites.push(newInvite);
     
     // Create notification
-    const newNotification: Notification = {
-        id: mockNotifications.length + 1,
-        userId: toUserId,
-        type: 'gameInvite',
-        message: `${fromUser.displayName} invited you to play a game`,
-        read: false,
-        timestamp: new Date(),
-        relatedUserId: fromUserId
-    };
-    mockNotifications.push(newNotification);
+    createNotification(
+        toUserId,
+        'gameInvite',
+        `${fromUser.displayName} invited you to play a game`,
+        { relatedUserId: fromUserId }
+    );
     
     return true;
 }
 
-// will need to update to take from database this 
+// ===== Leaderboard Functions =====
+
+// Get top players for leaderboard
 export function getTopPlayers(sortBy: 'wins' | 'winrate', limit: number = 10): UserProfile[] {
     // Make a copy to avoid modifying the original array
     const players = [...mockUsers];
     
-    // Sort based on criteria / 2 tabel
+    // Sort based on criteria
     if (sortBy === 'wins') {
         players.sort((a, b) => (b.stats?.wins || 0) - (a.stats?.wins || 0));
     } else if (sortBy === 'winrate') {
@@ -297,6 +401,8 @@ export function getTopPlayers(sortBy: 'wins' | 'winrate', limit: number = 10): U
     return players.slice(0, limit);
 }
 
+// ===== UI Helper Functions =====
+
 export function getRankIcon(rank: string): string {
     // Extract numeric rank if possible
     const rankNum = parseInt(rank?.replace(/\D/g, '') || '0');
@@ -314,4 +420,29 @@ export function getRankTitle(rank: string): string {
     if (rankNum <= 50) return 'Master';
     if (rankNum <= 100) return 'Expert';
     return 'Amateur';
+}
+
+// ===== Game Stats Management =====
+
+export function resetUserStats(userId: number): boolean {
+    const user = getUserById(userId);
+    if (!user) return false;
+    
+    user.stats = {
+        wins: 0,
+        losses: 0,
+        rank: undefined,
+        level: 1
+    };
+    
+    user.matchHistory = [];
+    
+    if (user.achievements) {
+        user.achievements.forEach(achievement => {
+            achievement.completed = false;
+            delete achievement.dateCompleted;
+        });
+    }
+    
+    return true;
 }
