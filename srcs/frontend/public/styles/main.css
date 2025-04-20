@@ -5,6 +5,7 @@
 @import url('./profile.css');
 @import url('./friends.css');
 @import url('./dashboard.css');
+@import url('./settings.css');
 
 * {
     margin: 0;
