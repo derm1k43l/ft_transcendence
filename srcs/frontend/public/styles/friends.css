@@ -1,128 +1,168 @@
 /* ===== FRIENDS VIEW ===== */
 .friends-view {
-    max-width: var(--max-content-width);
+    padding: 2rem;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
 }
 
+.friends-header {
+    margin-bottom: 2rem;
+}
+
+.friends-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.friends-header p {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Main container with sidebar and content - matching Settings layout */
 .friends-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+}
+
+/* Sidebar Styling */
+.friends-sidebar {
     background-color: var(--bg-color-medium);
     border-radius: var(--border-radius);
     padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.friends-container h2 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.9);
-}
-
-/* Fixed friends search layout */
-.friends-search-container {
-    margin-bottom: 1.5rem;
-}
-
-.search-form {
     display: flex;
-    gap: 0.8rem;
-    align-items: center;
+    flex-direction: column;
 }
 
-.search-form input {
-    flex: 1;
-    padding: 0.8rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--border-radius);
+/* Search Area */
+.friends-search {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.friends-search input {
+    width: 100%;
+    padding: 0.75rem;
     background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
     color: white;
-    font-size: 0.9rem;
-    height: 45px;
+    font-family: var(--font-family);
 }
 
-.search-form button {
-    height: 45px;
-    width: auto;
-    min-width: 80px;
-    padding: 0 1.2rem;
+.friends-search input:focus {
+    outline: none;
+    border-color: rgba(124, 92, 255, 0.5);
+}
+
+.friends-search button {
     background-color: #7c5cff;
     color: white;
     border: none;
     border-radius: var(--border-radius);
-    font-size: 0.9rem;
+    padding: 0.75rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0;
+    transition: all 0.2s ease;
+    font-weight: 500;
 }
 
-.search-form button:hover {
+.friends-search button:hover {
     background-color: #6346e7;
 }
 
-.tabs {
+/* Navigation - matching Settings sidebar */
+.friends-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.friends-nav li {
+    margin-bottom: 0.5rem;
+}
+
+.friends-nav a {
     display: flex;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
 }
 
-.tab-button {
-    padding: 0.8rem 1rem;
-    background: none;
-    border: none;
-    font-weight: 500;
-    cursor: pointer;
+.friends-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.friends-nav a.active {
+    background-color: rgba(124, 92, 255, 0.2);
+    color: white;
+    border-left: 3px solid #7c5cff;
+}
+
+.friends-count {
+    font-size: 0.85rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 0.15rem 0.5rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Content Area */
+.friends-content {
+    background-color: var(--bg-color-medium);
+    border-radius: var(--border-radius);
+    overflow: hidden;
     position: relative;
-    color: rgba(255, 255, 255, 0.6);
+    min-height: 600px;
 }
 
-.tab-button.active {
-    color: #7c5cff;
-}
-
-.tab-button.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: #7c5cff;
-}
-
-.tab-pane {
+/* Friends panels - like settings panels */
+.friends-panel {
     display: none;
+    padding: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+    height: 100%;
 }
 
-.tab-pane.active {
+.friends-panel.active {
     display: block;
 }
 
+.friends-panel h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Friends Grid */
 .friends-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
 }
 
 .friend-card {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(0, 0, 0, 0.2);
     border-radius: var(--border-radius);
-    padding: 1.2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .friend-card:hover {
     transform: translateY(-3px);
-    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .friend-avatar {
@@ -130,28 +170,26 @@
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
     border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .friend-info {
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
 }
 
-.friend-info h3 {
-    margin: 0.3rem 0;
-    color: white;
-    font-weight: 500;
-    border-bottom: none;
-    padding-bottom: 0;
+.friend-info h4 {
+    margin: 0;
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .friend-status {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
 }
 
 .friend-status::before {
@@ -179,12 +217,65 @@
     background-color: rgba(255, 255, 255, 0.3);
 }
 
-.friend-actions {
-    display: flex;
-    gap: 0.8rem;
-    margin-top: 0.8rem;
+.friend-status.in-game {
+    color: #FFC021;
 }
 
+.friend-status.in-game::before {
+    background-color: #FFC021;
+}
+
+.friend-actions {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.friend-button {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: rgba(124, 92, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.friend-button:hover {
+    background-color: rgba(124, 92, 255, 0.4);
+}
+
+.friend-button.message {
+    background-color: rgba(71, 215, 100, 0.2);
+}
+
+.friend-button.message:hover {
+    background-color: rgba(71, 215, 100, 0.4);
+}
+
+.friend-button.invite {
+    background-color: rgba(255, 192, 33, 0.2);
+}
+
+.friend-button.invite:hover {
+    background-color: rgba(255, 192, 33, 0.4);
+}
+
+.friend-button.add {
+    background-color: rgba(124, 92, 255, 0.2);
+}
+
+.friend-button.add:hover {
+    background-color: rgba(124, 92, 255, 0.4);
+}
+
+/* Requests List */
 .requests-list {
     display: flex;
     flex-direction: column;
@@ -192,18 +283,13 @@
 }
 
 .request-card {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius);
+    padding: 1rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.request-card:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
 }
 
 .request-avatar {
@@ -211,19 +297,18 @@
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .request-info {
     flex: 1;
 }
 
-.request-info h3 {
+.request-info h4 {
     margin: 0;
+    margin-bottom: 0.2rem;
     font-size: 1rem;
-    color: white;
-    border-bottom: none;
-    padding-bottom: 0;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .request-date {

@@ -1,6 +1,6 @@
 import { Router } from '../core/router.js';
-import { getUserById } from '../data/UserService.js';
-import { mockUsers } from '../data/mock_data.js' 
+import { getUserById, sendFriendRequest, acceptFriendRequest } from '../data/UserService.js';
+import { mockUsers } from '../data/mock_data.js';
 import { NotificationManager } from '../components/Notification.js';
 
 export class FriendsView {
@@ -23,39 +23,50 @@ export class FriendsView {
             return;
         }
 
-        // Create the UI sections
+        // Create the UI with layout matching Settings style
         this.element.innerHTML = `
-            <div class="friends-container">
+            <div class="friends-header">
                 <h2>Friends</h2>
-                
-                <div class="friends-search-container">
-                    <div class="search-form">
+                <p>Connect with other players and manage your friend list</p>
+            </div>
+            
+            <div class="friends-container">
+                <div class="friends-sidebar">
+                    <div class="friends-search">
                         <input type="text" id="friend-search" placeholder="Search for users...">
-                        <button id="search-button" class="button">Search</button>
+                        <button id="search-button" class="app-button">Search</button>
                     </div>
+                    
+                    <ul class="friends-nav">
+                        <li><a href="#all-friends" class="active" data-tab="friends-list">My Friends <span class="friends-count" id="friends-count"></span></a></li>
+                        <li><a href="#requests" data-tab="requests">Friend Requests <span class="friends-count" id="request-count"></span></a></li>
+                    </ul>
                 </div>
                 
-                <div class="tabs">
-                    <button class="tab-button active" data-tab="friends-list">My Friends</button>
-                    <button class="tab-button" data-tab="requests">Friend Requests <span id="request-count"></span></button>
-                </div>
-                
-                <div class="tab-content">
-                    <div id="friends-list" class="tab-pane active">
+                <div class="friends-content">
+                    <div id="friends-list" class="friends-panel active">
+                        <h3>My Friends</h3>
                         <div class="friends-grid" id="friends-grid">
                             <!-- Friends will be loaded here -->
+                            <div class="loading-spinner">Loading friends...</div>
                         </div>
                     </div>
                     
-                    <div id="requests" class="tab-pane">
+                    <div id="requests" class="friends-panel">
+                        <h3>Friend Requests</h3>
                         <div class="requests-list" id="requests-list">
                             <!-- Friend requests will be loaded here -->
+                            <div class="loading-spinner">Loading requests...</div>
                         </div>
                     </div>
-                </div>
-                
-                <div id="search-results" class="search-results">
-                    <!-- Search results will appear here -->
+                    
+                    <div id="search-results" class="friends-panel search-results-panel">
+                        <h3>Search Results</h3>
+                        <div class="search-results-container" id="search-results-container">
+                            <!-- Search results will appear here -->
+                            <p>Search for users to add them as friends</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -73,22 +84,27 @@ export class FriendsView {
     private setupEventListeners(): void {
         if (!this.element) return;
         
-        // Tab switching
-        const tabButtons = this.element.querySelectorAll('.tab-button');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active class from all buttons and panes
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                const panes = this.element?.querySelectorAll('.tab-pane');
-                panes?.forEach(pane => pane.classList.remove('active'));
+        // Nav item switching - like Settings tabs
+        const navLinks = this.element.querySelectorAll('.friends-nav a');
+        const panels = this.element.querySelectorAll('.friends-panel');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabId = link.getAttribute('data-tab');
                 
-                // Add active class to clicked button
-                button.classList.add('active');
+                // Update active link
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
                 
-                // Show corresponding pane
-                const tabId = button.getAttribute('data-tab');
-                const pane = this.element?.querySelector(`#${tabId}`);
-                pane?.classList.add('active');
+                // Show target panel, hide others
+                panels.forEach(panel => {
+                    if (panel.id === tabId) {
+                        panel.classList.add('active');
+                    } else {
+                        panel.classList.remove('active');
+                    }
+                });
             });
         });
         
@@ -97,14 +113,32 @@ export class FriendsView {
         const searchInput = this.element.querySelector('#friend-search') as HTMLInputElement;
         
         searchButton?.addEventListener('click', () => {
-            const searchTerm = searchInput?.value || '';
-            this.searchUsers(searchTerm);
+            const searchTerm = searchInput?.value.trim() || '';
+            if (searchTerm) {
+                this.searchUsers(searchTerm);
+                
+                // Switch to search results panel
+                navLinks.forEach(l => l.classList.remove('active'));
+                panels.forEach(panel => panel.classList.remove('active'));
+                
+                const searchPanel = this.element?.querySelector('#search-results');
+                if (searchPanel) searchPanel.classList.add('active');
+            }
         });
         
         searchInput?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                const searchTerm = searchInput.value || '';
-                this.searchUsers(searchTerm);
+                const searchTerm = searchInput.value.trim() || '';
+                if (searchTerm) {
+                    this.searchUsers(searchTerm);
+                    
+                    // Switch to search results panel
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    panels.forEach(panel => panel.classList.remove('active'));
+                    
+                    const searchPanel = this.element?.querySelector('#search-results');
+                    if (searchPanel) searchPanel.classList.add('active');
+                }
             }
         });
     }
@@ -112,40 +146,47 @@ export class FriendsView {
     private loadFriends(): void {
         const currentUser = getUserById(this.currentUserId);
         const friendsGrid = this.element?.querySelector('#friends-grid');
+        const friendsCount = this.element?.querySelector('#friends-count');
         
-        if (!friendsGrid || !currentUser || !currentUser.friends) {
-            if (friendsGrid) {
-                friendsGrid.innerHTML = '<p>You don\'t have any friends yet.</p>';
-            }
-            return;
+        if (!friendsGrid || !currentUser) return;
+        
+        const friends = currentUser.friends || [];
+        
+        // Update friends count
+        if (friendsCount) {
+            friendsCount.textContent = friends.length > 0 ? `(${friends.length})` : '';
         }
         
-        if (currentUser.friends.length === 0) {
-            friendsGrid.innerHTML = '<p>You don\'t have any friends yet.</p>';
+        if (friends.length === 0) {
+            friendsGrid.innerHTML = '<p class="empty-message">You don\'t have any friends yet. Use the search to find other players.</p>';
             return;
         }
         
         let friendsHTML = '';
         
-        currentUser.friends.forEach(friendId => {
+        friends.forEach(friendId => {
             const friend = getUserById(friendId);
             if (!friend) return;
             
-            // mock
+            // Determine status - ADD API 
+            const status = friend.status || (Math.random() > 0.5 ? 'online' : 'offline');
+            const statusText = status === 'in-game' ? 'In Game' : (status === 'online' ? 'Online' : 'Offline');
+            
             friendsHTML += `
                 <div class="friend-card">
-                    <img src="${friend.avatarUrl || 'https://placehold.co/100x100/1d1f21/ffffff?text=User'}" alt="${friend.displayName}" class="friend-avatar">
+                    <img src="${friend.avatarUrl || 'https://placehold.co/80x80/1d1f21/ffffff?text=' + friend.displayName.charAt(0)}" 
+                        alt="${friend.displayName}" class="friend-avatar">
                     <div class="friend-info">
-                        <h3>${friend.displayName}</h3>
-                        <p class="friend-status ${Math.random() > 0.5 ? 'online' : 'offline'}">
-                            ${Math.random() > 0.5 ? 'Online' : 'Offline'}
-                        </p>
+                        <h4>${friend.displayName}</h4>
+                        <div class="friend-status ${status}">
+                            ${statusText}
+                        </div>
                     </div>
                     <div class="friend-actions">
-                        <button class="action-button chat-button" data-id="${friend.id}">
-                            <i class="fas fa-comments"></i> Chat
+                        <button class="friend-button message" data-id="${friend.id}">
+                            <i class="fas fa-comment"></i> Message
                         </button>
-                        <button class="action-button game-button" data-id="${friend.id}">
+                        <button class="friend-button invite" data-id="${friend.id}">
                             <i class="fas fa-gamepad"></i> Invite
                         </button>
                     </div>
@@ -156,16 +197,16 @@ export class FriendsView {
         friendsGrid.innerHTML = friendsHTML;
         
         // Add event listeners to buttons
-        const chatButtons = this.element?.querySelectorAll('.chat-button');
-        chatButtons?.forEach(button => {
+        const messageButtons = this.element?.querySelectorAll('.friend-button.message');
+        messageButtons?.forEach(button => {
             button.addEventListener('click', () => {
                 const friendId = button.getAttribute('data-id');
                 this.router.navigate(`/chat/${friendId}`);
             });
         });
         
-        const gameButtons = this.element?.querySelectorAll('.game-button');
-        gameButtons?.forEach(button => {
+        const inviteButtons = this.element?.querySelectorAll('.friend-button.invite');
+        inviteButtons?.forEach(button => {
             button.addEventListener('click', () => {
                 const friendId = button.getAttribute('data-id');
                 const friend = getUserById(Number(friendId));
@@ -173,7 +214,8 @@ export class FriendsView {
                     NotificationManager.show({
                         title: 'Game Invitation',
                         message: `Invitation sent to ${friend.displayName}`,
-                        type: 'success'
+                        type: 'success',
+                        duration: 3000
                     });
                 }
             });
@@ -187,57 +229,104 @@ export class FriendsView {
         
         if (!requestsList || !currentUser) return;
         
-        if (!currentUser.friendRequests || currentUser.friendRequests.length === 0) {
-            requestsList.innerHTML = '<p>You don\'t have any friend requests.</p>';
-            if (requestCount) requestCount.textContent = '';
-            return;
-        }
+        const requests = currentUser.friendRequests || [];
+        const pendingRequests = requests.filter(r => r.status === 'pending');
         
         // Update request count
         if (requestCount) {
-            const pendingCount = currentUser.friendRequests.filter(r => r.status === 'pending').length;
-            requestCount.textContent = pendingCount > 0 ? `(${pendingCount})` : '';
+            requestCount.textContent = pendingRequests.length > 0 ? `(${pendingRequests.length})` : '';
+        }
+        
+        if (pendingRequests.length === 0) {
+            requestsList.innerHTML = '<p class="empty-message">You don\'t have any friend requests.</p>';
+            return;
         }
         
         let requestsHTML = '';
         
-        currentUser.friendRequests.forEach(request => {
-            if (request.status !== 'pending') return;
-            
+        pendingRequests.forEach(request => {
             const fromUser = getUserById(request.from);
             if (!fromUser) return;
             
             requestsHTML += `
                 <div class="request-card">
-                    <img src="${fromUser.avatarUrl || 'https://placehold.co/60x60/1d1f21/ffffff?text=User'}" alt="${fromUser.displayName}" class="request-avatar">
+                    <img src="${fromUser.avatarUrl || 'https://placehold.co/50x50/1d1f21/ffffff?text=' + fromUser.displayName.charAt(0)}" 
+                        alt="${fromUser.displayName}" class="request-avatar">
                     <div class="request-info">
-                        <h3>${fromUser.displayName}</h3>
-                        <p class="request-date">Sent on ${request.date}</p>
+                        <h4>${fromUser.displayName}</h4>
+                        <p class="request-date">Requested ${request.date}</p>
                     </div>
                     <div class="request-actions">
-                        <button class="action-button accept-button" data-id="${request.id}">
-                            <i class="fas fa-check"></i> Accept
+                        <button class="request-button accept" data-id="${request.id}" data-user-id="${fromUser.id}">
+                            Accept
                         </button>
-                        <button class="action-button reject-button" data-id="${request.id}">
-                            <i class="fas fa-times"></i> Reject
+                        <button class="request-button reject" data-id="${request.id}" data-user-id="${fromUser.id}">
+                            Reject
                         </button>
                     </div>
                 </div>
             `;
         });
         
-        requestsList.innerHTML = requestsHTML || '<p>You don\'t have any friend requests.</p>';
+        requestsList.innerHTML = requestsHTML;
         
+        // Add event listeners for accept/reject buttons
+        const acceptButtons = this.element?.querySelectorAll('.request-button.accept');
+        acceptButtons?.forEach(button => {
+            button.addEventListener('click', () => {
+                const requestId = Number(button.getAttribute('data-id'));
+                const userId = Number(button.getAttribute('data-user-id'));
+                
+                // Accept friend request
+                const success = acceptFriendRequest(this.currentUserId, requestId);
+                
+                if (success) {
+                    NotificationManager.show({
+                        title: 'Friend Request Accepted',
+                        message: 'You are now friends!',
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    // Reload both friend lists
+                    this.loadFriends();
+                    this.loadFriendRequests();
+                }
+            });
+        });
+        
+        const rejectButtons = this.element?.querySelectorAll('.request-button.reject');
+        rejectButtons?.forEach(button => {
+            button.addEventListener('click', () => {
+                const requestId = Number(button.getAttribute('data-id'));
+                const userId = Number(button.getAttribute('data-user-id'));
+                
+                // ADD API, reject the friend request
+                // For now, just remove the card and show notification
+                const requestCard = button.closest('.request-card');
+                if (requestCard) {
+                    requestCard.remove();
+                    
+                    NotificationManager.show({
+                        title: 'Friend Request Rejected',
+                        message: 'The friend request has been rejected.',
+                        type: 'info',
+                        duration: 3000
+                    });
+                    
+                    // Reload requests list to update counts
+                    this.loadFriendRequests();
+                }
+            });
+        });
     }
 
     private searchUsers(searchTerm: string): void {
-        const searchResults = this.element?.querySelector('#search-results');
+        const searchResults = this.element?.querySelector('#search-results-container');
         if (!searchResults) return;
         
-        if (!searchTerm) {
-            searchResults.innerHTML = '';
-            return;
-        }
+        // Show loading state
+        searchResults.innerHTML = '<div class="loading-spinner">Searching...</div>';
         
         const currentUser = getUserById(this.currentUserId);
         if (!currentUser) return;
@@ -250,28 +339,33 @@ export class FriendsView {
         );
         
         if (filteredUsers.length === 0) {
-            searchResults.innerHTML = '<p>No users found.</p>';
+            searchResults.innerHTML = '<p class="empty-message">No users found matching your search.</p>';
             return;
         }
         
-        let resultsHTML = '<h3>Search Results</h3>';
+        let resultsHTML = '';
         
         filteredUsers.forEach(user => {
             const isFriend = currentUser.friends?.includes(user.id);
+            const isPending = currentUser.friendRequests?.some(r => r.from === user.id && r.status === 'pending');
             
             resultsHTML += `
                 <div class="search-result-card">
-                    <img src="${user.avatarUrl || 'https://placehold.co/60x60/1d1f21/ffffff?text=User'}" alt="${user.displayName}" class="search-result-avatar">
+                    <img src="${user.avatarUrl || 'https://placehold.co/50x50/1d1f21/ffffff?text=' + user.displayName.charAt(0)}" 
+                        alt="${user.displayName}" class="search-result-avatar">
                     <div class="search-result-info">
-                        <h3>${user.displayName}</h3>
+                        <h4>${user.displayName}</h4>
                         <p>@${user.username}</p>
                     </div>
                     <div class="search-result-actions">
                         ${isFriend 
                             ? '<span class="friend-badge"><i class="fas fa-user-check"></i> Friend</span>'
-                            : `<button class="action-button add-friend-button" data-id="${user.id}">
-                                <i class="fas fa-user-plus"></i> Add Friend
-                            </button>`
+                            : (isPending 
+                                ? '<span class="pending-badge"><i class="fas fa-clock"></i> Pending</span>'
+                                : `<button class="friend-button add" data-id="${user.id}">
+                                    <i class="fas fa-user-plus"></i> Add Friend
+                                </button>`
+                            )
                         }
                     </div>
                 </div>
@@ -279,6 +373,35 @@ export class FriendsView {
         });
         
         searchResults.innerHTML = resultsHTML;
+        
+        // Add event listeners to add friend buttons
+        const addFriendButtons = this.element?.querySelectorAll('.friend-button.add');
+        addFriendButtons?.forEach(button => {
+            button.addEventListener('click', () => {
+                const userId = Number(button.getAttribute('data-id'));
+                const user = getUserById(userId);
+                
+                if (user) {
+                    // ADD API, send friend request
+                    const success = sendFriendRequest(this.currentUserId, userId);
+                    
+                    if (success) {
+                        // Update button to show pending
+                        const actionsDiv = button.parentElement;
+                        if (actionsDiv) {
+                            actionsDiv.innerHTML = '<span class="pending-badge"><i class="fas fa-clock"></i> Pending</span>';
+                        }
+                        
+                        NotificationManager.show({
+                            title: 'Friend Request Sent',
+                            message: `Friend request sent to ${user.displayName}`,
+                            type: 'success',
+                            duration: 3000
+                        });
+                    }
+                }
+            });
+        });
     }
 
     destroy(): void {
