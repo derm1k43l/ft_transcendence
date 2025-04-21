@@ -1,37 +1,4 @@
 /* Settings View Styles */
-.settings-view {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.settings-header {
-    margin-bottom: 2rem;
-}
-
-.settings-header h2 {
-    font-size: 1.8rem;
-    margin-bottom: 0.5rem;
-}
-
-.settings-header p {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Settings Layout */
-.settings-container {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 2rem;
-    min-height: 600px;
-}
-
-.settings-sidebar {
-    background-color: var(--bg-color-medium);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-}
-
 .settings-nav {
     list-style: none;
 }
@@ -376,27 +343,4 @@ input:checked + .toggle-slider:before {
 
 .text-button:hover {
     text-decoration: underline;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .settings-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .settings-sidebar {
-        display: flex;
-        overflow-x: auto;
-        padding: 0.5rem;
-    }
-    
-    .settings-nav {
-        display: flex;
-    }
-    
-    .settings-nav a {
-        white-space: nowrap;
-        margin-bottom: 0;
-        margin-right: 0.5rem;
-    }
 }

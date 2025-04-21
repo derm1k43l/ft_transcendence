@@ -6,6 +6,7 @@
 @import url('./friends.css');
 @import url('./dashboard.css');
 @import url('./settings.css');
+@import url('./responsive.css');
 
 * {
     margin: 0;
@@ -318,11 +319,6 @@ body {
     animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
 .close-about {
     position: absolute;
     top: 10px;
@@ -450,7 +446,8 @@ body {
 .sidebar-nav ul {
     list-style: none;
     flex-grow: 1;
-    margin-bottom: 2rem; /* Space for the logo or not.. no logo but a bit of space */
+    margin-bottom: 2rem;
+    padding: 0;
 }
 
 .sidebar-nav li {
@@ -460,13 +457,18 @@ body {
 .sidebar-nav a {
     display: flex;
     align-items: center;
-    padding: 0.8rem 1rem;
-    color: white;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     border-radius: var(--border-radius);
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
     font-weight: 400;
+}
+
+.sidebar-nav a span {
+    flex: 1;
 }
 
 .sidebar-nav a i {
@@ -476,21 +478,21 @@ body {
 }
 
 .sidebar-nav a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-nav a.active {
-    background-color: var(--active-color);
+    background-color: rgba(124, 92, 255, 0.2);
+    color: white;
+    border-left: 3px solid #7c5cff; 
 }
 
-.sidebar-nav a.active::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 3px;
-    background-color: #7c00e3;
+#logout-button {
+    background-color: rgba(255, 49, 49, 0.1);
+}
+
+#logout-button:hover {
+    background-color: rgba(255, 49, 49, 0.2);
 }
 
 .main-content {
@@ -641,92 +643,4 @@ body {
 
 .auth-alternate a:hover {
     opacity: 0.8;
-}
-
-
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-
-    .about-modal-content {
-        max-height: 70vh;
-        width: 90%;
-        padding: 1rem;
-        margin: 1rem;
-    }
-    
-    .team-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    
-    .member-image {
-        width: 120px;
-        height: 120px;
-    }
-    
-    .header-content {
-        max-width: 100%;
-        padding: 0.5rem 1rem;
-    }
-
-    .main-header {
-        padding: 0 1rem;
-    }
-
-    .main-nav {
-        position: fixed;
-        top: 60px;
-        right: 0;
-        width: 250px;
-        height: calc(100vh - 60px);
-        background-color: var(--bg-color-medium);
-        transform: translateX(100%);
-        transition: transform 0.3s ease-in-out;
-        padding-top: 1rem;
-        z-index: 42;
-        border-left: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .main-nav.active {
-        transform: translateX(0);
-    }
-
-    .main-nav .nav-links {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .main-nav .nav-links li {
-        margin: 1rem 0;
-        width: 100%;
-        text-align: center;
-    }
-    
-    .main-nav .nav-links a {
-        display: block;
-        padding: 1rem;
-        width: 90%;
-        margin: 0 auto;
-    }
-    
-    .main-nav .nav-links a:hover,
-    .main-nav .nav-links a.active {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .login-form-container {
-        padding: 2rem 1.5rem;
-    }
-
-    .app-layout {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
 }

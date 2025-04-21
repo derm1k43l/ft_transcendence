@@ -1,4 +1,134 @@
 /* ===== SHARED COMPONENT STYLES ===== */
+/* Main container styles - consistent across all views */
+.friends-view,
+.chat-view,
+.settings-view {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.friends-header,
+.chat-header,
+.settings-header {
+    margin-bottom: 2rem;
+}
+
+.friends-header h2,
+.chat-header h2,
+.settings-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.friends-header p,
+.chat-header p,
+.settings-header p {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.friends-container,
+.chat-container,
+.settings-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+    min-height: calc(90vh - 200px);
+    max-height: calc(90vh - 200px);
+}
+
+.friends-sidebar,
+.chat-sidebar,
+.settings-sidebar {
+    background-color: var(--bg-color-medium);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.friends-content,
+.chat-content,
+.settings-content {
+    background-color: var(--bg-color-medium);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+}
+
+.friends-nav,
+.chat-contacts,
+.settings-nav {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    flex-grow: 1;
+}
+
+.friends-nav::-webkit-scrollbar,
+.chat-contacts::-webkit-scrollbar,
+.settings-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.friends-nav::-webkit-scrollbar-thumb,
+.chat-contacts::-webkit-scrollbar-thumb,
+.settings-nav::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.friends-nav::-webkit-scrollbar-track,
+.chat-contacts::-webkit-scrollbar-track,
+.settings-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.friends-panel,
+.chat-panel,
+.settings-panel {
+    display: none;
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.friends-panel::-webkit-scrollbar,
+.chat-panel::-webkit-scrollbar,
+.settings-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.friends-panel::-webkit-scrollbar-thumb,
+.chat-panel::-webkit-scrollbar-thumb,
+.settings-panel::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.friends-panel::-webkit-scrollbar-track,
+.chat-panel::-webkit-scrollbar-track,
+.settings-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.friends-panel.active,
+.chat-panel.active,
+.settings-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
 .card {
     background-color: var(--bg-color-medium);
     border-radius: var(--border-radius);
@@ -56,7 +186,7 @@
     border: 1px solid #7c5cff;
     background: transparent;
     color: #7c5cff;
-    font-size: 0.8rem;
+    font-size: 0.8rem; 
     cursor: pointer;
     transition: all 0.3s ease;
     display: inline-flex;

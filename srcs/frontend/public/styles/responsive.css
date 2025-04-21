@@ -1,0 +1,379 @@
+/* Responsive styles for all views */
+
+/* Large screens (desktops, less than 1200px) */
+@media (max-width: 1200px) {
+    .friends-view,
+    .chat-view,
+    .settings-view,
+    .dashboard-view,
+    .profile-view,
+    .game-view {
+        padding: 1.5rem;
+    }
+    
+    .donut-chart-container,
+    .progress-chart-container {
+        width: 48%;
+    }
+}
+
+/* Medium screens (tablets, less than 992px) */
+@media (max-width: 992px) {
+    /* Main content layouts */
+    .friends-container,
+    .chat-container,
+    .settings-container {
+        grid-template-columns: 200px 1fr;
+        gap: 1.5rem;
+    }
+    
+    .page-content {
+        padding: 1rem;
+    }
+    
+    /* Dashboard elements */
+    .stat-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .activity-feed {
+        max-height: 350px;
+    }
+    
+    .recent-games-list {
+        max-height: 350px;
+    }
+    
+    /* Navigation */
+    .sidebar {
+        width: 60px;
+        padding: 1rem 0.5rem;
+    }
+    
+    .sidebar-nav a span,
+    .sidebar .username {
+        display: none;
+    }
+    
+    .sidebar-nav a i {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
+    
+    .sidebar .user-profile {
+        justify-content: center;
+    }
+    
+    .sidebar .avatar {
+        margin-right: 0;
+    }
+    
+    .sidebar-nav a {
+        justify-content: center;
+        padding: 0.8rem;
+    }
+    
+    /* Content area */
+    .main-content {
+        margin-left: 60px;
+    }
+}
+
+/* Small screens (mobile landscape, less than 768px) */
+@media (max-width: 768px) {
+    /* Headers */
+    .friends-header,
+    .chat-header,
+    .settings-header,
+    .dashboard-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .friends-header h2,
+    .chat-header h2, 
+    .settings-header h2,
+    .dashboard-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Layout containers */
+    .friends-container,
+    .chat-container,
+    .settings-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        min-height: auto;
+        max-height: none;
+    }
+    
+    /* Navigation sidebars converted to horizontal scrolling */
+    .friends-sidebar,
+    .chat-sidebar,
+    .settings-sidebar {
+        padding: 0.75rem;
+        overflow-x: auto;
+        flex-direction: column;
+        max-height: 200px;
+    }
+    
+    .friends-search,
+    .chat-search {
+        padding: 0 0.5rem;
+    }
+    
+    .friends-nav,
+    .settings-nav {
+        display: flex;
+        padding: 0.5rem;
+    }
+    
+    .friends-nav li,
+    .settings-nav li {
+        margin-right: 0.5rem;
+        margin-bottom: 0;
+    }
+    
+    .friends-nav a,
+    .settings-nav a {
+        white-space: nowrap;
+        padding: 0.6rem 1rem;
+    }
+    
+    /* Chat contacts converted to horizontal scroll */
+    .chat-contacts {
+        display: flex;
+        padding: 0.5rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    
+    .chat-contact {
+        flex-shrink: 0;
+        flex-direction: column;
+        width: 70px;
+        text-align: center;
+        margin-right: 0.5rem;
+    }
+    
+    .chat-contact-avatar {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .chat-contact-info h4 {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70px;
+    }
+    
+    .chat-last-message,
+    .chat-time {
+        display: none;
+    }
+    
+    /* Dashboard elements */
+    .quick-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stats-charts-container {
+        flex-direction: column;
+    }
+    
+    .donut-chart-container,
+    .progress-chart-container {
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-columns {
+        flex-direction: column;
+    }
+    
+    .dashboard-column {
+        width: 100%;
+        margin: 0 0 1.5rem 0;
+    }
+    
+    /* Friends grid */
+    .friends-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    /* Game screen */
+    .game-container {
+        flex-direction: column;
+    }
+    
+    .game-sidebar {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .game-canvas-container {
+        width: 100%;
+        height: auto;
+    }
+    
+    /* Form elements */
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-column {
+        width: 100%;
+        padding: 0;
+    }
+}
+
+/* Extra small screens (mobile portrait, less than 576px) */
+@media (max-width: 576px) {
+    /* General spacing */
+    .friends-view,
+    .chat-view,
+    .settings-view,
+    .dashboard-view,
+    .profile-view,
+    .game-view {
+        padding: 1rem 0.75rem;
+    }
+    
+    /* Friends cards */
+    .friends-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .friend-card {
+        padding: 0.75rem;
+    }
+    
+    .friend-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .friend-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    .friend-button {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.5rem;
+    }
+    
+    /* Cards and sections */
+    .card,
+    .settings-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Headers */
+    .card-header h3,
+    .settings-section h4 {
+        font-size: 1.1rem;
+    }
+    
+    /* Modals */
+    .modal-content {
+        width: 95%;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+    
+    /* Tabs */
+    .tabs {
+        overflow-x: auto;
+    }
+    
+    .tab-button {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    /* Friend request cards */
+    .request-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .request-avatar {
+        margin-right: 0;
+        margin-bottom: 0.75rem;
+    }
+    
+    .request-info {
+        margin-bottom: 0.75rem;
+    }
+    
+    .request-actions {
+        width: 100%;
+    }
+}
+
+/* Support for high-resolution screens */
+@media (-webkit-min-device-pixel-ratio: 2), 
+       (min-resolution: 192dpi) { 
+    body {
+        font-weight: 300; /* Slightly thinner text for retina displays */
+    }
+}
+
+/* Dark mode preferences */
+@media (prefers-color-scheme: dark) {
+    /* We already have a dark theme, no changes needed */
+}
+
+/* Print styles */
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    body {
+        padding: 1cm !important;
+    }
+    
+    .sidebar,
+    .header,
+    .app-footer,
+    .game-canvas-container canvas {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+    
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid;
+    }
+    
+    .stat-cards, .dashboard-columns {
+        page-break-inside: avoid;
+    }
+}
