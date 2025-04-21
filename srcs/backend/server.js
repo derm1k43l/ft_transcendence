@@ -13,7 +13,7 @@ fastify.register(require('@punkish/fastify-better-sqlite3'), {
 	database: path.resolve(dbDir, 'mydb.sqlite')
 });
 
-fastify.register(require('./routes/playerRoutes'));
+fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/scoreRoutes'));
 
 const PORT = process.env.PORT ||  3000;
@@ -27,7 +27,7 @@ fastify.after((err) => {
 		const db = fastify.betterSqlite3;
 		//Initialize the database: Create the table if it doesn't exist
 		db.exec(`
-			CREATE TABLE IF NOT EXISTS players (
+			CREATE TABLE IF NOT EXISTS users (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				username TEXT NOT NULL UNIQUE,
 				created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -35,10 +35,10 @@ fastify.after((err) => {
 
 			CREATE TABLE IF NOT EXISTS scores (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				player_id INTEGER NOT NULL,
+				user_id INTEGER NOT NULL,
 				score INTEGER NOT NULL,
 				game_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-				FOREIGN KEY (player_id) REFERENCES players (id)
+				FOREIGN KEY (user_id) REFERENCES users (id)
 			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');

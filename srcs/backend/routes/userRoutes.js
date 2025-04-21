@@ -1,13 +1,13 @@
 const {
-	getPlayers,
-	getPlayer,
-	addPlayer,
-	deletePlayer,
-	updatePlayer,
-	} = require('../controllers/playerController')
+	getUsers,
+	getUser,
+	addUser,
+	deleteUser,
+	updateUser,
+	} = require('../controllers/userController')
 
-// Player schema
-const Player = {
+// User schema
+const User = {
 	type: 'object',
 	properties: {
 		id: {type: 'integer'},
@@ -16,20 +16,20 @@ const Player = {
 	},
 };
 
-// Options for get all Players
-const getPlayersOpts = {
+// Options for get all Users
+const getUsersOpts = {
 	schema: {
 		response: {
 			200: {
 				type: 'array',
-				items: Player,
+				items: User,
 			},
 		},
 	},
-	handler: getPlayers,
+	handler: getUsers,
 }
 
-const getPlayerOpts = {
+const getUserOpts = {
 	schema: {
 		params: {
 			type: 'object',
@@ -39,7 +39,7 @@ const getPlayerOpts = {
 			required: ['id']
 		},
 		response: {
-			200: Player,
+			200: User,
 			404: {
 				type: 'object',
 				properties: {
@@ -48,10 +48,10 @@ const getPlayerOpts = {
 			}
 		},
 	},
-	handler: getPlayer,
+	handler: getUser,
 };
 
-const postPlayerOpts = {
+const postUserOpts = {
 	schema: {
 		body: {
 			type: 'object',
@@ -61,7 +61,7 @@ const postPlayerOpts = {
 			},
 		},
 		response: {
-			201: Player,
+			201: User,
 			400: {
 				type: 'object',
 				properties: {
@@ -76,10 +76,10 @@ const postPlayerOpts = {
 			}
 		},
 	},
-	handler: addPlayer,
+	handler: addUser,
 };
 
-const deletePlayerOpts = {
+const deleteUserOpts = {
 	schema: {
 		params: {
 			type: 'object',
@@ -103,10 +103,10 @@ const deletePlayerOpts = {
 			 }
 		},
 	},
-	handler: deletePlayer,
+	handler: deleteUser,
 };
 
-const updatePlayerOpts = {
+const updateUserOpts = {
 	schema: {
 		params: {
 			type: 'object',
@@ -123,7 +123,7 @@ const updatePlayerOpts = {
 			}
 		 },
 		response: {
-			200: Player,
+			200: User,
 			 404: {
 				type: 'object',
 				properties: {
@@ -138,26 +138,26 @@ const updatePlayerOpts = {
 			}
 		},
 	},
-	handler: updatePlayer,
+	handler: updateUser,
 };
 
-function playerRoutes (fastify, options, done) {
-	// Get all Players
-	fastify.get('/players', getPlayersOpts);
+function userRoutes (fastify, options, done) {
+	// Get all Users
+	fastify.get('/users', getUsersOpts);
 
-	// Get single Player
-	fastify.get('/players/:id', getPlayerOpts);
+	// Get single User
+	fastify.get('/users/:id', getUserOpts);
 
-	// Add Player
-	fastify.post('/players', postPlayerOpts);
+	// Add User
+	fastify.post('/users', postUserOpts);
 
-	// Delete Player
-	fastify.delete('/players/:id', deletePlayerOpts);
+	// Delete User
+	fastify.delete('/users/:id', deleteUserOpts);
 
-	// Update Player
-	fastify.put('/players/:id', updatePlayerOpts);
+	// Update User
+	fastify.put('/users/:id', updateUserOpts);
 
 	done();
 }
 
-module.exports = playerRoutes;
+module.exports = userRoutes;

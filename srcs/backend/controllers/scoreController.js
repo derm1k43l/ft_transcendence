@@ -6,12 +6,12 @@ const getScores = async (req, reply) => {
 		const scores = db.prepare(`
 			SELECT
 				s.id,
-				s.player_id,
+				s.user_id,
 				p.username,
 				s.score,
 				s.game_date
 			FROM scores s
-			JOIN players p ON s.player_id = p.id
+			JOIN users p ON s.user_id = p.id
 			ORDER BY s.score DESC
 		`).all();
 		reply.send(scores);
@@ -21,15 +21,15 @@ const getScores = async (req, reply) => {
 	}
 }
 
-const getPlayerScores = async (req, reply) => {
+const getUserScores = async (req, reply) => {
 	try {
-		const { player_id } = req.params;
+		const { user_id } = req.params;
 		const db = req.server.betterSqlite3;
 
-		// First check if player exists
-		const player = db.prepare('SELECT * FROM players WHERE id = ?').get(player_id);
-		if (!player) {
-			reply.code(404).send({ message: 'Player not found' });
+		// First check if user exists
+		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(user_id);
+		if (!user) {
+			reply.code(404).send({ message: 'User not found' });
 			return;
 		}
 
@@ -37,15 +37,15 @@ const getPlayerScores = async (req, reply) => {
 		const scores = db.prepare(`
 			SELECT
 				s.id,
-				s.player_id,
+				s.user_id,
 				p.username,
 				s.score,
 				s.game_date
 			FROM scores s
-			JOIN players p ON s.player_id = p.id
-			WHERE s.player_id = ?
+			JOIN users p ON s.user_id = p.id
+			WHERE s.user_id = ?
 			ORDER BY s.score DESC
-		`).all(player_id);
+		`).all(user_id);
 
 		if (!scores) { //check if needed
 			reply.code(404).send({ message: 'Scores not found' });
@@ -60,33 +60,33 @@ const getPlayerScores = async (req, reply) => {
 
 const addScore = async (req, reply) => {
 	try {
-		const { player_id, score } = req.body;
+		const { user_id, score } = req.body;
 		const db = req.server.betterSqlite3;
 
-		if (!player_id || score === undefined) {
-			reply.code(400).send({ message: 'Player ID and score are required' });
+		if (!user_id || score === undefined) {
+			reply.code(400).send({ message: 'User ID and score are required' });
 			return;
 		}
 
-		// Check if player exists
-		const player = db.prepare('SELECT * FROM players WHERE id = ?').get(player_id);
-		if (!player) {
-			reply.code(404).send({ message: 'Player not found' });
+		// Check if user exists
+		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(user_id);
+		if (!user) {
+			reply.code(404).send({ message: 'User not found' });
 			return;
 		}
 
-		const result = db.prepare('INSERT INTO scores (player_id, score) VALUES (?, ?)').run(player_id, score);
+		const result = db.prepare('INSERT INTO scores (user_id, score) VALUES (?, ?)').run(user_id, score);
 		const newScoreId = result.lastInsertRowid;
 		
 		const newScore = db.prepare(`
 			SELECT 
 				s.id, 
-				s.player_id, 
+				s.user_id, 
 				p.username, 
 				s.score, 
 				s.game_date 
 			FROM scores s
-			JOIN players p ON s.player_id = p.id
+			JOIN users p ON s.user_id = p.id
 			WHERE s.id = ?
 		`).get(newScoreId);
 		reply.code(201).send(newScore);
@@ -116,7 +116,7 @@ const deleteScore = async (req, reply) => {
 
 module.exports = {
 	getScores,
-	getPlayerScores,
+	getUserScores,
 	addScore,
 	deleteScore
 };

@@ -1,6 +1,6 @@
 const {
 	getScores,
-	getPlayerScores,
+	getUserScores,
 	addScore,
 	deleteScore,
 	} = require('../controllers/scoreController');
@@ -10,7 +10,7 @@ const Score = {
 	type: 'object',
 	properties: {
 		id: { type: 'integer' },
-		player_id: { type: 'integer' },
+		user_id: { type: 'integer' },
 		username: { type: 'string' },
 		score: { type: 'integer' },
 		game_date: { type: 'string' },
@@ -29,14 +29,14 @@ const getScoresOpts = {
 	handler: getScores,
 };
 
-const getPlayerScoresOpts = {
+const getUserScoresOpts = {
 	schema: {
 		params: {
 			type: 'object',
 			properties: {
-				player_id: { type: 'integer' }
+				user_id: { type: 'integer' }
 			},
-			required: ['player_id']
+			required: ['user_id']
 		},
 		response: {
 			200: {
@@ -51,16 +51,16 @@ const getPlayerScoresOpts = {
 			}
 		},
 	},
-	handler: getPlayerScores,
+	handler: getUserScores,
 };
 
 const postScoreOpts = {
 	schema: {
 		body: {
 			type: 'object',
-			required: ['player_id', 'score'],
+			required: ['user_id', 'score'],
 			properties: {
-				player_id: { type: 'integer' },
+				user_id: { type: 'integer' },
 				score: { type: 'integer' },
 			},
 		},
@@ -114,8 +114,8 @@ function scoreRoutes(fastify, options, done) {
 	// Get all scores
 	fastify.get('/scores', getScoresOpts);
 
-	// Get scores for a specific player
-	fastify.get('/players/:player_id/scores', getPlayerScoresOpts);
+	// Get scores for a specific User
+	fastify.get('/users/:user_id/scores', getUserScoresOpts);
 
 	// Add score
 	fastify.post('/scores', postScoreOpts);
