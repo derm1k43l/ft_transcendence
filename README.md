@@ -1,5 +1,8 @@
 # ft_transcendence - Advanced Web Ping Pong Game
 
+A real-time multiplayer Pong game with chat features, user profiles, authentication, and tournament functionality.
+
+
 ## Table of Contents
 - [Technologies](#technologies)
 - [Features](#features)
@@ -12,10 +15,16 @@
 ## Technologies
 
 ### Frontend
-
+- **Language**: TypeScript
+- **UI**: Custom CSS with responsive design
+- **Architecture**: Single Page Application (SPA)
+- **Libraries**:
+  - Chart.js for data visualization
+  - FontAwesome for icons
+  - No heavy frameworks - built with vanilla TS/JS
 
 ### Backend 
-
+[Backend details to be added when completed]
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
@@ -38,14 +47,21 @@
 - Docker and Docker Compose
 - Node.js and npm (for local development)
 
-### Installation
+## Installation
+- git clone https://github.com/derm1k43l/ft_transcendence
+- cd ft_transcendence
+- make
+- visit http://localhost:8080
 
-git clone <repository-url>
-cd ft_transcendence
-make
-visit localhost
-
-# Commits format
+## Commits format
 - \+ | Added something 
 - ~ | Modified something
 - \- | Removed something
+
+## Security Features
+
+- JWT for secure authentication
+- CSRF protection
+- Two-factor authentication (2FA)
+- Input validation and sanitization
+- Secure WebSockets for real-time communication

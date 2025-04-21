@@ -44,51 +44,6 @@ body {
 }
 
 /* --- Login Page Styles --- */
-.main-header {
-    padding: 0 2rem;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    z-index: 42;
-    backdrop-filter: blur(5px);
-    background-color: rgba(15, 15, 15, 0.3);
-}
-
-.header-content {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    max-width: var(--max-content-width);
-    margin: 0 auto;
-    height: 60px;
-    padding: 0.5rem 0;
-}
-
-.main-nav .nav-links {
-    list-style: none;
-    display: flex;
-    padding-top: 3rem;
-}
-
-.main-nav .nav-links li {
-    margin-left: 1.5rem;
-}
-
-.main-nav .nav-links a {
-    color: white;
-    text-decoration: none;
-    padding: 0.5rem 0;
-    transition: color 0.3s ease;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-}
-
-.main-nav .nav-links a.active {
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-}
-
 .login-main {
     flex-grow: 1;
     display: flex;
@@ -422,8 +377,8 @@ body {
 }
 
 .user-profile .avatar {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     margin-bottom: 0.8rem;
     border: 3px solid white;
@@ -643,4 +598,33 @@ body {
 
 .auth-alternate a:hover {
     opacity: 0.8;
+}
+
+.floating-about-button {
+    position: fixed;
+    top: 60px;
+    right: 300px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(15, 15, 15, 0.6);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 42;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.floating-about-button i {
+    font-size: 40px;
+}
+
+.floating-about-button:hover {
+    background-color: rgba(124, 92, 255, 0.6);
+    transform: scale(1.05);
 }

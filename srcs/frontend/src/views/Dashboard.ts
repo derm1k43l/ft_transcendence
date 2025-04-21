@@ -189,43 +189,43 @@ export class DashboardView {
         });
     }
     
-    private initializeCharts(user: any): void {
-        if (!window.Chart) return;
-        
-        // Results Donut Chart
-        const resultsChartCanvas = document.getElementById('results-chart') as HTMLCanvasElement;
-        if (resultsChartCanvas) {
-            const resultsChart = new window.Chart(resultsChartCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Wins', 'Losses'],
-                    datasets: [{
-                        data: [user.stats?.wins || 0, user.stats?.losses || 0],
-                        backgroundColor: ['#4CAF50', '#F44336'],
-                        borderColor: '#1d1f21',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            titleColor: '#fff',
-                            bodyColor: '#fff',
-                            displayColors: false
-                        }
+private initializeCharts(user: any): void {
+    if (!window.Chart) return;
+    
+    // Results Donut Chart - Keep this as is, it's simple and effective
+    const resultsChartCanvas = document.getElementById('results-chart') as HTMLCanvasElement;
+    if (resultsChartCanvas) {
+        const resultsChart = new window.Chart(resultsChartCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Wins', 'Losses'],
+                datasets: [{
+                    data: [user.stats?.wins || 0, user.stats?.losses || 0],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderColor: '#1d1f21',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
                     },
-                    cutout: '70%'
-                }
-            });
-            
-            this.charts.push(resultsChart);
-        }
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        displayColors: false
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+        
+        this.charts.push(resultsChart);
+    }
         
         // Performance Bar Chart - Changed from line chart
         const performanceChartCanvas = document.getElementById('performance-chart') as HTMLCanvasElement;

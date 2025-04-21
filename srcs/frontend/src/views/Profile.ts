@@ -1,19 +1,19 @@
 import { Router } from '../core/router.js';
-import { getUserById, getRankIcon, getRankTitle} from '../data/UserService.js';
+import { getUserById, updateUserProfile } from '../data/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;
     private router: Router;
-    private currentUserId: number = 1; // get real one
+    private currentUserId: number = 1; // default logged-in user
     private profileUserId: number;
 
-    // we need wil deccide later if id or user
-    constructor(router: Router, userId?: number) {
+    constructor(router: Router, userId?: string) {
         this.router = router;
-        // If userId is provided, view that user's profile
+        
+        // If userId is provided as a string parameter from the router, convert it to number
         // Otherwise view the current user's profile
-        this.profileUserId = userId || this.currentUserId;
+        this.profileUserId = userId ? parseInt(userId) : this.currentUserId;
     }
 
     render(rootElement: HTMLElement): void {
@@ -53,10 +53,10 @@ export class ProfileView {
                         </div>
                     </div>
                     ${isOwnProfile ? 
-                        `<button class="profile-edit-button" id="profile-edit-btn">
+                        `<button class="app-button" id="profile-edit-btn">
                             <i class="fas fa-edit"></i> Edit Profile
                         </button>` : 
-                        `<button class="profile-friend-button" id="add-friend-btn">
+                        `<button class="app-button" id="add-friend-btn">
                             <i class="fas fa-user-plus"></i> Add Friend
                         </button>`
                     }
@@ -69,7 +69,7 @@ export class ProfileView {
                     <div class="quick-stats-grid">
                         <div class="quick-stat">
                             <div class="stat-icon rank">
-                                ${getRankIcon(user.stats?.rank || '-')}
+                                <i class="fas fa-medal"></i>
                             </div>
                             <div class="stat-info">
                                 <h4>Rank</h4>
@@ -171,40 +171,8 @@ export class ProfileView {
                         `<a href="#" class="view-all-link" id="load-more-matches">Load More Matches</a>` : ''}
                 </div>
             </div>
-            
-            ${isOwnProfile ? `
-                <!-- Edit Profile Modal -->
-                <div class="profile-modal" id="profile-edit-modal">
-                    <div class="profile-modal-content">
-                        <div class="profile-modal-header">
-                            <h3>Edit Profile</h3>
-                            <button class="profile-modal-close" id="profile-modal-close">&times;</button>
-                        </div>
-                        <div class="profile-modal-body">
-                            <div class="profile-avatar-edit">
-                                <img src="${user.avatarUrl || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="Profile Avatar" class="profile-avatar-preview">
-                                <button class="app-button">Change Avatar</button>
-                            </div>
-                            <form class="profile-edit-form">
-                                <div class="profile-edit-field">
-                                    <label for="display-name">Display Name</label>
-                                    <input type="text" id="display-name" value="${user.displayName}">
-                                </div>
-                                <div class="profile-edit-field">
-                                    <label for="bio">Bio</label>
-                                    <textarea id="bio">${user.bio || ''}</textarea>
-                                </div>
-                                <div class="profile-edit-actions">
-                                    <button type="button" class="app-button" id="cancel-edit">Cancel</button>
-                                    <button type="submit" class="app-button">Save Changes</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            ` : ''}
         </div>
-    `;
+        `;
         
         rootElement.appendChild(this.element);
 
@@ -216,54 +184,32 @@ export class ProfileView {
         if (!this.element) return;
         
         if (isOwnProfile) {
-            // Setup edit profile
+            // Edit profile button
             const editBtn = this.element.querySelector('#profile-edit-btn');
-            const modal = this.element.querySelector('#profile-edit-modal');
-            const closeBtn = this.element.querySelector('#profile-modal-close');
-            const cancelBtn = this.element.querySelector('#cancel-edit');
-            
-            editBtn?.addEventListener('click', () => {
-                modal?.classList.add('active');
-            });
-            
-            closeBtn?.addEventListener('click', () => {
-                modal?.classList.remove('active');
-            });
-            
-            cancelBtn?.addEventListener('click', () => {
-                modal?.classList.remove('active');
-            });
-            
-            // Close modal when clicking outside
-            modal?.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    this.showEditProfileModal(user);
+                });
+            }
         } else {
             // Add friend button for other users' profiles
             const addFriendBtn = this.element.querySelector('#add-friend-btn');
             addFriendBtn?.addEventListener('click', () => {
                 // In a real app, this would send a friend request
                 // For now, just show a notification
-                console.log('Add friend clicked');
-                // Use NotificationManager if available
-                if (typeof NotificationManager !== 'undefined') {
-                    (window as any).NotificationManager.show({
-                        title: 'Friend Request Sent',
-                        message: `A friend request has been sent to ${user.displayName}.`,
-                        type: 'success',
-                        duration: 3000
-                    });
-                } else {
-                    alert(`Friend request sent to ${user.displayName}`);
-                }
+                NotificationManager.show({
+                    title: 'Friend Request Sent',
+                    message: `A friend request has been sent to ${user.displayName}.`,
+                    type: 'success',
+                    duration: 3000
+                });
             });
         }
         
         // Load more matches button
         const loadMoreBtn = this.element.querySelector('#load-more-matches');
-        loadMoreBtn?.addEventListener('click', () => {
+        loadMoreBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
             this.loadMoreMatches(user);
         });
     }
@@ -277,7 +223,7 @@ export class ProfileView {
         if (!matchList || !loadMoreBtn) return;
         
         // Get current number of matches displayed
-        const currentMatchCount = matchList.querySelectorAll('.match-item').length;
+        const currentMatchCount = matchList.querySelectorAll('.activity-item').length;
         
         // Get next batch of matches (5 more)
         const nextMatches = user.matchHistory.slice(currentMatchCount, currentMatchCount + 5);
@@ -291,15 +237,19 @@ export class ProfileView {
         
         // Create matches HTML
         const matchesHTML = nextMatches.map((match: any) => `
-            <div class="match-item ${match.result}">
-                <div class="match-opponent">
-                    <span class="match-result-indicator"></span>
-                    <span>vs ${match.opponent}</span>
+            <div class="activity-item ${match.result}">
+                <div class="activity-icon">
+                    <i class="fas fa-${match.result === 'win' ? 'trophy' : 'times'}"></i>
                 </div>
-                <div class="match-details">
-                    <div class="match-score">${match.score}</div>
-                    <div class="match-date">${match.date}</div>
-                    ${match.gameMode ? `<div class="match-mode">${match.gameMode}</div>` : ''}
+                <div class="activity-details">
+                    <div class="activity-primary">
+                        <span class="game-result">vs ${match.opponent}</span>
+                        <span class="game-score">${match.score}</span>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="game-date">${match.date}</span>
+                        ${match.gameMode ? `<span class="game-mode">${match.gameMode}</span>` : ''}
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -312,6 +262,180 @@ export class ProfileView {
             loadMoreBtn.textContent = 'No More Matches';
             loadMoreBtn.setAttribute('disabled', 'true');
         }
+    }
+    
+    // Modal for editing profile including cover photo
+    private showEditProfileModal(user: any): void {
+        if (!this.element) return;
+        
+        // Create modal if it doesn't exist yet
+        let modal = document.getElementById('profile-edit-modal');
+        
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'profile-edit-modal';
+            modal.className = 'modal';
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Profile</h3>
+                        <button class="modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="profile-edit-form">
+                            <!-- Cover Photo -->
+                            <div class="cover-upload-container">
+                                <div class="cover-preview" style="background-image: url('${user.coverPhotoUrl || 'https://placehold.co/1200x300/7c00e3/ffffff?text=Cover+Photo'}');">
+                                    <div class="cover-overlay">
+                                        <label for="cover-upload" class="upload-btn">
+                                            <i class="fas fa-camera"></i> Change Cover
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="file" id="cover-upload" accept="image/*" style="display:none;">
+                            </div>
+                            
+                            <!-- Avatar -->
+                            <div class="avatar-upload-container">
+                                <img src="${user.avatarUrl || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.displayName}" class="edit-avatar-preview">
+                                <div class="avatar-overlay">
+                                    <label for="avatar-upload" class="upload-btn">
+                                        <i class="fas fa-camera"></i>
+                                    </label>
+                                </div>
+                                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+                            </div>
+                            
+                            <!-- User Info -->
+                            <div class="form-group">
+                                <label for="displayName">Display Name</label>
+                                <input type="text" id="displayName" name="displayName" value="${user.displayName}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bio">Bio</label>
+                                <textarea id="bio" name="bio" rows="4">${user.bio || ''}</textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="app-button secondary" id="cancel-edit">Cancel</button>
+                                <button type="submit" class="app-button" id="save-profile">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Show modal
+        modal.style.display = 'flex';
+        
+        // Get form elements
+        const form = document.getElementById('profile-edit-form') as HTMLFormElement;
+        const coverUpload = document.getElementById('cover-upload') as HTMLInputElement;
+        const avatarUpload = document.getElementById('avatar-upload') as HTMLInputElement;
+        const coverPreview = modal.querySelector('.cover-preview') as HTMLElement;
+        const avatarPreview = modal.querySelector('.edit-avatar-preview') as HTMLImageElement;
+        const closeButton = modal.querySelector('.modal-close') as HTMLButtonElement;
+        const cancelButton = document.getElementById('cancel-edit') as HTMLButtonElement;
+        
+        // Handle file uploads for preview
+        coverUpload?.addEventListener('change', function(e) {
+            const fileInput = e.target as HTMLInputElement;
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (coverPreview && e.target) {
+                        coverPreview.style.backgroundImage = `url(${e.target.result})`;
+                    }
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+        
+        avatarUpload?.addEventListener('change', function(e) {
+            const fileInput = e.target as HTMLInputElement;
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarPreview && e.target) {
+                        avatarPreview.src = e.target.result as string;
+                    }
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+        
+        // Handle form submission
+        form?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Get form data
+            const displayName = (document.getElementById('displayName') as HTMLInputElement).value;
+            const bio = (document.getElementById('bio') as HTMLTextAreaElement).value;
+            
+            // In a real app, you would upload the files to a server and then update the user profile with the URLs
+            
+            // For demo purposes, we'll create object URLs from the files
+            let avatarUrl = user.avatarUrl;
+            let coverPhotoUrl = user.coverPhotoUrl;
+            
+            if (avatarUpload.files && avatarUpload.files[0]) {
+                avatarUrl = URL.createObjectURL(avatarUpload.files[0]);
+            }
+            
+            if (coverUpload.files && coverUpload.files[0]) {
+                coverPhotoUrl = URL.createObjectURL(coverUpload.files[0]);
+            }
+            
+            // Update the user profile
+            const updatedProfile = {
+                displayName,
+                bio,
+                avatarUrl,
+                coverPhotoUrl
+            };
+            
+            // Call your update service
+            updateUserProfile(user.id, updatedProfile);
+            
+            // Show notification
+            NotificationManager.show({
+                title: 'Profile Updated',
+                message: 'Your profile has been updated successfully.',
+                type: 'success',
+                duration: 3000
+            });
+            
+            // Close modal
+            modal!.style.display = 'none';
+            
+            if (modal) {
+                modal.style.display = 'none';
+            } else {
+                console.error('Modal element is null');
+            }
+        });
+        
+        // Close modal when clicking the close button
+        closeButton?.addEventListener('click', () => {
+            modal!.style.display = 'none';
+        });
+        
+        // Close modal when clicking the cancel button
+        cancelButton?.addEventListener('click', () => {
+            modal!.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal!.style.display = 'none';
+            }
+        });
     }
 
     destroy(): void {

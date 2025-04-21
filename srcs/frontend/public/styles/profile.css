@@ -70,23 +70,6 @@
     margin-top: 0.8rem;
 }
 
-.profile-edit-button {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--border-radius);
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.profile-edit-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
 .profile-content {
     padding: 0 2rem;
 }
@@ -304,125 +287,10 @@
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* Edit Profile Modal */
-.profile-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.profile-modal.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.profile-modal-content {
-    background-color: var(--bg-color-medium);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-modal-header h3 {
-    margin: 0;
-    color: white;
-}
-
-.profile-modal-close {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.profile-modal-close:hover {
-    color: white;
-}
-
-.profile-modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.profile-avatar-edit {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
-
-.profile-avatar-preview {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-}
-
 .profile-edit-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-
-.profile-edit-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.profile-edit-field label {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
-}
-
-.profile-edit-field input,
-.profile-edit-field textarea {
-    padding: 0.8rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--border-radius);
-    background-color: rgba(0, 0, 0, 0.2);
-    color: white;
-    font-size: 0.9rem;
-}
-
-.profile-edit-field textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-.profile-edit-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1rem;
 }
 
 .profile-meta {
@@ -443,12 +311,6 @@
     margin-right: 0.4rem;
 }
 
-.profile-section-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-}
-
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -463,4 +325,140 @@
 .card-actions {
     display: flex;
     gap: 0.5rem;
+}
+
+/* Modal container */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--bg-color-medium);
+    border-radius: var(--border-radius);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-weight: 500;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Profile Upload Elements */
+.cover-upload-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.cover-preview {
+    width: 100%;
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--border-radius);
+    position: relative;
+}
+
+.cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: var(--border-radius);
+}
+
+.cover-preview:hover .cover-overlay {
+    opacity: 1;
+}
+
+.avatar-upload-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.edit-avatar-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.avatar-upload-container:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.upload-btn {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 }

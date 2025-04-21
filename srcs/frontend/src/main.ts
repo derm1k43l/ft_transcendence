@@ -69,6 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Define Routes for the main app content area ---
     router.addRoute('/', DashboardView); // Default IS profile
     router.addRoute('/profile', ProfileView);
+
+    // Add parameterized routes for profile/:id and chat/:id
+    router.addParamRoute('/profile/:id', ProfileView);
+    router.addParamRoute('/chat/:id', ChatView);
+
     router.addRoute('/chat', ChatView);
     router.addRoute('/friends', FriendsView);
     router.addRoute('/game', GameView);
@@ -78,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners ---
     setupEventListeners();
     setupAboutModal();
-     NotificationManager.initialize();
+    NotificationManager.initialize();
 
     // --- Initial UI State ---
     updateUI(); // Show login or app view based on initial state
