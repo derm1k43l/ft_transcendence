@@ -28,9 +28,19 @@ fastify.after((err) => {
 		//Initialize the database: Create the table if it doesn't exist
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS users (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				username TEXT NOT NULL UNIQUE,
-				created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			username TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL,
+			display_name TEXT NOT NULL,
+			email TEXT UNIQUE,
+			bio TEXT,
+			avatar_url TEXT,
+			cover_photo_url TEXT,
+			join_date TEXT,
+			has_two_factor_auth INTEGER DEFAULT 0,
+			status TEXT DEFAULT 'offline',
+			last_active TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 			);
 
 			CREATE TABLE IF NOT EXISTS scores (

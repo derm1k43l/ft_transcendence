@@ -1,24 +1,31 @@
 ### GET ALL USERS
 GET http://localhost:3000/users HTTP/1.1
 
-
 ### GET SINGLE USER
 GET http://localhost:3000/users/2 HTTP/1.1
 
-
-
-### CREATE USER
+### CREATE USER 1
 POST http://localhost:3000/users HTTP/1.1
 Content-Type: application/json
 
 {
-	"username": "user2"
+	"username": "user1",
+	"password": "test",
+	"display_name": "User"
 }
 
+### CREATE USER 2
+POST http://localhost:3000/users HTTP/1.1
+Content-Type: application/json
+
+{
+	"username": "user2",
+	"password": "Big Test",
+	"display_name": "Big Sal"
+}
 
 ### DELETE USER
-DELETE http://localhost:3000/users/3 HTTP/1.1
-
+DELETE http://localhost:3000/users/1 HTTP/1.1
 
 ### UPDATE USER
 PUT http://localhost:3000/users/2 HTTP/1.1
@@ -29,7 +36,7 @@ Content-Type: application/json
 }
 
 
-
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 
 
