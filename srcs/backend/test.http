@@ -42,26 +42,3 @@ Content-Type: application/json
 
 
 
-
-
-### ADD SCORE
-POST http://localhost:3000/scores HTTP/1.1
-Content-Type: application/json
-
-{
-	"user_id": 2,
-	"score": 500
-}
-
-### GET ALL SCORES
-GET http://localhost:3000/scores HTTP/1.1
-
-
-### GET ALL SCORES BY A USER
-GET http://localhost:3000/users/2/scores HTTP/1.1
-
-
-### DELETE SCORE
-DELETE http://localhost:3000/scores/6 HTTP/1.1
-
-

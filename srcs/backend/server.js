@@ -14,7 +14,6 @@ fastify.register(require('@punkish/fastify-better-sqlite3'), {
 });
 
 fastify.register(require('./routes/userRoutes'));
-fastify.register(require('./routes/scoreRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -41,14 +40,6 @@ fastify.after((err) => {
 			status TEXT DEFAULT 'offline',
 			last_active TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-			);
-
-			CREATE TABLE IF NOT EXISTS scores (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				user_id INTEGER NOT NULL,
-				score INTEGER NOT NULL,
-				game_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-				FOREIGN KEY (user_id) REFERENCES users (id)
 			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');
