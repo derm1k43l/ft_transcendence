@@ -25,6 +25,9 @@ let logoutButton: HTMLAnchorElement | null;
 let sidebarUsernameElement: HTMLElement | null;
 let sidebarAvatarElement: HTMLImageElement | null;
 let loginFormContainer: HTMLElement | null;
+let sidebar: HTMLElement | null;
+let menuToggle: HTMLButtonElement | null;
+let sidebarOverlay: HTMLElement | null;
 
 // About modal elements
 let aboutLink: HTMLElement | null;
@@ -44,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginFormContainer = document.querySelector('.login-form-container');
 
     // Get sidebar elements
+    sidebar = document.querySelector('.sidebar');
     sidebarLinks = document.querySelectorAll('.sidebar-nav a[data-view]');
     logoutButton = document.getElementById('logout-button') as HTMLAnchorElement;
     sidebarUsernameElement = document.querySelector('.sidebar .user-profile .username');
@@ -80,9 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
     router.addRoute('/tournament', TournamentView);
     router.addRoute('/settings', SettingsView);
 
+    // --- Setup Responsive UI Elements ---
+    setupResponsiveElements();
+
     // --- Event Listeners ---
     setupEventListeners();
     setupAboutModal();
+    setupResponsiveNavigation();
     NotificationManager.initialize();
 
     // --- Initial UI State ---
@@ -140,6 +148,134 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- Functions ---
+function setupResponsiveElements(): void {
+    // Get menu toggle and overlay elements
+    menuToggle = document.querySelector('.menu-toggle');
+    sidebarOverlay = document.querySelector('.sidebar-overlay');
+    
+    // Initialize responsive layout
+    updateResponsiveLayout();
+    
+    // Listen for window resize events
+    window.addEventListener('resize', updateResponsiveLayout);
+}
+
+function updateResponsiveLayout(): void {
+    const isDesktop = window.innerWidth > 992;
+    
+    // Only apply these changes when logged in
+    if (!isLoggedIn) return;
+    
+    if (menuToggle) {
+        menuToggle.style.display = isDesktop ? 'none' : 'flex';
+    }
+    
+    if (sidebar) {
+        // Desktop: expanded sidebar
+        if (isDesktop) {
+            sidebar.style.transform = 'translateX(0)';
+            sidebar.style.width = '250px';
+            
+            if (appContentRoot && appContentRoot.parentElement) {
+                appContentRoot.parentElement.style.marginLeft = '250px';
+                appContentRoot.parentElement.style.width = 'calc(100% - 250px)';
+            }
+        } 
+        // Tablet/Mobile: hidden by default
+        else {
+            // Only hide if not currently active
+            if (!sidebar.classList.contains('active')) {
+                sidebar.style.transform = 'translateX(-100%)';
+            }
+            sidebar.style.width = '250px'; // Full width sidebar when it appears
+            
+            if (appContentRoot && appContentRoot.parentElement) {
+                appContentRoot.parentElement.style.marginLeft = '0';
+                appContentRoot.parentElement.style.width = '100%';
+            }
+        }
+    }
+    
+    // Update accessibility state
+    if (sidebar) {
+        sidebar.setAttribute('aria-hidden', isDesktop ? 'false' : sidebar.classList.contains('active') ? 'false' : 'true');
+    }
+}
+
+function setupResponsiveNavigation(): void {
+    if (!menuToggle || !sidebarOverlay) return;
+    
+    // Toggle sidebar when hamburger menu is clicked
+    menuToggle.addEventListener('click', () => {
+        if (!menuToggle || !sidebarOverlay || !sidebar) return;
+
+        const isActive = sidebar?.classList.contains('active');
+        
+        // Toggle active class
+        if (isActive) {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            sidebar.style.transform = 'translateX(-100%)';
+        } else {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            sidebar.style.transform = 'translateX(0)';
+        }
+        
+        // Toggle aria-expanded for accessibility
+        menuToggle.setAttribute('aria-expanded', isActive ? 'false' : 'true');
+        menuToggle.setAttribute('aria-label', isActive ? 'Open menu' : 'Close menu');
+        sidebar.setAttribute('aria-hidden', isActive ? 'true' : 'false');
+    });
+    
+    // Close sidebar when overlay is clicked
+    sidebarOverlay.addEventListener('click', () => {
+        if (!menuToggle || !sidebarOverlay || !sidebar) return;
+
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        sidebar.style.transform = 'translateX(-100%)';
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.setAttribute('aria-label', 'Open menu');
+        sidebar.setAttribute('aria-hidden', 'true');
+    });
+    
+    // Close sidebar when clicking sidebar links (on mobile)
+    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (!menuToggle || !sidebarOverlay || !sidebar) return;
+
+            if (window.innerWidth <= 992) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                sidebar.style.transform = 'translateX(-100%)';
+                menuToggle.setAttribute('aria-expanded', 'false');
+                sidebar.setAttribute('aria-hidden', 'true');
+            }
+        });
+    });
+
+    // Close sidebar when escape key is pressed
+    document.addEventListener('keydown', (e) => {
+        if (!menuToggle || !sidebarOverlay || !sidebar) return;
+        if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            sidebar.style.transform = 'translateX(-100%)';
+            menuToggle.setAttribute('aria-expanded', 'false');
+            sidebar.setAttribute('aria-hidden', 'true');
+        }
+    });
+    if (!menuToggle || !sidebarOverlay || !sidebar) return; // whY???????
+    // Initialize ARIA attributes for accessibility
+    sidebar.setAttribute('id', 'sidebar');
+    sidebar.setAttribute('aria-hidden', window.innerWidth <= 992 ? 'true' : 'false');
+    menuToggle.setAttribute('aria-controls', 'sidebar');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    menuToggle.setAttribute('aria-label', 'Open menu');
+}
+
 function setupAboutModal(): void {
     // Set up click handlers for about links
     aboutLink?.addEventListener('click', (e) => {
@@ -220,7 +356,7 @@ function setupEventListeners(): void {
                 title: 'Welcome',
                 message: `Welcome back, ${foundUser.displayName}!`,
                 type: 'info',
-                duration: 500000
+                duration: 3000
             });
             
             setTimeout(() => {
@@ -330,7 +466,7 @@ function updateUI(): void {
         loginViewElement?.classList.remove('active');
         appViewElement?.classList.add('active');
 
-        // Update sidebar profile info we should asig at the registariton this
+        // Update sidebar profile info
         if (sidebarUsernameElement) {
             sidebarUsernameElement.textContent = currentUser.displayName;
         }
@@ -338,6 +474,9 @@ function updateUI(): void {
             sidebarAvatarElement.src = currentUser.avatarUrl || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'; // Default avatar
             sidebarAvatarElement.alt = `${currentUser.displayName}'s avatar`;
         }
+
+        // Apply responsive layout
+        updateResponsiveLayout();
 
     } else {
         loginViewElement?.classList.add('active');
@@ -350,14 +489,33 @@ function updateUI(): void {
         if (appContentRoot) appContentRoot.innerHTML = '';
         if (sidebarUsernameElement) sidebarUsernameElement.textContent = 'User Name';
         if (sidebarAvatarElement) sidebarAvatarElement.src = 'https://placehold.co/80x80/1d1f21/ffffff?text=User';
+        
+        // Hide hamburger menu and sidebar when logged out
+        if (menuToggle) {
+            menuToggle.style.display = 'none';
+        }
+        if (sidebar) {
+            sidebar.classList.remove('active');
+        }
+        if (sidebarOverlay) {
+            sidebarOverlay.classList.remove('active');
+        }
     }
 }
 
 function updateSidebarLinks(currentHash: string): void {
     sidebarLinks.forEach(link => {
-        if (link.getAttribute('href') === currentHash) {
+        const href = link.getAttribute('href');
+        
+        // Basic matching for exact URLs
+        if (href === currentHash) {
             link.classList.add('active');
-        } else {
+        } 
+        // Match parameterized routes (e.g. /profile/123 should match /profile/:id)
+        else if (href && currentHash.startsWith(href + '/')) {
+            link.classList.add('active');
+        }
+        else {
             link.classList.remove('active');
         }
     });

@@ -356,19 +356,6 @@ body {
     background-color: var(--bg-color-dark);
 }
 
-.sidebar {
-    width: 250px;
-    background-color: var(--bg-color-medium);
-    padding: 1.5rem 1.5rem; /* --  sidebar space ing*/
-    border-right : 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    transition: width 0.3s ease;
-    flex-shrink: 0;
-    position: relative;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-}
-
 .user-profile {
     text-align: center;
     margin-bottom: 2rem;
@@ -390,56 +377,6 @@ body {
     font-weight: 500;
     color: white;
     font-size: 1.1rem;
-}
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; 
-}
-
-.sidebar-nav ul {
-    list-style: none;
-    flex-grow: 1;
-    margin-bottom: 2rem;
-    padding: 0;
-}
-
-.sidebar-nav li {
-    margin-bottom: 0.5rem;
-}
-
-.sidebar-nav a {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 0.75rem 1rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    border-radius: var(--border-radius);
-    transition: all 0.2s ease;
-    position: relative;
-    font-weight: 400;
-}
-
-.sidebar-nav a span {
-    flex: 1;
-}
-
-.sidebar-nav a i {
-    margin-right: 1rem;
-    width: 20px;
-    text-align: center;
-}
-
-.sidebar-nav a:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar-nav a.active {
-    background-color: rgba(124, 92, 255, 0.2);
-    color: white;
-    border-left: 3px solid #7c5cff; 
 }
 
 #logout-button {
