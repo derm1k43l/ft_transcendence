@@ -27,7 +27,7 @@ Content-Type: application/json
 ### DELETE USER
 DELETE http://localhost:3000/users/1 HTTP/1.1
 
-### UPDATE USER
+### UPDATE USER FULL
 PUT http://localhost:3000/users/2 HTTP/1.1
 Content-Type: application/json
 
@@ -35,10 +35,65 @@ Content-Type: application/json
 	"username": "Sexy Cool Updated user"
 }
 
+### UPDATE USER PARTIAL
+PATCH http://localhost:3000/users/1/profile HTTP/1.1
+Content-Type: application/json
+
+{
+	"username": "Just a What now",
+	"display_name": "New Name Joe"
+}
+
+
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 
+### ADD USER STATS for ID 1
+POST http://localhost:3000/user-stats
+Content-Type: application/json
 
+{
+	"user_id": 1,
+	"wins": 10,
+	"losses": 5,
+	"rank": "Gold",
+	"level": 3
+}
+
+### ADD USER STATS for ID 2
+POST http://localhost:3000/user-stats
+Content-Type: application/json
+
+{
+	"user_id": 2,
+	"wins": 10,
+	"losses": 5,
+	"rank": "Gold",
+	"level": 3
+}
+
+### GET USER 1 STATS
+GET http://localhost:3000/users/1/stats
+
+### GET USER 2 STATS
+GET http://localhost:3000/users/2/stats
+
+### UPDATE USER STATS
+PUT http://localhost:3000/users/2/stats
+Content-Type: application/json
+
+{
+	"wins": 15,
+	"losses": 7,
+	"rank": "Platinum",
+	"level": 4
+}
+
+### DELETE USER STATS
+DELETE http://localhost:3000/users/2/stats
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 

@@ -1,0 +1,180 @@
+const {
+	getUserStat,
+	addUserStat,
+	updateUserStat,
+	deleteUserStat,
+} = require('../controllers/userStatsController');
+
+const { UserStat } = require('../schemas/userStatsSchema');
+
+// Options for get single User Stat by user_id
+const getUserStatOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				userId: { type: 'integer' }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: UserStat,
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: getUserStat,
+};
+
+// Options for add User Stat
+const addUserStatOpts = {
+	schema: {
+		body: {
+			type: 'object',
+			required: ['user_id'],
+			properties: {
+				user_id: { type: 'integer'},
+				wins: { type: 'integer'},
+				losses: { type: 'integer'},
+				rank: { type: 'string'},
+				level: { type: 'integer'},
+			},
+		},
+		response: {
+			201: UserStat,
+			400: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			404: {
+				 type: 'object',
+				 properties: {
+					 message: { type: 'string' }
+				 }
+			 },
+			409: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			 500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: addUserStat,
+};
+
+// Options for update User Stat
+const updateUserStatOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				userId: { type: 'integer' }
+			},
+			required: ['userId']
+		},
+		 body: {
+			type: 'object',
+			// None are strictly required for update, but at least one should be provided
+			properties: {
+				wins: { type: 'integer'},
+				losses: { type: 'integer'},
+				rank: { type: 'string'},
+				level: { type: 'integer'},
+			}
+		 },
+		response: {
+			200: UserStat,
+			400: {
+				 type: 'object',
+				 properties: {
+					 message: { type: 'string' }
+				 }
+			 },
+			 404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			 500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: updateUserStat,
+};
+
+// Options for delete User Stat
+const deleteUserStatOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				userId: { type: 'integer' }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: {type: 'string'}
+				},
+			},
+			404: {
+				 type: 'object',
+				 properties: {
+					 message: { type: 'string' }
+				 }
+			 },
+			 500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: deleteUserStat,
+};
+
+
+function userStatsRoutes (fastify, options, done) {
+	// Get user stats by user ID
+	fastify.get('/users/:userId/stats', getUserStatOpts);
+
+	// Add user stats (assumes user ID in the body, instead of URL, can be changed if necessary)
+	fastify.post('/user-stats', addUserStatOpts);
+
+	// Update user stats by user ID
+	fastify.put('/users/:userId/stats', updateUserStatOpts);
+
+	// Delete user stats by user ID
+	fastify.delete('/users/:userId/stats', deleteUserStatOpts);
+
+	done();
+}
+
+module.exports = userStatsRoutes;

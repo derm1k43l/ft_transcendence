@@ -1,3 +1,8 @@
+/*
+TODO: 
+	password not hashed yet!
+*/
+
 const fastify = require('fastify')( {logger: true} );
 const fs = require('fs'); //optional
 const path = require('path'); //optional
@@ -14,6 +19,7 @@ fastify.register(require('@punkish/fastify-better-sqlite3'), {
 });
 
 fastify.register(require('./routes/userRoutes'));
+fastify.register(require('./routes/userStatsRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -40,6 +46,15 @@ fastify.after((err) => {
 			status TEXT DEFAULT 'offline',
 			last_active TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			);
+
+			CREATE TABLE IF NOT EXISTS user_stats (
+			user_id INTEGER PRIMARY KEY,
+			wins INTEGER DEFAULT 0,
+			losses INTEGER DEFAULT 0,
+			rank TEXT,
+			level INTEGER DEFAULT 1,
+			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');
