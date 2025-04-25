@@ -97,3 +97,50 @@ DELETE http://localhost:3000/users/2/stats
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 
+### Add Game Settings for ID 1
+POST http://localhost:3000/game-settings
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"board_color": "#222222",
+	"paddle_color": "#ffffff",
+	"ball_color": "#ff0000",
+	"score_color": "#00ff00",
+	"sound_enabled": 1,
+	"vibration_enabled": 0
+}
+
+### Add Game Settings for ID 2
+POST http://localhost:3000/game-settings
+Content-Type: application/json
+
+{
+	"user_id": 2,
+	"board_color": "#333333",
+	"paddle_color": "#ffffff",
+	"ball_color": "#ff0000",
+	"score_color": "#00ff00",
+	"sound_enabled": 1,
+	"vibration_enabled": 0
+}
+
+
+### Get User 1 Game Settings
+GET http://localhost:3000/users/1/settings
+
+### Get User 2 Game Settings
+GET http://localhost:3000/users/2/settings
+
+### Update Game Settings
+PUT http://localhost:3000/users/1/settings
+Content-Type: application/json
+
+{
+	"paddle_color": "#0000ff",
+	"sound_enabled": 0
+}
+
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

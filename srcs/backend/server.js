@@ -20,6 +20,7 @@ fastify.register(require('@punkish/fastify-better-sqlite3'), {
 
 fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
+fastify.register(require('./routes/gameSettingsRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -54,6 +55,17 @@ fastify.after((err) => {
 			losses INTEGER DEFAULT 0,
 			rank TEXT,
 			level INTEGER DEFAULT 1,
+			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+			);
+
+			CREATE TABLE IF NOT EXISTS game_settings (
+			user_id INTEGER PRIMARY KEY,
+			board_color TEXT DEFAULT '#000000',
+			paddle_color TEXT DEFAULT '#FFFFFF',
+			ball_color TEXT DEFAULT '#FFFFFF',
+			score_color TEXT DEFAULT '#FFFFFF',
+			sound_enabled INTEGER DEFAULT 1,
+			vibration_enabled INTEGER DEFAULT 1,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 		`);
