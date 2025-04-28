@@ -188,3 +188,59 @@ DELETE http://localhost:3000/match-history/1
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+### Add Achievement for ID 1
+POST http://localhost:3000/achievements
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"name": "First Win",
+	"description": "Complete your first win in the game.",
+	"icon": "first-win-icon.png",
+	"completed": 0,
+	"date_completed": "2025-04-21T14:00:00Z"
+}
+
+### Add Achievement for ID 2
+POST http://localhost:3000/achievements
+Content-Type: application/json
+
+{
+	"user_id": 2,
+	"name": "First Win",
+	"description": "Complete your first win in the game.",
+	"icon": "first-win-icon.png",
+	"completed": 0,
+	"date_completed": "2025-04-21T14:00:00Z"
+}
+
+### Get All Achievements
+GET http://localhost:3000/achievements
+
+### Get Achievement by ID
+GET http://localhost:3000/achievements/1
+
+### Get Achievements for a Specific User
+GET http://localhost:3000/users/1/achievements
+
+### Update Achievement by ID
+PUT http://localhost:3000/achievements/1
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"name": "First Win",
+	"description": "Complete your first win in the game.",
+	"icon": "first-win-icon.png",
+	"completed": 1,
+	"date_completed": "2025-04-21T14:00:00Z"
+}
+
+### Delete Achievement by ID
+DELETE http://localhost:3000/achievements/1
+
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+

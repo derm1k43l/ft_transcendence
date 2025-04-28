@@ -22,6 +22,7 @@ fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
 fastify.register(require('./routes/gameSettingsRoutes'));
 fastify.register(require('./routes/matchHistoryRoutes'));
+fastify.register(require('./routes/achievementsRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -80,6 +81,17 @@ fastify.after((err) => {
 			date TEXT NOT NULL,
 			duration TEXT,
 			game_mode TEXT,
+			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+			);
+
+			CREATE TABLE IF NOT EXISTS achievements (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT NOT NULL,
+			icon TEXT NOT NULL,
+			completed INTEGER DEFAULT 0,
+			date_completed TEXT,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 		`);
