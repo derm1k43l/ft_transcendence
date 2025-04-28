@@ -192,7 +192,7 @@ export class DashboardView {
 private initializeCharts(user: any): void {
     if (!window.Chart) return;
     
-    // Results Donut Chart - Keep this as is, it's simple and effective
+    // Results Donut Chart
     const resultsChartCanvas = document.getElementById('results-chart') as HTMLCanvasElement;
     if (resultsChartCanvas) {
         const resultsChart = new window.Chart(resultsChartCanvas, {
@@ -227,136 +227,163 @@ private initializeCharts(user: any): void {
         this.charts.push(resultsChart);
     }
         
-        // Performance Bar Chart - Changed from line chart
-        const performanceChartCanvas = document.getElementById('performance-chart') as HTMLCanvasElement;
-        if (performanceChartCanvas && user.matchHistory && user.matchHistory.length > 0) {
-            // Process match history data for the bar chart
-            const matchData = [...user.matchHistory].reverse().slice(0, 10).reverse();
-            const labels = matchData.map((_, index) => `Match ${index + 1}`);
-            const data = matchData.map(match => match.result === 'win' ? 1 : 0);
-
-            // Calculate cumulative wins -- doe this provine any value? idk.. but its cool
-            const cumulativeWins = data.reduce<number[]>((acc, curr, i) => {
-                        acc.push((acc[i - 1] || 0) + curr);
-                        return acc;
-            }, []);
-            
-            const performanceChart = new window.Chart(performanceChartCanvas, {
-                type: 'line', // Changed line look coooool
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Match Result (Win/Loss)',
-                            data: data,
-                            backgroundColor: 'rgba(124, 92, 255, 0.2)',
-                            borderColor: 'rgba(124, 92, 255, 1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: data.map(result => result === 1 ? '#4CAF50' : '#F44336'),
-                            pointBorderColor: '#fff',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            tension: 0.1,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Cumulative Wins',
-                            data: cumulativeWins,
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                            borderColor: 'rgba(76, 175, 80, 0.8)',
-                            borderWidth: 2,
-                            pointBackgroundColor: 'rgba(76, 175, 80, 0.8)',
-                            pointBorderColor: '#fff',
-                            pointRadius: 3,
-                            pointHoverRadius: 5,
-                            tension: 0.4,
-                            yAxisID: 'y1',
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            titleColor: '#fff',
-                            bodyColor: '#fff'
+    const performanceChartCanvas = document.getElementById('performance-chart') as HTMLCanvasElement;
+    if (performanceChartCanvas && user.matchHistory && user.matchHistory.length > 0) {
+        // Process match history data
+        const matchData = [...user.matchHistory].reverse().slice(0, 10).reverse();
+        const labels = matchData.map((_, index) => `Match ${index + 1}`);
+        
+        const matchResults = [1, 0, 1, 1, 0]; // Example array
+        
+        // Extract scores from match data and calculate performance metrics
+        const scores = matchData.map(match => {
+            const [playerScore, opponentScore] = match.score.split('-').map(Number);
+            return {
+                playerScore,
+                opponentScore,
+                pointDifference: playerScore - opponentScore,
+                pointRatio: playerScore / (playerScore + opponentScore)
+            };
+        });
+        
+        // Calculate win rate over time
+        const winRates = matchResults.map((_, index) => {
+            // Get games played so far from index 0 to index (inclusive)
+            const gamesSoFar = matchResults.slice(0, index + 1);
+            const winsSoFar = gamesSoFar.reduce((sum, result) => sum + result, 0);
+            const winPercentage = (winsSoFar / gamesSoFar.length) * 100;
+            return winPercentage;
+          });
+        
+        // Calculate point difference percentage
+        const pointPerformance = scores.map(score => score.pointRatio * 100);
+        
+        const performanceChart = new window.Chart(performanceChartCanvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Match Result (Win/Loss)',
+                        data: matchResults,
+                        backgroundColor: 'rgba(124, 92, 255, 0.2)',
+                        borderColor: 'rgba(124, 92, 255, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: matchResults.map(result => result === 1 ? '#4CAF50' : '#F44336'),
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Win Rate %',
+                        data: winRates,
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderColor: 'rgba(76, 175, 80, 0.8)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(76, 175, 80, 0.8)',
+                        pointBorderColor: '#fff',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        tension: 0.4,
+                        yAxisID: 'y1',
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.7)'
                         }
                     },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            min: -0.5,
-                            max: 1.5,
-                            ticks: {
-                                stepSize: 1,
-                                callback: function(value: number) {
-                                    if (value === 0) return 'Loss';
-                                    if (value === 1) return 'Win';
-                                    return '';
-                                },
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            },
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            min: 0,
-                            suggestedMax: Math.max(...cumulativeWins) + 1,
-                            title: {
-                                display: true,
-                                text: 'Cumulative Wins',
-                                color: 'rgba(76, 175, 80, 0.8)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            },
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                    tooltip: {
+                        mode: 'index',
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        callbacks: {
+                            label: function(context: any) {
+                                if (context.datasetIndex === 0) {
+                                    return context.raw === 1 ? 'Win' : 'Loss';
+                                } else if (context.datasetIndex === 1) {
+                                    return `Win Rate: ${context.raw.toFixed(1)}%`;
+                                }
+                                return '';
                             }
                         }
                     }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        min: -0.5,
+                        max: 1.5,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value: number) {
+                                if (value === 0) return 'Loss';
+                                if (value === 1) return 'Win';
+                                return '';
+                            },
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Win Rate %',
+                            color: 'rgba(76, 175, 80, 0.8)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
                 }
-            });
-            
-            this.charts.push(performanceChart);
-        }
-    }
-    
-    private loadLeaderboards(): void {
-        // Load top 10 by wins
-        const topPlayersByWins = getTopPlayers('wins', 10);
-        this.renderLeaderboard('wins-leaderboard', topPlayersByWins, 'wins');
+            }
+        });
         
-        // Load top 10 by win rate
-        const topPlayersByWinRate = getTopPlayers('winrate', 10);
-        this.renderLeaderboard('winrate-leaderboard', topPlayersByWinRate, 'winrate');
+        this.charts.push(performanceChart);
     }
+}
     
-    private renderLeaderboard(containerId: string, players: any[], type: 'wins' | 'winrate'): void {
+private loadLeaderboards(): void {
+    // Load top 10 by wins
+    const topPlayersByWins = getTopPlayers('wins', 10);
+    this.renderLeaderboard('wins-leaderboard', topPlayersByWins, 'wins');
+        
+    // Load top 10 by win rate
+    const topPlayersByWinRate = getTopPlayers('winrate', 10);
+    this.renderLeaderboard('winrate-leaderboard', topPlayersByWinRate, 'winrate');
+}
+    
+private renderLeaderboard(containerId: string, players: any[], type: 'wins' | 'winrate'): void {
         const container = document.getElementById(containerId);
         if (!container) return;
         
@@ -404,10 +431,10 @@ private initializeCharts(user: any): void {
             </table>
         `;
         
-        container.innerHTML = html;
-    }
+    container.innerHTML = html;
+}
     
-    private setupEventListeners(): void {
+private setupEventListeners(): void {
         if (!this.element) return;
         
         // Tab navigation for leaderboard
