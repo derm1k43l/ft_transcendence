@@ -21,6 +21,8 @@ fastify.register(require('@punkish/fastify-better-sqlite3'), {
 fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
 fastify.register(require('./routes/gameSettingsRoutes'));
+fastify.register(require('./routes/matchHistoryRoutes'));
+fastify.register(require('./routes/achievementsRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -66,6 +68,30 @@ fastify.after((err) => {
 			score_color TEXT DEFAULT '#FFFFFF',
 			sound_enabled INTEGER DEFAULT 1,
 			vibration_enabled INTEGER DEFAULT 1,
+			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+			);
+
+			CREATE TABLE IF NOT EXISTS match_history (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			opponent_id INTEGER NOT NULL,
+			opponent_name TEXT NOT NULL,
+			result TEXT NOT NULL CHECK(result IN ('win', 'loss', 'draw')),
+			score TEXT NOT NULL,
+			date TEXT NOT NULL,
+			duration TEXT,
+			game_mode TEXT,
+			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+			);
+
+			CREATE TABLE IF NOT EXISTS achievements (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT NOT NULL,
+			icon TEXT NOT NULL,
+			completed INTEGER DEFAULT 0,
+			date_completed TEXT,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 		`);

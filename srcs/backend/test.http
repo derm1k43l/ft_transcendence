@@ -144,3 +144,103 @@ Content-Type: application/json
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+
+### Might want to implement opponent name as optional later
+### Add Match History Item
+POST http://localhost:3000/match-history
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"opponent_id": 2,
+	"opponent_name": "PlayerTwo",
+	"result": "win",
+	"score": "5-3",
+	"date": "2025-04-21T14:00:00Z",
+	"duration": "10m",
+	"game_mode": "ranked"
+}
+
+### Get All Match History
+GET http://localhost:3000/match-history
+
+### Get Match History Item by ID
+GET http://localhost:3000/match-history/1
+
+### Get Match History for a Specific User
+GET http://localhost:3000/users/1/match-history
+
+### Update Match History Item by ID
+PUT http://localhost:3000/match-history/1
+Content-Type: application/json
+
+{
+	"result": "loss",
+	"score": "3-5",
+	"duration": "12m"
+}
+
+### Delete Match History Item by ID
+DELETE http://localhost:3000/match-history/1
+
+
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+### Add Achievement for ID 1
+POST http://localhost:3000/achievements
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"name": "First Win",
+	"description": "Complete your first win in the game.",
+	"icon": "first-win-icon.png",
+	"completed": 0,
+	"date_completed": "2025-04-21T14:00:00Z"
+}
+
+### Add Achievement for ID 2
+POST http://localhost:3000/achievements
+Content-Type: application/json
+
+{
+	"user_id": 2,
+	"name": "First Win",
+	"description": "Complete your first win in the game.",
+	"icon": "first-win-icon.png",
+	"completed": 0,
+	"date_completed": "2025-04-21T14:00:00Z"
+}
+
+### Get All Achievements
+GET http://localhost:3000/achievements
+
+### Get Achievement by ID
+GET http://localhost:3000/achievements/1
+
+### Get Achievements for a Specific User
+GET http://localhost:3000/users/1/achievements
+
+### Update Achievement by ID
+PUT http://localhost:3000/achievements/1
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"name": "First Win",
+	"description": "Complete your first win in the game.",
+	"icon": "first-win-icon.png",
+	"completed": 1,
+	"date_completed": "2025-04-21T14:00:00Z"
+}
+
+### Delete Achievement by ID
+DELETE http://localhost:3000/achievements/1
+
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
