@@ -244,3 +244,23 @@ DELETE http://localhost:3000/achievements/1
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
+### Add friendship
+POST http://localhost:3000/friends HTTP/1.1
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"friend_id": 2
+}
+
+### Check if Two Users are Friends
+GET http://localhost:3000/users/1/friends/2 HTTP/1.1
+
+### Get Friends for a Specific User
+GET http://localhost:3000/users/1/friends HTTP/1.1
+
+### Remove Friendship
+DELETE http://localhost:3000/users/1/friends/2 HTTP/1.1
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

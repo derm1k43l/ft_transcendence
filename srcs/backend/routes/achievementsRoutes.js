@@ -106,7 +106,7 @@ const addAchievementOpts = {
 					message: { type: 'string' }
 				}
 			},
-			 500: {
+			500: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
@@ -127,7 +127,7 @@ const updateAchievementOpts = {
 			},
 			required: ['id']
 		},
-		 body: {
+		body: {
 			type: 'object',
 			properties: {
 				user_id: { type: 'integer'},
@@ -137,22 +137,22 @@ const updateAchievementOpts = {
 				completed: { type: 'integer'},
 				date_completed: { type: 'string'},
 			}
-		 },
+		},
 		response: {
 			200: Achievement,
-			 404: {
+			404: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
 				}
 			},
-			 400: {
-				 type: 'object',
-				 properties: {
-					 message: { type: 'string' }
-				 }
-			 },
-			 500: {
+			400: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
@@ -185,8 +185,8 @@ const deleteAchievementOpts = {
 				 properties: {
 					 message: { type: 'string' }
 				 }
-			 },
-			 500: {
+			},
+			500: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
