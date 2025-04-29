@@ -220,7 +220,7 @@ const updateFriendRequestStatus = async (req, reply) => {
 				} else {
 					req.log.error(err);
 					reply.code(500).send({ message: 'Error creating friendship after accepting request', error: err.message });
-				 }
+				}
 			}
 		} else { // status === 'rejected'
 			reply.send({ message: 'Friend request rejected' });
