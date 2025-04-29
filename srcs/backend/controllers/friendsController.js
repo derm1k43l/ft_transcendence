@@ -43,7 +43,6 @@ const checkFriendship = async (req, reply) => {
 	}
 };
 
-
 const addFriendship = async (req, reply) => {
 	try {
 		const { user_id, friend_id } = req.body;

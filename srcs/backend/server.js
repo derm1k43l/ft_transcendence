@@ -24,6 +24,7 @@ fastify.register(require('./routes/gameSettingsRoutes'));
 fastify.register(require('./routes/matchHistoryRoutes'));
 fastify.register(require('./routes/achievementsRoutes'));
 fastify.register(require('./routes/friendsRoutes'));
+fastify.register(require('./routes/friendRequestsRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -102,6 +103,16 @@ fastify.after((err) => {
 			PRIMARY KEY (user_id, friend_id),
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
 			FOREIGN KEY (friend_id) REFERENCES users (id) ON DELETE CASCADE
+			);
+
+			CREATE TABLE IF NOT EXISTS friend_requests (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			from_user_id INTEGER NOT NULL,
+			to_user_id INTEGER NOT NULL,
+			status TEXT NOT NULL CHECK(status IN ('pending', 'accepted', 'rejected')),
+			date TEXT NOT NULL,
+			FOREIGN KEY (from_user_id) REFERENCES users (id) ON DELETE CASCADE,
+			FOREIGN KEY (to_user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');

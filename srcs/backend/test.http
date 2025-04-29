@@ -231,7 +231,7 @@ Content-Type: application/json
 {
 	"user_id": 1,
 	"name": "First Win",
-	"description": "Complete your first win in the game.",
+	"description": "Complete your LAST win in the game.",
 	"icon": "first-win-icon.png",
 	"completed": 1,
 	"date_completed": "2025-04-21T14:00:00Z"
@@ -261,6 +261,50 @@ GET http://localhost:3000/users/1/friends HTTP/1.1
 
 ### Remove Friendship
 DELETE http://localhost:3000/users/1/friends/2 HTTP/1.1
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+### Add friend request (Might need more tests)
+POST http://localhost:3000/friend-requests HTTP/1.1
+Content-Type: application/json
+
+{
+	"from_user_id": 1,
+	"to_user_id": 2
+}
+
+### Get All Friend Requests
+GET http://localhost:3000/friend-requests HTTP/1.1
+
+### Get a Single Friend Request by ID
+GET http://localhost:3000/friend-requests/1 HTTP/1.1
+
+### Get Sent Friend Requests for a User
+GET http://localhost:3000/users/1/sent-friend-requests HTTP/1.1
+
+### Get Received Friend Requests for a User
+GET http://localhost:3000/users/2/received-friend-requests HTTP/1.1
+
+### Update Friend Request Status (Accept)
+PUT http://localhost:3000/friend-requests/1/statuscd HTTP/1.1
+Content-Type: application/json
+
+{
+	"status": "accepted"
+}
+
+### Update Friend Request Status (Reject) (id is for the request)
+PUT http://localhost:3000/friend-requests/1/status HTTP/1.1
+Content-Type: application/json
+
+{
+	"status": "rejected"
+}
+
+### Delete a Friend Request
+DELETE http://localhost:3000/friend-requests/1 HTTP/1.1
+
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

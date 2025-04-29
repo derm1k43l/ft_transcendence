@@ -1,0 +1,261 @@
+const {
+	getFriendRequests,
+	getFriendRequest,
+	getSentFriendRequests,
+	getReceivedFriendRequests,
+	addFriendRequest,
+	updateFriendRequestStatus,
+	deleteFriendRequest,
+} = require('../controllers/friendRequestsController');
+
+const { FriendRequest, FriendRequestDetails } = require('../schemas/friendRequestsSchema');
+
+// Options for get all Friend Requests
+const getFriendRequestsOpts = {
+	schema: {
+		response: {
+			200: {
+				type: 'array',
+				items: FriendRequestDetails, // Return detailed request objects
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: getFriendRequests,
+};
+
+// Options for get single Friend Request
+const getFriendRequestOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
+		},
+		response: {
+			200: FriendRequestDetails, // Return detailed request object
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: getFriendRequest,
+};
+
+// Options for get Sent Friend Requests for a user
+const getSentFriendRequestsOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				userId: { type: 'integer' }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: {
+				type: 'array',
+				items: FriendRequestDetails,
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: getSentFriendRequests,
+};
+
+// Options for get Received Friend Requests for a user (usually pending)
+const getReceivedFriendRequestsOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				userId: { type: 'integer' }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: {
+				type: 'array',
+				items: FriendRequestDetails,
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: getReceivedFriendRequests,
+};
+
+// Options for add Friend Request
+const addFriendRequestOpts = {
+	schema: {
+		body: {
+			type: 'object',
+			required: ['from_user_id', 'to_user_id'],
+			properties: {
+				from_user_id: { type: 'integer'},
+				to_user_id: { type: 'integer'},
+			},
+		},
+		response: {
+			201: FriendRequest, // Return the basic request object on creation
+			400: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			409: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: addFriendRequest,
+};
+
+// Options for update Friend Request Status
+const updateFriendRequestStatusOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
+		},
+		body: {
+			type: 'object',
+			required: ['status'],
+			properties: {
+				status: { type: 'string', enum: ['accepted', 'rejected']},
+			}
+		},
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			400: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			409: { // For cases where friendship already exists on accept
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: updateFriendRequestStatus,
+};
+
+// Options for delete Friend Request
+const deleteFriendRequestOpts = {
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
+		},
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: {type: 'string'}
+				},
+			},
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		},
+	},
+	handler: deleteFriendRequest,
+};
+
+function friendRequestsRoutes (fastify, options, done) {
+	// Get all friend requests
+	fastify.get('/friend-requests', getFriendRequestsOpts);
+
+	// Get single friend request by ID
+	fastify.get('/friend-requests/:id', getFriendRequestOpts);
+
+	// Get friend requests sent by a user
+	fastify.get('/users/:userId/sent-friend-requests', getSentFriendRequestsOpts);
+
+	// Get friend requests received by a user (pending)
+	fastify.get('/users/:userId/received-friend-requests', getReceivedFriendRequestsOpts);
+
+	// Add friend request
+	fastify.post('/friend-requests', addFriendRequestOpts);
+
+	// Update friend request status (accept/reject)
+	fastify.put('/friend-requests/:id/status', updateFriendRequestStatusOpts);
+
+	// Delete friend request
+	fastify.delete('/friend-requests/:id', deleteFriendRequestOpts);
+
+	done();
+}
+
+module.exports = friendRequestsRoutes;
