@@ -59,18 +59,18 @@ const addUserStatOpts = {
 				}
 			},
 			404: {
-				 type: 'object',
-				 properties: {
-					 message: { type: 'string' }
-				 }
-			 },
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
 			409: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
 				}
 			},
-			 500: {
+			500: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
@@ -91,7 +91,7 @@ const updateUserStatOpts = {
 			},
 			required: ['userId']
 		},
-		 body: {
+		body: {
 			type: 'object',
 			// None are strictly required for update, but at least one should be provided
 			properties: {
@@ -100,22 +100,22 @@ const updateUserStatOpts = {
 				rank: { type: 'string'},
 				level: { type: 'integer'},
 			}
-		 },
+		},
 		response: {
 			200: UserStat,
 			400: {
-				 type: 'object',
-				 properties: {
-					 message: { type: 'string' }
-				 }
-			 },
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
 			 404: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
 				}
 			},
-			 500: {
+			500: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
@@ -144,12 +144,12 @@ const deleteUserStatOpts = {
 				},
 			},
 			404: {
-				 type: 'object',
-				 properties: {
-					 message: { type: 'string' }
-				 }
-			 },
-			 500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
@@ -159,7 +159,6 @@ const deleteUserStatOpts = {
 	},
 	handler: deleteUserStat,
 };
-
 
 function userStatsRoutes (fastify, options, done) {
 	// Get user stats by user ID

@@ -33,11 +33,11 @@ const addGameSettings = async (req, reply) => {
 			 return;
 		}
 
-		 // Check if user exists
+		// Check if user exists
 		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
 		if (!userExists) {
-			 reply.code(404).send({ message: 'User not found' });
-			 return;
+			reply.code(404).send({ message: 'User not found' });
+			return;
 		}
 
 		try {
@@ -92,12 +92,12 @@ const updateGameSettings = async (req, reply) => {
 		const result = db.prepare(query).run(...params);
 
 		if (result.changes === 0) {
-			 const settingsExist = db.prepare('SELECT user_id FROM game_settings WHERE user_id = ?').get(userId);
-			 if (!settingsExist) {
-				  reply.code(404).send({ message: 'Game settings not found' });
-			 } else {
-				  reply.code(200).send({ message: 'No changes made to game settings' });
-			 }
+			const settingsExist = db.prepare('SELECT user_id FROM game_settings WHERE user_id = ?').get(userId);
+			if (!settingsExist) {
+				reply.code(404).send({ message: 'Game settings not found' });
+			} else {
+				reply.code(200).send({ message: 'No changes made to game settings' });
+			}
 		} else {
 			const updatedSettings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(userId);
 			reply.send(updatedSettings);

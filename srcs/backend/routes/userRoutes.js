@@ -13,189 +13,189 @@ const { User } = require('../schemas/userSchema');
 // Options for get all Users
 const getUsersOpts = {
 	schema: {
-	response: {
-		200: {
-		type: 'array',
-		items: User
+		response: {
+			200: {
+				type: 'array',
+				items: User
+			}
 		}
-	}
 	},
 	handler: getUsers
 };
 
 const getUserOpts = {
 	schema: {
-	params: {
-		type: 'object',
-		properties: {
-		id: { type: 'integer' }
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
 		},
-		required: ['id']
-	},
-	response: {
-		200: User,
-		404: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
+		response: {
+			200: User,
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
 		}
-		}
-	}
 	},
 	handler: getUser
 };
 
 const getUserProfileOpts = {
 	schema: {
-	params: {
-		type: 'object',
-		properties: {
-		id: { type: 'integer' }
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
 		},
-		required: ['id']
-	},
-	response: {
-		200: User,
-		404: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
+		response: {
+			200: User,
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
 		}
-		}
-	}
 	},
 	handler: getUserProfile
 };
 
 const postUserOpts = {
 	schema: {
-	body: {
-		type: 'object',
-		required: ['username', 'password', 'display_name'],
-		properties: {
-		username: { type: 'string' },
-		password: { type: 'string' },
-		display_name: { type: 'string' },
-		email: { type: 'string' },
-		bio: { type: 'string' },
-		avatar_url: { type: 'string' },
-		cover_photo_url: { type: 'string' }
-		}
-	},
-	response: {
-		201: User,
-		400: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
-		}
+		body: {
+			type: 'object',
+			required: ['username', 'password', 'display_name'],
+			properties: {
+				username: { type: 'string' },
+				password: { type: 'string' },
+				display_name: { type: 'string' },
+				email: { type: 'string' },
+				bio: { type: 'string' },
+				avatar_url: { type: 'string' },
+				cover_photo_url: { type: 'string' }
+			}
 		},
-		409: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
+		response: {
+			201: User,
+			400: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			409: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
 		}
-		}
-	}
 	},
 	handler: addUser
 };
 
 const updateUserOpts = {
 	schema: {
-	params: {
-		type: 'object',
-		properties: {
-		id: { type: 'integer' }
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
 		},
-		required: ['id']
-	},
-	body: {
-		type: 'object',
-		properties: {
-		username: { type: 'string' },
-		display_name: { type: 'string' },
-		email: { type: 'string' },
-		bio: { type: 'string' },
-		avatar_url: { type: 'string' },
-		cover_photo_url: { type: 'string' },
-		has_two_factor_auth: { type: 'integer' },
-		status: { type: 'string' }
-		}
-	},
-	response: {
-		200: User,
-		404: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
-		}
+		body: {
+			type: 'object',
+			properties: {
+				username: { type: 'string' },
+				display_name: { type: 'string' },
+				email: { type: 'string' },
+				bio: { type: 'string' },
+				avatar_url: { type: 'string' },
+				cover_photo_url: { type: 'string' },
+				has_two_factor_auth: { type: 'integer' },
+				status: { type: 'string' }
+			}
 		},
-		409: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
+		response: {
+			200: User,
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			409: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
 		}
-		}
-	}
 	},
 	handler: updateUser
 };
 
 const updateUserProfileOpts = {
 	schema: {
-	params: {
-		type: 'object',
-		properties: {
-		id: { type: 'integer' }
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
 		},
-		required: ['id']
-	},
-	body: {
-		type: 'object',
-		properties: {
-		display_name: { type: 'string' },
-		bio: { type: 'string' },
-		avatar_url: { type: 'string' },
-		cover_photo_url: { type: 'string' }
+		body: {
+			type: 'object',
+			properties: {
+				display_name: { type: 'string' },
+				bio: { type: 'string' },
+				avatar_url: { type: 'string' },
+				cover_photo_url: { type: 'string' }
+			}
+		},
+		response: {
+			200: User,
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
 		}
-	},
-	response: {
-		200: User,
-		404: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
-		}
-		}
-	}
 	},
 	handler: updateUserProfile
 };
 
 const deleteUserOpts = {
 	schema: {
-	params: {
-		type: 'object',
-		properties: {
-		id: { type: 'integer' }
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
 		},
-		required: ['id']
-	},
-	response: {
-		200: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			404: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
 		}
-		},
-		404: {
-		type: 'object',
-		properties: {
-			message: { type: 'string' }
-		}
-		}
-	}
 	},
 	handler: deleteUser
 };

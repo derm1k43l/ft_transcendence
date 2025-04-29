@@ -21,7 +21,6 @@ const FriendDetails = {
 	}
 }
 
-
 module.exports = {
 	Friend,
 	FriendDetails,

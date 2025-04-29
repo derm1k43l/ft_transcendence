@@ -181,10 +181,10 @@ const deleteAchievementOpts = {
 				},
 			},
 			404: {
-				 type: 'object',
-				 properties: {
-					 message: { type: 'string' }
-				 }
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
 			},
 			500: {
 				type: 'object',

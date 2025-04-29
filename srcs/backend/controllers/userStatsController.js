@@ -28,10 +28,9 @@ const addUserStat = async (req, reply) => {
 		// Check if user exists
 		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
 		if (!userExists) {
-			 reply.code(404).send({ message: 'User not found' });
-			 return;
+			reply.code(404).send({ message: 'User not found' });
+			return;
 		}
-
 
 		try {
 			const result = db.prepare('INSERT INTO user_stats (user_id, wins, losses, rank, level) VALUES (?, ?, ?, ?, ?)').run(user_id, wins, losses, rank, level);
@@ -41,7 +40,7 @@ const addUserStat = async (req, reply) => {
 			if (err.message.includes('UNIQUE constraint failed')) {
 				reply.code(409).send({ message: 'User stats already exist for this user' });
 			} else if (err.message.includes('FOREIGN KEY constraint failed')) {
-				 reply.code(400).send({ message: 'Invalid user_id' });
+				reply.code(400).send({ message: 'Invalid user_id' });
 			}
 			else {
 				throw err;
@@ -88,12 +87,12 @@ const updateUserStat = async (req, reply) => {
 
 		if (result.changes === 0) {
 			// Check if the user_id exists to distinguish 404 from no changes
-			 const userStatExists = db.prepare('SELECT user_id FROM user_stats WHERE user_id = ?').get(userId);
-			 if (!userStatExists) {
-				 reply.code(404).send({ message: 'User stats not found' });
-			 } else {
-				 reply.code(200).send({ message: 'No changes made to user stats' });
-			 }
+			const userStatExists = db.prepare('SELECT user_id FROM user_stats WHERE user_id = ?').get(userId);
+			if (!userStatExists) {
+				reply.code(404).send({ message: 'User stats not found' });
+			} else {
+				reply.code(200).send({ message: 'No changes made to user stats' });
+			}
 		} else {
 			const updatedStat = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get(userId);
 			reply.send(updatedStat);
