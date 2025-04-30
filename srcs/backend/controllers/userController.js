@@ -1,5 +1,7 @@
 const getUsers = async (req, reply) => {
 	try {
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 	const users = db.prepare(`
 		SELECT 
@@ -18,6 +20,8 @@ const getUsers = async (req, reply) => {
 const getUser = async (req, reply) => {
 	try {
 	const { id } = req.params;
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 	
 	const user = db.prepare(`
@@ -43,6 +47,8 @@ const getUser = async (req, reply) => {
 const getUserProfile = async (req, reply) => {
 	try {
 	const { id } = req.params;
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 	
 	const user = db.prepare(`
@@ -67,6 +73,17 @@ const getUserProfile = async (req, reply) => {
 
 const addUser = async (req, reply) => {
 	try {
+		// console.log("Debug: Inside addUser controller"); // Add this log
+        // console.log("Debug: Type of req:", typeof req); // Add this
+        // console.log("Debug: req object keys:", Object.keys(req)); // Add this
+        // console.log("Debug: req.betterSqlite3 is:", req.betterSqlite3); // Add this - THIS IS KEY!
+        // // If you want to see req.server specifically (though less standard access)
+        // console.log("Debug: req.server is:", req.server); // Add this
+        // if (req.server) { // Check if req.server exists before checking its properties
+        //     console.log("Debug: req.server.betterSqlite3 is:", req.server.betterSqlite3); // Add this
+        // }
+        // console.log("Debug: reply.betterSqlite3 is:", reply.betterSqlite3);
+
 	const { 
 		username, 
 		password, 
@@ -77,6 +94,8 @@ const addUser = async (req, reply) => {
 		cover_photo_url 
 	} = req.body;
 	
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 
 	// Basic validation
@@ -130,6 +149,8 @@ const updateUser = async (req, reply) => {
 	try {
 	const { id } = req.params;
 	const updates = req.body;
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 
 	// Don't allow updating certain fields directly
@@ -189,6 +210,8 @@ const updateUserProfile = async (req, reply) => {
 	try {
 	const { id } = req.params;
 	const { display_name, bio, avatar_url, cover_photo_url } = req.body;
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 
 	// Validate at least one field is being updated
@@ -245,6 +268,8 @@ const updateUserProfile = async (req, reply) => {
 const deleteUser = async (req, reply) => {
 	try {
 	const { id } = req.params;
+	// const db = req.server.betterSqlite3;
+	// const db = req.betterSqlite3;
 	const db = req.server.betterSqlite3;
 	
 	const result = db.prepare('DELETE FROM users WHERE id = ?').run(id);

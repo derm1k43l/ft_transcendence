@@ -1,6 +1,8 @@
 const getChatMessagesBetweenUsers = async (req, reply) => {
 	try {
 		const { userId1, userId2 } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		// Get messages sent from user1 to user2 OR user2 to user1, ordered by timestamp
@@ -35,6 +37,8 @@ const getChatMessagesBetweenUsers = async (req, reply) => {
 const getChatMessage = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		 const message = db.prepare(`
@@ -71,6 +75,8 @@ const getChatMessage = async (req, reply) => {
 const addChatMessage = async (req, reply) => {
 	try {
 		const { sender_id, receiver_id, content } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		// timestamp defaults to CURRENT_TIMESTAMP in schema
 
@@ -113,6 +119,8 @@ const addChatMessage = async (req, reply) => {
 const markChatMessageAsRead = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const result = db.prepare('UPDATE chat_messages SET read = 1 WHERE id = ?').run(id);
@@ -136,6 +144,8 @@ const markChatMessageAsRead = async (req, reply) => {
 const deleteChatMessage = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const result = db.prepare('DELETE FROM chat_messages WHERE id = ?').run(id);

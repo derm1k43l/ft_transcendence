@@ -1,6 +1,8 @@
 const getUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const stat = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get(userId);
 
@@ -18,6 +20,8 @@ const getUserStat = async (req, reply) => {
 const addUserStat = async (req, reply) => {
 	try {
 		const { user_id, wins = 0, losses = 0, rank, level = 1 } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (!user_id) {
@@ -56,6 +60,8 @@ const updateUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
 		const { wins, losses, rank, level } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		// Build the update query dynamically based on provided fields
@@ -107,6 +113,8 @@ const updateUserStat = async (req, reply) => {
 const deleteUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const result = db.prepare('DELETE FROM user_stats WHERE user_id = ?').run(userId);

@@ -1,25 +1,54 @@
 /*
 TODO: 
-	password not hashed yet!
+	password not hashed yet! (use argon2?)
 	create login user function for safety
 	user updates might have some issues
-	persist data?
+	persist data? FIXED??
+	friend request accepting has isses
 */
 
 const fastify = require('fastify')( {logger: true} );
 const fs = require('fs'); //optional
 const path = require('path'); //optional
+const Database = require('better-sqlite3');
 
 const dbDir = path.resolve(__dirname, './db');
+
 if (!fs.existsSync(dbDir)) {
 	console.log('Setting up dbDir!');
 	fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// SQLite plugin
-fastify.register(require('@punkish/fastify-better-sqlite3'), {
-	database: path.resolve(dbDir, 'mydb.sqlite')
-});
+const dbFilePath = path.resolve(dbDir, 'mydb.sqlite'); // Store the resolved path
+console.log(`Attempting to use database file at: ${dbFilePath}`);
+
+// Create the database instance directly and globally accessible
+let db; // Use 'let' so it can be assigned
+try {
+	db = new Database(dbFilePath);
+	console.log("Database is correctly running in file-backed mode."); // debugging log
+	if (db.memory) {
+		console.error("CRITICAL ERROR: Database is running IN-MEMORY despite file path being provided!");
+		console.error("This means data WILL NOT persist.");
+		console.error(`Check file path permissions: ${dbFilePath}`);
+		console.error("Investigate environment/filesystem issues.");
+		process.exit(1); // Exit if it's unexpectedly in-memory
+	}
+
+	// Enable foreign key constraints immediately after opening
+	db.exec('PRAGMA foreign_keys = ON;');
+	console.log('PRAGMA foreign_keys = ON;');
+
+	db.exec('PRAGMA journal_mode = DELETE;'); // debugging log
+	db.exec('PRAGMA synchronous = FULL;'); // debugging log
+	console.log('Set PRAGMA journal_mode = DELETE and synchronous = FULL');
+} catch (err) {
+	console.error(`Error opening database at ${dbFilePath}:`, err);
+	process.exit(1); // Exit if database connection fails
+}
+
+// decorate fastify instance with db connection
+fastify.decorate('betterSqlite3', db);
 
 fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
@@ -37,9 +66,6 @@ fastify.after((err) => {
 	if (err) console.error(err);
 
 	try {
-		// Access database instance
-		const db = fastify.betterSqlite3;
-		//Initialize the database: Create the table if it doesn't exist
 		db.exec(`
 			CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,11 +157,71 @@ fastify.after((err) => {
 			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');
-
+		console.log('Database connection appears successful.');
+		try { // debugging log can be removed
+			db.prepare('CREATE TABLE IF NOT EXISTS test_persistence (key TEXT PRIMARY KEY, value TEXT)').run();
+			db.prepare('INSERT OR IGNORE INTO test_persistence (key, value) VALUES (?, ?)').run('test_key', 'test_value_1');
+			const testValue = db.prepare('SELECT value FROM test_persistence WHERE key = ?').get('test_key');
+			console.log(`Persistence test: Found value "${testValue.value}" for key "test_key".`); // Should find "test_value_1" on first run, or subsequent runs if persistent
+		} catch(testErr) { // debugging log
+			console.error('Persistence test failed:', testErr);
+		} // can be removed
 	} catch(dbERR) {
 		fastify.log.error('Database initialization failed: ', dbERR);
-		// process.exit(1); //might wanna exit here
+		process.exit(1);
 	}
+});
+
+// Register the database close logic with Fastify's onClose hook
+fastify.addHook('onClose', (instance, done) => {
+	console.log('Fastify shutting down, closing database connection...');
+	const db = instance.betterSqlite3; // Access the db instance
+	if (db && typeof db.close === 'function') {
+		try {
+			db.close();
+			console.log('Database connection closed cleanly.');
+			done(); // Signal the hook is complete
+		} catch (closeErr) {
+			console.error('Error closing database connection:', closeErr);
+			done(closeErr); // Signal hook complete with error
+		}
+	} else {
+		console.warn('Database instance not found or cannot be closed on shutdown.');
+		done(); // Nothing to close
+	}
+});
+
+// These handlers will catch signals like Ctrl+C and explicitly call fastify.close()
+process.on('SIGINT', () => { // SIGINT is Ctrl+C
+	console.log('SIGINT received, ensuring database connection is closed directly...'); // Log this
+	const db = fastify.betterSqlite3; // Access the db instance
+	if (db && typeof db.close === 'function') {
+		try {
+			 db.close(); // Close the connection synchronously
+			 console.log('Database connection closed cleanly directly from SIGINT handler.'); // Log this
+		} catch (closeErr) {
+			 console.error('Error closing database connection directly from SIGINT handler:', closeErr); // Log this
+		}
+	} else {
+		console.warn('Database instance not found for final close attempt in SIGINT handler.'); // Log this
+	}
+	process.exit(0); // Exit cleanly
+});
+
+process.on('SIGTERM', () => { // SIGTERM is sent by process managers like Docker, PM2
+	console.log('SIGTERM received, ensuring database connection is closed directly...'); // Log this
+	const db = fastify.betterSqlite3;
+	if (db && typeof db.close === 'function') {
+		try {
+			db.close();
+			console.log('Database connection closed cleanly directly from SIGTERM handler.');
+		} catch (closeErr) {
+			console.error('Error closing database connection directly from SIGTERM handler:', closeErr);
+		}
+	} else {
+		console.warn('Database instance not found for final close attempt in SIGTERM handler.');
+	}
+	process.exit(0);
 });
 
 const start = async() => {
@@ -144,8 +230,12 @@ const start = async() => {
 		await fastify.ready();
 
 		await fastify.listen({ port: PORT, host: '0.0.0.0' });
+
+		// Log listening addresses after server starts
+		console.log(`Server listening on ${PORT}`);
+		console.log('Server listening at', fastify.addresses());
 	} catch(error) {
-		fastify.log.error(error);
+		fastify.log.error('Error starting server:', error);
 		process.exit(1);
 	}
 };

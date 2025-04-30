@@ -1,6 +1,8 @@
 const getUserFriends = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		// Join with the users table to get friend details
@@ -28,6 +30,8 @@ const getUserFriends = async (req, reply) => {
 const checkFriendship = async (req, reply) => {
 	try {
 		const { userId, friendId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const friendship = db.prepare('SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ?').get(userId, friendId);
@@ -46,6 +50,8 @@ const checkFriendship = async (req, reply) => {
 const addFriendship = async (req, reply) => {
 	try {
 		const { user_id, friend_id } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (!user_id || !friend_id) {
@@ -90,6 +96,8 @@ const addFriendship = async (req, reply) => {
 const removeFriendship = async (req, reply) => {
 	try {
 		const { userId, friendId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (userId === friendId) {

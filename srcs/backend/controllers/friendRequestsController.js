@@ -1,5 +1,7 @@
 const getFriendRequests = async (req, reply) => {
 	try {
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		// Join with users table to get sender and receiver details
@@ -31,6 +33,8 @@ const getFriendRequests = async (req, reply) => {
 const getFriendRequest = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const request = db.prepare(`
@@ -66,6 +70,8 @@ const getFriendRequest = async (req, reply) => {
 const getSentFriendRequests = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const requests = db.prepare(`
@@ -97,6 +103,8 @@ const getSentFriendRequests = async (req, reply) => {
 const getReceivedFriendRequests = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const requests = db.prepare(`
@@ -129,6 +137,8 @@ const getReceivedFriendRequests = async (req, reply) => {
 const addFriendRequest = async (req, reply) => {
 	try {
 		const { from_user_id, to_user_id } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const date = new Date().toISOString();
 
@@ -185,6 +195,8 @@ const updateFriendRequestStatus = async (req, reply) => {
 	try {
 		const { id } = req.params;
 		const { status } = req.body; // 'accepted' or 'rejected'
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (!status || !['accepted', 'rejected'].includes(status)) {
@@ -235,6 +247,8 @@ const updateFriendRequestStatus = async (req, reply) => {
 const deleteFriendRequest = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const result = db.prepare('DELETE FROM friend_requests WHERE id = ?').run(id);

@@ -1,6 +1,8 @@
 const getUserGameSettings = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const settings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(userId);
 
@@ -26,6 +28,8 @@ const addGameSettings = async (req, reply) => {
 			sound_enabled = 1,
 			vibration_enabled = 1,
 		} = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (!user_id) {
@@ -63,6 +67,8 @@ const updateGameSettings = async (req, reply) => {
 	try {
 		const { userId } = req.params;
 		const { board_color, paddle_color, ball_color, score_color, sound_enabled, vibration_enabled } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		let query = 'UPDATE game_settings SET';

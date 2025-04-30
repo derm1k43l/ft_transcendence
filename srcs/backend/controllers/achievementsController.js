@@ -1,5 +1,7 @@
 const getAchievements = async (req, reply) => {
 	try {
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const achievements = db.prepare('SELECT * FROM achievements').all();
 		reply.send(achievements);
@@ -12,6 +14,8 @@ const getAchievements = async (req, reply) => {
 const getAchievement = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(id);
 
@@ -29,6 +33,8 @@ const getAchievement = async (req, reply) => {
 const getUserAchievements = async (req, reply) => {
 	try {
 		const { userId } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const achievements = db.prepare('SELECT * FROM achievements WHERE user_id = ?').all(userId);
 		reply.send(achievements);
@@ -41,6 +47,8 @@ const getUserAchievements = async (req, reply) => {
 const addAchievement = async (req, reply) => {
 	try {
 		const { user_id, name, description, icon, completed = 0, date_completed } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (!user_id || !name || !description || !icon) {
@@ -81,6 +89,8 @@ const updateAchievement = async (req, reply) => {
 	try {
 		const { id } = req.params;
 		const { user_id, name, description, icon, completed, date_completed } = req.body;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		let query = 'UPDATE achievements SET';
@@ -130,6 +140,8 @@ const updateAchievement = async (req, reply) => {
 const deleteAchievement = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const result = db.prepare('DELETE FROM achievements WHERE id = ?').run(id);
