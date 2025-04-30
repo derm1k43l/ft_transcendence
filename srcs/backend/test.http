@@ -35,7 +35,7 @@ Content-Type: application/json
 	"username": "Sexy Cool Updated user"
 }
 
-### UPDATE USER PARTIAL
+### UPDATE USER PARTIAL (not fully working)
 PATCH http://localhost:3000/users/1/profile HTTP/1.1
 Content-Type: application/json
 
@@ -308,3 +308,28 @@ DELETE http://localhost:3000/friend-requests/1 HTTP/1.1
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+### CREATE CHAT MESSAGE FROM USER 1 TO USER 2
+POST http://localhost:3000/chat-messages HTTP/1.1
+Content-Type: application/json
+
+{
+	"sender_id": 1,
+	"receiver_id": 2,
+	"content": "Hey Big Sal! 👋~~~~~~~~",
+	"timestamp": "2025-04-21T14:00:00.000Z",
+	"read": 0
+}
+
+### GET MESSAGES BETWEEN USER 1 AND USER 2
+GET http://localhost:3000/users/1/chat/2 HTTP/1.1
+
+### GET CHAT MESSAGE BY ID
+GET http://localhost:3000/chat-messages/1 HTTP/1.1
+
+### MARK MESSAGE AS READ
+PUT http://localhost:3000/chat-messages/1/read HTTP/1.1
+
+### DELETE CHAT MESSAGE BY ID
+DELETE http://localhost:3000/chat-messages/1 HTTP/1.1
+

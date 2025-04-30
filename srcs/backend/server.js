@@ -1,6 +1,9 @@
 /*
 TODO: 
 	password not hashed yet!
+	create login user function for safety
+	user updates might have some issues
+	persist data?
 */
 
 const fastify = require('fastify')( {logger: true} );
@@ -25,6 +28,7 @@ fastify.register(require('./routes/matchHistoryRoutes'));
 fastify.register(require('./routes/achievementsRoutes'));
 fastify.register(require('./routes/friendsRoutes'));
 fastify.register(require('./routes/friendRequestsRoutes'));
+fastify.register(require('./routes/chatMessagesRoutes'));
 
 const PORT = process.env.PORT ||  3000;
 
@@ -114,6 +118,17 @@ fastify.after((err) => {
 			FOREIGN KEY (from_user_id) REFERENCES users (id) ON DELETE CASCADE,
 			FOREIGN KEY (to_user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
+
+			CREATE TABLE IF NOT EXISTS chat_messages (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			sender_id INTEGER NOT NULL,
+			receiver_id INTEGER NOT NULL,
+			content TEXT NOT NULL,
+			timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+			read INTEGER DEFAULT 0,
+			FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
+			FOREIGN KEY (receiver_id) REFERENCES users (id) ON DELETE CASCADE
+			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');
 
@@ -122,7 +137,6 @@ fastify.after((err) => {
 		// process.exit(1); //might wanna exit here
 	}
 });
-
 
 const start = async() => {
 	try {
