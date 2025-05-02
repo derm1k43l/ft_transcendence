@@ -1,11 +1,18 @@
 # Use Nginx to serve static files
-FROM nginx:alpine
+FROM node:18
 
-# Remove default nginx page
-RUN rm -rf /usr/share/nginx/html/*
+# Install dependencies
+COPY package*.json ./
 
-# Copy static site files into nginx html directory
-COPY public/ /usr/share/nginx/html/
+# Copy rest of the code
+COPY . .
+
+RUN npm install
+
+RUN npm run build
 
 # Expose port 80
-EXPOSE 80
+EXPOSE 8080
+
+# Start the server
+CMD ["npm", "run", "serve:local"]

@@ -10,8 +10,18 @@ DATABASE_DATA = $(DATA_PATH)/database
 # Increase timeout for docker-compose
 export COMPOSE_HTTP_TIMEOUT=200
 
+
 # Default target
-all: create_dirs start_containers
+all: start_docker create_dirs start_containers
+
+# make sure docker daemon is running
+start_docker:
+	open -a Docker
+	@echo "Waiting for Docker to start..."
+	@until docker info > /dev/null 2>&1; do \
+		sleep 1; \
+	done
+	@echo "Docker is ready."
 
 # Create necessary directories
 create_dirs:

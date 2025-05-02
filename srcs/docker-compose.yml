@@ -1,17 +1,4 @@
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: ft_transcendence_backend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - backend_data:/app/db
-    networks:
-      - ft_transcendence_network
-
   frontend:
     build:
       context: ./frontend
@@ -19,17 +6,9 @@ services:
     container_name: ft_transcendence_frontend
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
       - frontend_data:/app/public
-    networks:
-      - ft_transcendence_network
-    depends_on:
-      - backend
-
-networks:
-  ft_transcendence_network:
-    driver: bridge
 
 volumes:
   frontend_data:
@@ -37,10 +16,4 @@ volumes:
     driver_opts:
       type: none
       device: ${HOME}/data/frontend
-      o: bind
-  backend_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${HOME}/data/backend
       o: bind
