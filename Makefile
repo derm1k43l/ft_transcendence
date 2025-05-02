@@ -16,12 +16,14 @@ all: start_docker create_dirs start_containers
 
 # make sure docker daemon is running
 start_docker:
-	open -a Docker
-	@echo "Waiting for Docker to start..."
-	@until docker info > /dev/null 2>&1; do \
-		sleep 1; \
-	done
-	@echo "Docker is ready."
+	@if ! docker info > /dev/null 2>&1; then \
+		echo "Starting Docker..."; \
+		open -a Docker; \
+		until docker info > /dev/null 2>&1; do \
+			sleep 1; \
+		done; \
+		echo "Docker is ready."; \
+	fi
 
 # Create necessary directories
 create_dirs:
@@ -35,15 +37,15 @@ start_containers:
 	@docker-compose -f $(NAME) up --build -d
 
 # Start only specific components
-frontend:
+frontend: start_docker
 	@echo "Building and starting frontend..."
 	@docker-compose -f $(NAME) up --build -d frontend
 
-backend:
+backend: start_docker
 	@echo "Building and starting backend..."
 	@docker-compose -f $(NAME) up --build -d backend
 
-database:
+database: start_docker
 	@echo "Building and starting database..."
 	@docker-compose -f $(NAME) up --build -d database
 
@@ -54,12 +56,12 @@ frontend_dev:
 	cd srcs/frontend && npm run build && npm run serve:local
 
 # Stop and remove containers (keep volumes)
-down:
+down: start_docker
 	@echo "Stopping containers..."
 	@docker-compose -f $(NAME) down
 
 # Complete cleanup
-fclean: down
+fclean: start_docker down
 	@echo "Removing containers, volumes, networks, and images..."
 	@docker-compose -f $(NAME) down --volumes --rmi all
 	@rm -rf $(DATA_PATH)
@@ -71,17 +73,17 @@ fclean: down
 re: fclean all
 
 # Show container status
-ps:
+ps: start_docker
 	@docker-compose -f $(NAME) ps
 
 # Container logs for each service
-logs_frontend:
+logs_frontend: start_docker
 	@docker-compose -f $(NAME) logs frontend
 
-logs_backend:
+logs_backend: start_docker
 	@docker-compose -f $(NAME) logs backend
 
-logs_database:
+logs_database: start_docker
 	@docker-compose -f $(NAME) logs database
 
 .PHONY: all create_dirs start_containers frontend backend database frontend_dev down fclean re ps logs_frontend logs_backend logs_database
