@@ -12,7 +12,7 @@ export COMPOSE_HTTP_TIMEOUT=200
 
 
 # Default target
-all: start_docker create_dirs start_containers
+all: start_docker start_containers
 
 # make sure docker daemon is running
 start_docker:
@@ -24,12 +24,6 @@ start_docker:
 		done; \
 		echo "Docker is ready."; \
 	fi
-
-# Create necessary directories
-create_dirs:
-	@echo "Creating data directories..."
-	mkdir -p $(FRONTEND_DATA) $(BACKEND_DATA) $(DATABASE_DATA)
-	chmod -R 777 $(FRONTEND_DATA) $(BACKEND_DATA) $(DATABASE_DATA)
 
 # Start all containers
 start_containers:
@@ -86,4 +80,4 @@ logs_backend: start_docker
 logs_database: start_docker
 	@docker-compose -f $(NAME) logs database
 
-.PHONY: all create_dirs start_containers frontend backend database frontend_dev down fclean re ps logs_frontend logs_backend logs_database
+.PHONY: all start_docker start_containers frontend backend database frontend_dev down fclean re ps logs_frontend logs_backend logs_database
