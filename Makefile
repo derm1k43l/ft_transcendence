@@ -1,15 +1,8 @@
 # Container definitions
-NAME = ./srcs/docker-compose.yml
-DATA_PATH = $(HOME)/data
-
-# Directories to create
-FRONTEND_DATA = $(DATA_PATH)/frontend
-BACKEND_DATA = $(DATA_PATH)/backend
-DATABASE_DATA = $(DATA_PATH)/database
+NAME = ./docker-compose.yml
 
 # Increase timeout for docker-compose
 export COMPOSE_HTTP_TIMEOUT=200
-
 
 # Default target
 all: start_docker start_containers
@@ -58,7 +51,6 @@ down: start_docker
 fclean: start_docker down
 	@echo "Removing containers, volumes, networks, and images..."
 	@docker-compose -f $(NAME) down --volumes --rmi all
-	@rm -rf $(DATA_PATH)
 	@docker volume prune -f
 	@docker network prune -f
 	@docker system prune -af

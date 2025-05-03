@@ -1,7 +1,7 @@
 services:
   frontend:
     build:
-      context: ./frontend
+      context: ./srcs/frontend
       dockerfile: Dockerfile
     container_name: ft_transcendence_frontend
     restart: unless-stopped
