@@ -23,19 +23,6 @@ start_containers:
 	@echo "Starting all containers..."
 	@docker-compose -f $(NAME) up --build -d
 
-# Start only specific components
-frontend: start_docker
-	@echo "Building and starting frontend..."
-	@docker-compose -f $(NAME) up --build -d frontend
-
-backend: start_docker
-	@echo "Building and starting backend..."
-	@docker-compose -f $(NAME) up --build -d backend
-
-database: start_docker
-	@echo "Building and starting database..."
-	@docker-compose -f $(NAME) up --build -d database
-
 # Frontend development commands
 frontend_dev:
 	@echo "Building frontend..."
@@ -72,4 +59,4 @@ logs_backend: start_docker
 logs_database: start_docker
 	@docker-compose -f $(NAME) logs database
 
-.PHONY: all start_docker start_containers frontend backend database frontend_dev down fclean re ps logs_frontend logs_backend logs_database
+.PHONY: all start_docker start_containers frontend_dev down fclean re ps logs_frontend logs_backend logs_database

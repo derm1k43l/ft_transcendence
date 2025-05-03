@@ -10,8 +10,6 @@ services:
     volumes:
       - frontend_data:/app/public
 
-
-
 volumes:
   frontend_data:
     driver: local
