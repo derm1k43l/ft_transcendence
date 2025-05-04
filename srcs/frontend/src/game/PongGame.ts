@@ -111,11 +111,14 @@ export class PongGame {
   }
 
   private getTemplate(): string {
-      return `
-          <div class="score">0 0</div>
-          <div class="ball"></div>
-          <div class="paddle__left"></div>
-          <div class="paddle__right"></div>
-      `;
-  }
+    return `
+      <div class="game__container">
+      <div class="score">0 0</div>
+      <div class="ball"></div>
+      <div class="paddle paddle__left"></div>
+      <div class="paddle paddle__right"></div>
+      <div class="middle__line"></div>
+      </div>
+    `;
+}
 }
