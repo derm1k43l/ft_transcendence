@@ -3,19 +3,30 @@
 A real-time multiplayer Pong game with chat features, user profiles, authentication, and tournament functionality.
 
 ## Modules
- - Web: ◦ Major module: Use a framework to build the backend.
-        ◦ Minor module: Use a database for the backend.
-- User Management:  ◦ Major module: Standard user management, authentication, users across tournaments.
-                    ◦ Major module: Implementing a remote authentication.
-- Gameplay and user experience: ◦ Major module: Remote players.
-                                ◦ Minor module: Game customization options.
-                                ◦ Major module: Live chat.
-- AI-Algo:  ◦ Major module: Introduce an AI opponent.
-            ◦ Minor module: User and game stats dashboards.
-- Cybersecurity: ◦ Minor module: GDPR compliance options with user anonymization, local data management, and Account Deletion.
-                 ◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.
-- Accessibility:  ◦ Minor module: Support on all devices.
-                  ◦ Minor module: Expanding browser compatibility.
+### Web:
+- **Major**: Fastify with Node.js backend framework
+- **Minor**: SQLite database integration
+
+### User Management:
+- **Major**: Standard user management (registration, profiles, avatars, stats)
+- **Major**: Google Sign-in authentication
+
+### Gameplay:
+- **Major**: Remote multiplayer functionality
+- **Minor**: Game customization options (power-ups, maps)
+- **Major**: Live chat system
+
+### AI-Algo:
+- **Major**: AI opponent with strategic gameplay
+- **Minor**: User and game statistics dashboards
+
+### Cybersecurity:
+- **Major**: Two-Factor Authentication (2FA) and JWT implementation
+- **Minor**: GDPR compliance with data management options
+
+### Accessibility:
+- **Minor**: Cross-device compatibility
+- **Minor**: Multi-browser support
 
 ## Table of Contents
 - [Technologies](#technologies)
@@ -38,22 +49,65 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
   - No heavy frameworks - built with vanilla TS/JS
 
 ### Backend 
-[Backend details to be added when completed]
+- **Framework**: Fastify with Node.js
+- **Database**: SQLite
+- **Authentication**: JWT, Google OAuth 2.0, 2FA
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
 - **Build System**: Makefile
 
+### Live Chat System
+Our chat implementation allows users to:
+- Send and receive direct messages through the application
+- Block unwanted communications from specific users
+- Invite friends to play games directly from the chat interface
+- Receive tournament notifications and updates
+- Access player profiles through convenient links in the chat
+
+### GDPR Compliance
+Our application respects user privacy rights in accordance with GDPR:
+
+- **Data Transparency**: Users can view all personal data stored about them
+- **Right to be Forgotten**: Complete account deletion functionality permanently removes user data
+- **Data Portability**: Users can export their data in a standard format
+- **Privacy Controls**: Granular settings for visibility of online status, game history, and personal information
+- **Consent Management**: Clear privacy notices and consent options for data processing
+- **Data Minimization**: Only essential information is collected and stored
+
 ## Features
-- Single-page application (SPA)
-- User authentication and profile management
-- Real-time multiplayer Pong game
-- Chat functionality
-- Tournament system
-- Mobile-responsive design
 
-## Project Structure
+### Core
+- Single-page application with browser navigation support
+- Responsive design for all devices
+- Cross-browser compatibility
 
+### User Experience
+- User registration and authentication
+- Google Sign-in integration
+- Two-factor authentication
+- Profile customization with avatars
+- Friend management system
+
+### Gameplay
+- Real-time multiplayer Pong with latency compensation
+- AI opponents with varying difficulty levels
+- Tournament system with rankings
+- Game customization options
+- Match history and statistics
+
+### Social
+- Live chat with direct messaging
+- User blocking capabilities
+- Game invitations through chat
+- Player status indicators
+
+### Security
+- JWT authentication
+- CSRF protection
+- Data privacy controls (GDPR compliant)
+- Input validation and sanitization
+- Secure  WebSockets
 
 ## Getting Started
 
