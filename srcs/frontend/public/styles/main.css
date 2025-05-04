@@ -7,6 +7,7 @@
 @import url('./dashboard.css');
 @import url('./settings.css');
 @import url('./responsive.css');
+@import url('./game.css');
 
 * {
     margin: 0;

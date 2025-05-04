@@ -1,0 +1,82 @@
+/*--- Game ---*/
+
+.game {
+    width: 100%;
+    height: 80vh;
+    background-size: cover; /* Ensures the image covers the entire div */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents tiling */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 80%;
+    background: rgba(6, 4, 31, 0.5); /* Blue overlay with 50% opacity */
+    z-index: 1;
+}
+
+.game * {
+    position: relative;
+    z-index: 2; /* Ensures content stays above overlay */
+}
+
+.game__container {
+    background-color: black;
+    width: 800px;
+    height: 500px;
+    border: 5px solid white;
+    margin: 0px auto;
+    position: relative;
+}
+
+.paddle {
+    width: 10px;
+    height: 80px;
+    position: absolute;
+    border-radius: 15px;
+}
+
+.paddle__left {
+    background-color: blue;
+    left: 10px;
+}
+
+.paddle__right {
+    background-color: red;
+    right: 10px;
+}
+
+.middle__line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%; 
+    border-right: 2px dashed rgba(255, 255, 255, 0.547);
+    z-index: 0;
+}
+
+.ball {
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    left: 65%;
+    top: 80%;
+    transform: translate(-50%, -50%);
+}
+
+.score {
+    color: white;
+    font-size: 50px;
+    text-align: center;
+    margin-top: 20px;
+    letter-spacing: 10px;
+    left: 20px;
+}
