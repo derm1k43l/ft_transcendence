@@ -2,6 +2,20 @@
 
 A real-time multiplayer Pong game with chat features, user profiles, authentication, and tournament functionality.
 
+## Modules
+ - Web: ◦ Major module: Use a framework to build the backend.
+        ◦ Minor module: Use a database for the backend.
+- User Management:  ◦ Major module: Standard user management, authentication, users across tournaments.
+                    ◦ Major module: Implementing a remote authentication.
+- Gameplay and user experience: ◦ Major module: Remote players.
+                                ◦ Minor module: Game customization options.
+                                ◦ Major module: Live chat.
+- AI-Algo:  ◦ Major module: Introduce an AI opponent.
+            ◦ Minor module: User and game stats dashboards.
+- Cybersecurity: ◦ Minor module: GDPR compliance options with user anonymization, local data management, and Account Deletion.
+                 ◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.
+- Accessibility:  ◦ Minor module: Support on all devices.
+                  ◦ Minor module: Expanding browser compatibility.
 
 ## Table of Contents
 - [Technologies](#technologies)
