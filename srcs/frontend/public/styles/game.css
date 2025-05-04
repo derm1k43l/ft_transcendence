@@ -1,54 +1,103 @@
+#modeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 200px;
+    z-index: 2;
+}
+
+#modeContainer button {
+    padding: 14px 30px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #1a1a40;
+    border: 3px solid rgb(124, 92, 255);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgb(124, 92, 255);
+    width: 360px;
+    text-align: center;
+}
+
+#modeContainer button:hover {
+    background-color: rgb(124, 92, 255);
+    color: #1a1a40;
+    box-shadow: 0 0 15px rgb(124, 92, 255), 0 0 25px rgb(124, 92, 255);
+    transform: scale(1.05);
+}
+
+#modeContainer button:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 5px rgb(124, 92, 255);
+}
+
 /*--- Game ---*/
 .game {
     width: 100%;
-    height: 80vh;
-    background-size: cover; /* Ensures the image covers the entire div */
-    background-position: center; /* Centers the image */
-    background-repeat: no-repeat; /* Prevents tiling */
+    height: 90vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative; /* <-- Add this */
+    position: relative;
 }
 
 .game::before {
     content: "";
     position: absolute;
     width: 100%;
-    height: 80%;
-    background: rgba(6, 4, 31, 0.5); /* Blue overlay with 50% opacity */
+    height: 90%;
+    background: rgba(6, 4, 31, 0.5);
     z-index: 1;
 }
 
 .game * {
     position: relative;
-    z-index: 2; /* Ensures content stays above overlay */
+    z-index: 2;
+}
+
+@keyframes blinkBorder {
+    0%, 100% {
+        box-shadow: 0 0 0 8px white;
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgb(124, 92, 255);
+    }
 }
 
 .game__container {
     background-color: black;
-    width: 800px;
-    height: 500px;
-    border: 5px solid white;
-    margin: 0px auto;
+    width: 950px;
+    height: 590px;
+    border: 8px solid transparent;
+    margin: 0 auto;
     position: relative;
+    margin-top: 200px;
+    border: 8px solid transparent;
+    animation: blinkBorder 1s infinite;
 }
-
+    
 .paddle {
-    width: 10px;
-    height: 80px;
+    width: 12px;
+    height: 95px;
     position: absolute;
-    border-radius: 15px;
+    border-radius: 20px;
 }
 
 .paddle__left {
     background-color: blue;
-    left: 10px;
+    left: 15px;
 }
 
 .paddle__right {
     background-color: red;
-    right: 10px;
+    right: 15px;
 }
 
 .middle__line {
@@ -56,14 +105,14 @@
     left: 50%;
     top: 0;
     width: 2px;
-    height: 100%; 
-    border-right: 2px dashed rgba(255, 255, 255, 0.547);
+    height: 100%;
+    border-right: 2px dashed rgba(255, 255, 255, 0.5);
     z-index: 0;
 }
 
 .ball {
-    width: 15px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
     background-color: white;
     border-radius: 50%;
     position: absolute;
@@ -73,10 +122,7 @@
 }
 
 .score {
-    color: white;
-    font-size: 50px;
+    animation: blinkBorder 0.5s infinite;
+    font-size: 60px;
     text-align: center;
-    margin-top: 20px;
-    letter-spacing: 10px;
-    left: 20px;
 }

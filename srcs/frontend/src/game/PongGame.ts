@@ -4,6 +4,9 @@ export class PongGame {
   private paddleLeft: HTMLElement;
   private paddleRight: HTMLElement;
   private scoreDisplay: HTMLElement;
+  private leftScoreElement: HTMLElement;
+  private rightScoreElement: HTMLElement;
+
 
   private ballX = 400;
   private ballY = 250;
@@ -30,6 +33,9 @@ export class PongGame {
       this.paddleLeft = this.container.querySelector('.paddle__left')!;
       this.paddleRight = this.container.querySelector('.paddle__right')!;
       this.scoreDisplay = this.container.querySelector('.score')!;
+      this.leftScoreElement = this.container.querySelector('#leftScore')!;
+      this.rightScoreElement = this.container.querySelector('#rightScore')!;
+
 
       window.addEventListener('keydown', this.onKeyDown);
       window.addEventListener('keyup', this.onKeyUp);
@@ -56,22 +62,23 @@ export class PongGame {
       this.ballX += this.ballSpeedX;
       this.ballY += this.ballSpeedY;
 
-      if (this.ballY <= 10 || this.ballY >= 480) this.ballSpeedY *= -1;
+       // Bounce off the top and bottom walls
+      if (this.ballY <= 10 || this.ballY >= 570) this.ballSpeedY *= -1;
 
       if (this.ballX <= 30 &&
           this.ballY + 10 >= this.leftPaddleY &&
           this.ballY <= this.leftPaddleY + this.paddleHeight
       ) {
           this.ballSpeedX *= -1;
-          this.ballX = 31;
+          this.ballX = 40;
       }
 
-      if (this.ballX >= 760 &&
+      if (this.ballX >= 895 && 
           this.ballY + 10 >= this.rightPaddleY &&
           this.ballY <= this.rightPaddleY + this.paddleHeight
       ) {
           this.ballSpeedX *= -1;
-          this.ballX = 759;
+          this.ballX = 895;
       }
 
       if (this.ballX <= 0) {
@@ -79,18 +86,18 @@ export class PongGame {
           this.resetBall();
       }
 
-      if (this.ballX >= 800) {
+      if (this.ballX >= 940) {
           this.leftScore++;
           this.resetBall();
       }
 
       if (this.keyState['w']) this.leftPaddleY = Math.max(this.leftPaddleY - this.paddleSpeed, 0);
-      if (this.keyState['s']) this.leftPaddleY = Math.min(this.leftPaddleY + this.paddleSpeed, 410);
+      if (this.keyState['s']) this.leftPaddleY = Math.min(this.leftPaddleY + this.paddleSpeed, 480);
       if (this.isSinglePlayer) {
-          this.rightPaddleY = Math.max(Math.min(this.ballY - this.paddleHeight / 2, 410), 0);
+          this.rightPaddleY = Math.max(Math.min(this.ballY - this.paddleHeight / 2, 480), 0);
       } else {
           if (this.keyState['ArrowUp']) this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
-          if (this.keyState['ArrowDown']) this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 410);
+          if (this.keyState['ArrowDown']) this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
       }
 
       this.updateUI();
@@ -107,18 +114,21 @@ export class PongGame {
       this.ball.style.top = `${this.ballY}px`;
       this.paddleLeft.style.top = `${this.leftPaddleY}px`;
       this.paddleRight.style.top = `${this.rightPaddleY}px`;
-      this.scoreDisplay.textContent = `${this.leftScore}  ${this.rightScore}`;
+      this.leftScoreElement.textContent = `${this.leftScore}`;
+      this.rightScoreElement.textContent = `${this.rightScore}`;
   }
 
   private getTemplate(): string {
     return `
+      <div class="score">
+        <span id="leftScore">0</span> &lt; - &gt; <span id="rightScore">0</span>
+      </div>
       <div class="game__container">
-      <div class="score">0 0</div>
-      <div class="ball"></div>
-      <div class="paddle paddle__left"></div>
-      <div class="paddle paddle__right"></div>
-      <div class="middle__line"></div>
+        <div class="ball"></div>
+        <div class="paddle paddle__left"></div>
+        <div class="paddle paddle__right"></div>
+        <div class="middle__line"></div>
       </div>
     `;
-}
+  }
 }

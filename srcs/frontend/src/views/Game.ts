@@ -12,15 +12,17 @@ export class GameView {
     render(container: HTMLElement) {
         container.innerHTML = `
             <div id="modeContainer">
-                <button id="singleplayerButton">Single Player</button>
-                <button id="multiplayerButton">Multiplayer</button>
+                <button id="singleplayerButton">Single Player (AI)</button>
+                <button id="multiplayerKeyboardButton">Multiplayer (Same Keyboard)</button>
+                <button id="multiplayerButton">Multiplayer (Remote players)</button>
             </div>
             <div id="game-container"></div>
         `;
 
         const modeContainer = container.querySelector('#modeContainer') as HTMLElement;
         const singleplayerButton = container.querySelector('#singleplayerButton') as HTMLButtonElement;
-        const multiplayerButton = container.querySelector('#multiplayerButton') as HTMLButtonElement;
+        const multiplayerKeyboardButton = container.querySelector('#multiplayerKeyboardButton') as HTMLButtonElement;
+        const multiplayerRemoteButton = container.querySelector('#multiplayerRemoteButton') as HTMLButtonElement;
         const gameContainer = container.querySelector('#game-container') as HTMLElement;
 
         singleplayerButton.addEventListener('click', () => {
@@ -28,7 +30,7 @@ export class GameView {
             this.startGame(gameContainer, true);
         });
 
-        multiplayerButton.addEventListener('click', () => {
+        multiplayerKeyboardButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
             this.startGame(gameContainer, false);
         });
