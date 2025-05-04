@@ -338,12 +338,6 @@ body {
     margin-bottom: 1rem;
 }
 
-.member-bio {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: white;
-}
-
 /* --- Main App Layout Styles (After Login) --- */
 .app-layout-container {
     width: 100%;
