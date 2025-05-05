@@ -9,13 +9,14 @@ all: start_docker start_containers
 
 # make sure docker daemon is running
 start_docker:
-	@if ! docker info > /dev/null 2>&1; then \
-		echo "Starting Docker..."; \
-		open -a Docker; \
-		until docker info > /dev/null 2>&1; do \
+	@if ! docker stats --no-stream > /dev/null 2>&1; then \
+		printf "Docker is starting up..."; \
+		open -g -a Docker; \
+		while ! docker stats --no-stream > /dev/null 2>&1; do \
+			printf "."; \
 			sleep 1; \
 		done; \
-		echo "Docker is ready."; \
+		echo ""; \
 	fi
 
 # Start all containers
