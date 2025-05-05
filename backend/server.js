@@ -3,8 +3,10 @@ TODO:
 	password not hashed yet! (use argon2?)
 	create login user function for safety
 	user updates might have some issues
-	persist data? FIXED??
 	friend request accepting has isses
+	define generic error schema
+	implement stricter schema validation
+	create user authentication, no handlers for it yet
 */
 
 const fastify = require('fastify')( {logger: true} );
@@ -29,19 +31,12 @@ try {
 	console.log("Database is correctly running in file-backed mode."); // debugging log
 	if (db.memory) {
 		console.error("CRITICAL ERROR: Database is running IN-MEMORY despite file path being provided!");
-		console.error("This means data WILL NOT persist.");
-		console.error(`Check file path permissions: ${dbFilePath}`);
-		console.error("Investigate environment/filesystem issues.");
 		process.exit(1); // Exit if it's unexpectedly in-memory
 	}
 
-	// Enable foreign key constraints immediately after opening
-	db.exec('PRAGMA foreign_keys = ON;');
-	console.log('PRAGMA foreign_keys = ON;');
-
-	db.exec('PRAGMA journal_mode = DELETE;'); // debugging log
-	db.exec('PRAGMA synchronous = FULL;'); // debugging log
-	console.log('Set PRAGMA journal_mode = DELETE and synchronous = FULL');
+	db.exec('PRAGMA foreign_keys = ON;'); // should be on by default
+	db.exec('PRAGMA journal_mode = DELETE;');
+	db.exec('PRAGMA synchronous = FULL;');
 } catch (err) {
 	console.error(`Error opening database at ${dbFilePath}:`, err);
 	process.exit(1); // Exit if database connection fails
@@ -155,17 +150,22 @@ fastify.after((err) => {
 			FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
 			FOREIGN KEY (receiver_id) REFERENCES users (id) ON DELETE CASCADE
 			);
+
+			CREATE TABLE IF NOT EXISTS notifications (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			type TEXT NOT NULL CHECK(type IN ('friendRequest', 'gameInvite', 'achievement', 'system')),
+			message TEXT NOT NULL,
+			read INTEGER DEFAULT 0,
+			timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+			action_url TEXT,
+			related_user_id INTEGER,
+			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+			FOREIGN KEY (related_user_id) REFERENCES users (id) ON DELETE SET NULL
+			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');
 		console.log('Database connection appears successful.');
-		try { // debugging log can be removed
-			db.prepare('CREATE TABLE IF NOT EXISTS test_persistence (key TEXT PRIMARY KEY, value TEXT)').run();
-			db.prepare('INSERT OR IGNORE INTO test_persistence (key, value) VALUES (?, ?)').run('test_key', 'test_value_1');
-			const testValue = db.prepare('SELECT value FROM test_persistence WHERE key = ?').get('test_key');
-			console.log(`Persistence test: Found value "${testValue.value}" for key "test_key".`); // Should find "test_value_1" on first run, or subsequent runs if persistent
-		} catch(testErr) { // debugging log
-			console.error('Persistence test failed:', testErr);
-		} // can be removed
 	} catch(dbERR) {
 		fastify.log.error('Database initialization failed: ', dbERR);
 		process.exit(1);

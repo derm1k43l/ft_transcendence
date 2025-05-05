@@ -73,72 +73,60 @@ const getUserProfile = async (req, reply) => {
 
 const addUser = async (req, reply) => {
 	try {
-		// console.log("Debug: Inside addUser controller"); // Add this log
-        // console.log("Debug: Type of req:", typeof req); // Add this
-        // console.log("Debug: req object keys:", Object.keys(req)); // Add this
-        // console.log("Debug: req.betterSqlite3 is:", req.betterSqlite3); // Add this - THIS IS KEY!
-        // // If you want to see req.server specifically (though less standard access)
-        // console.log("Debug: req.server is:", req.server); // Add this
-        // if (req.server) { // Check if req.server exists before checking its properties
-        //     console.log("Debug: req.server.betterSqlite3 is:", req.server.betterSqlite3); // Add this
-        // }
-        // console.log("Debug: reply.betterSqlite3 is:", reply.betterSqlite3);
+		const {
+			username, 
+			password, 
+			display_name, 
+			email, 
+			bio, 
+			avatar_url, 
+			cover_photo_url 
+		} = req.body;
+		
+		// const db = req.server.betterSqlite3;
+		// const db = req.betterSqlite3;
+		const db = req.server.betterSqlite3;
 
-	const { 
-		username, 
-		password, 
-		display_name, 
-		email, 
-		bio, 
-		avatar_url, 
-		cover_photo_url 
-	} = req.body;
-	
-	// const db = req.server.betterSqlite3;
-	// const db = req.betterSqlite3;
-	const db = req.server.betterSqlite3;
-
-	// Basic validation
-	if (!username || !password || !display_name) {
-		return reply.code(400).send({ message: 'Username, password and display name are required' });
-	}
-
-	try {
-		const result = db.prepare(`
-		INSERT INTO users (
-			username, password, display_name, email, bio, 
-			avatar_url, cover_photo_url, join_date
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-		`).run(
-		username,
-		password,
-		display_name,
-		email || null,
-		bio || null,
-		avatar_url || null,
-		cover_photo_url || null,
-		new Date().toISOString()
-		);
-
-		const newUser = db.prepare(`
-		SELECT 
-			id, username, display_name, email, bio,
-			avatar_url, cover_photo_url, join_date,
-			has_two_factor_auth, status, last_active, created_at
-		FROM users 
-		WHERE id = ?
-		`).get(result.lastInsertRowid);
-
-		reply.code(201).send(newUser);
-	} catch (err) {
-		if (err.message.includes('UNIQUE constraint failed: users.username')) {
-		reply.code(409).send({ message: 'Username already exists' });
-		} else if (err.message.includes('UNIQUE constraint failed: users.email') && email) {
-		reply.code(409).send({ message: 'Email already exists' });
-		} else {
-		throw err;
+		// Basic validation
+		if (!username || !password || !display_name) {
+			return reply.code(400).send({ message: 'Username, password and display name are required' });
 		}
-	}
+		try {
+			const result = db.prepare(`
+			INSERT INTO users (
+				username, password, display_name, email, bio, 
+				avatar_url, cover_photo_url, join_date
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			`).run(
+			username,
+			password,
+			display_name,
+			email || null,
+			bio || null,
+			avatar_url || null,
+			cover_photo_url || null,
+			new Date().toISOString()
+			);
+
+			const newUser = db.prepare(`
+			SELECT 
+				id, username, display_name, email, bio,
+				avatar_url, cover_photo_url, join_date,
+				has_two_factor_auth, status, last_active, created_at
+			FROM users 
+			WHERE id = ?
+			`).get(result.lastInsertRowid);
+
+			reply.code(201).send(newUser);
+		} catch (err) {
+			if (err.message.includes('UNIQUE constraint failed: users.username')) {
+			reply.code(409).send({ message: 'Username already exists' });
+			} else if (err.message.includes('UNIQUE constraint failed: users.email') && email) {
+			reply.code(409).send({ message: 'Email already exists' });
+			} else {
+			throw err;
+			}
+		}
 	} catch (error) {
 	req.log.error(error);
 	reply.code(500).send({ message: 'Error adding user' });
