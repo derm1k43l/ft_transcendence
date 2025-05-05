@@ -27,6 +27,8 @@ export class PongGame {
     // Game mode and key tracking
     private isSinglePlayer = false;
     private keyState: Record<string, boolean> = {};
+    private aiTargetY: number = 250;
+    private aiViewIntervalId: number | null = null;
     private intervalId: number | null = null;
 
     // Initialize game container and insert HTML template
@@ -47,22 +49,56 @@ export class PongGame {
         window.addEventListener('keyup', this.onKeyUp);
     }
 
+    private startAI() {
+        this.aiViewIntervalId = window.setInterval(() => this.updateAI(), 1000);
+    }
+    
+    private updateAI() {
+        const observedBallX = this.ballX;
+        const observedBallY = this.ballY;
+        const observedSpeedX = this.ballSpeedX;
+        const observedSpeedY = this.ballSpeedY;
+    
+        const paddleX = 895;
+        const distanceToPaddle = paddleX - observedBallX;
+        const timeToPaddle = distanceToPaddle / observedSpeedX;
+    
+        let predictedY = observedBallY + observedSpeedY * timeToPaddle;
+        const screenHeight = 580;
+    
+        // Bounce prediction
+        while (predictedY < 0 || predictedY > screenHeight) {
+            if (predictedY < 0) predictedY = -predictedY;
+            if (predictedY > screenHeight) predictedY = 2 * screenHeight - predictedY;
+        }
+    
+        this.aiTargetY = predictedY;
+    
+        console.log('AI sees ball at:', observedBallX, observedBallY, '-> predicting Y:', predictedY);
+    }    
+
     // Start the game loop and optionally enable single-player mode
     start(isSinglePlayer = false) {
         this.isSinglePlayer = isSinglePlayer;
         this.intervalId = window.setInterval(() => this.updateGame(), 16);
+        if (this.isSinglePlayer) {
+            this.startAI();
+        }
     }
 
     // Stop the game and clean up
     destroy() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-        }
-        window.removeEventListener('keydown', this.onKeyDown);
-        window.removeEventListener('keyup', this.onKeyUp);
-        this.container.innerHTML = '';
+    if (this.intervalId) {
+        clearInterval(this.intervalId);
     }
-
+    if (this.aiViewIntervalId) {
+        clearInterval(this.aiViewIntervalId);
+    }
+    window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
+    this.container.innerHTML = '';
+    }
+    
     // Track when a key is pressed
     private onKeyDown = (e: KeyboardEvent) => this.keyState[e.key] = true;
     // Track when a key is released
@@ -92,6 +128,7 @@ export class PongGame {
             this.ballSpeedX *= -1;
             this.ballX = 895;
         }
+
         // Player scores
         if (this.ballX <= 0) {
             this.rightScore++;
@@ -101,24 +138,42 @@ export class PongGame {
             this.leftScore++;
             this.resetBall();
         }
+
         // Paddle movement
         if (this.keyState['w']) this.leftPaddleY = Math.max(this.leftPaddleY - this.paddleSpeed, 0);
         if (this.keyState['s']) this.leftPaddleY = Math.min(this.leftPaddleY + this.paddleSpeed, 480);
         if (this.isSinglePlayer) {
-            this.rightPaddleY = Math.max(Math.min(this.ballY - this.paddleHeight / 2, 480), 0);
+            const paddleCenter = this.rightPaddleY + this.paddleHeight / 2;
+        
+            if (paddleCenter < this.aiTargetY - 5) {
+                this.keyState['ArrowDown'] = true;
+                this.keyState['ArrowUp'] = false;
+            } else if (paddleCenter > this.aiTargetY + 5) {
+                this.keyState['ArrowUp'] = true;
+                this.keyState['ArrowDown'] = false;
+            } else {
+                this.keyState['ArrowUp'] = false;
+                this.keyState['ArrowDown'] = false;
+            }
+        
+            // MOVE PADDLE BASED ON KEY STATE
+            if (this.keyState['ArrowUp']) this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
+            if (this.keyState['ArrowDown']) this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
         } else {
             if (this.keyState['ArrowUp']) this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
             if (this.keyState['ArrowDown']) this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
-        }
+        }        
         // Update visual positions
         this.updateUI();
     }
+
     // Reset ball to center and reverse direction after scoring
     private resetBall() {
         this.ballX = 400;
         this.ballY = 250;
         this.ballSpeedX *= -1;
     }
+
     // Update DOM elements to reflect current game state
     private updateUI() {
         this.ball.style.left = `${this.ballX}px`;
@@ -128,6 +183,7 @@ export class PongGame {
         this.leftScoreElement.textContent = `${this.leftScore}`;
         this.rightScoreElement.textContent = `${this.rightScore}`;
     }
+
     // Return the HTML layout for the game
     private getTemplate(): string {
         return `
