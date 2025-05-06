@@ -1,3 +1,5 @@
+import { getUserGameSettings } from '../data/UserService.js';
+
 export class PongGame {
     // DOM elements used in the game
     private container: HTMLElement;
@@ -30,8 +32,11 @@ export class PongGame {
     private aiTargetY: number = 250;
     private aiViewIntervalId: number | null = null;
     private intervalId: number | null = null;
+    
+    // --------------------------------------------------------------------------
+    private gameSettings = getUserGameSettings(1); // Here must be put currentUserId
+    // --------------------------------------------------------------------------
 
-    // Initialize game container and insert HTML template
     constructor(container: HTMLElement) {
         this.container = container;
         this.container.innerHTML = this.getTemplate();
@@ -43,12 +48,21 @@ export class PongGame {
         this.scoreDisplay = this.container.querySelector('.score')!;
         this.leftScoreElement = this.container.querySelector('#leftScore')!;
         this.rightScoreElement = this.container.querySelector('#rightScore')!;
+        const gameContainer = this.container.querySelector('.game__container') as HTMLElement;
+        
+        // Apply settings from gameSettings
+        this.ball.style.backgroundColor = this.gameSettings.ballColor;
+        this.paddleLeft.style.backgroundColor = this.gameSettings.paddleColor;
+        this.paddleRight.style.backgroundColor = this.gameSettings.paddleColor;
+        this.leftScoreElement.style.color = this.gameSettings.scoreColor;
+        this.rightScoreElement.style.color = this.gameSettings.scoreColor;
+        gameContainer.style.backgroundColor = this.gameSettings.boardColor;
 
         // Listen for key press and release events
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
     }
-
+    
     private startAI() {
         this.aiViewIntervalId = window.setInterval(() => this.updateAI(), 1000);
     }
@@ -68,8 +82,10 @@ export class PongGame {
     
         // Bounce prediction
         while (predictedY < 0 || predictedY > screenHeight) {
-            if (predictedY < 0) predictedY = -predictedY;
-            if (predictedY > screenHeight) predictedY = 2 * screenHeight - predictedY;
+            if (predictedY < 0) 
+                predictedY = -predictedY;
+            if (predictedY > screenHeight) 
+                predictedY = 2 * screenHeight - predictedY;
         }
     
         this.aiTargetY = predictedY;
@@ -140,8 +156,10 @@ export class PongGame {
         }
 
         // Paddle movement
-        if (this.keyState['w']) this.leftPaddleY = Math.max(this.leftPaddleY - this.paddleSpeed, 0);
-        if (this.keyState['s']) this.leftPaddleY = Math.min(this.leftPaddleY + this.paddleSpeed, 480);
+        if (this.keyState['w']) 
+            this.leftPaddleY = Math.max(this.leftPaddleY - this.paddleSpeed, 0);
+        if (this.keyState['s']) 
+            this.leftPaddleY = Math.min(this.leftPaddleY + this.paddleSpeed, 480);
         if (this.isSinglePlayer) {
             const paddleCenter = this.rightPaddleY + this.paddleHeight / 2;
         
@@ -157,11 +175,15 @@ export class PongGame {
             }
         
             // MOVE PADDLE BASED ON KEY STATE
-            if (this.keyState['ArrowUp']) this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
-            if (this.keyState['ArrowDown']) this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
+            if (this.keyState['ArrowUp']) 
+                this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
+            if (this.keyState['ArrowDown']) 
+                this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
         } else {
-            if (this.keyState['ArrowUp']) this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
-            if (this.keyState['ArrowDown']) this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
+            if (this.keyState['ArrowUp']) 
+                this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
+            if (this.keyState['ArrowDown']) 
+                this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
         }        
         // Update visual positions
         this.updateUI();

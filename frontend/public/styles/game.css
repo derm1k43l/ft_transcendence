@@ -73,7 +73,6 @@
 }
 
 .game__container {
-    background-color: black;
     width: 950px;
     height: 590px;
     border: 8px solid transparent;
@@ -92,12 +91,10 @@
 }
 
 .paddle__left {
-    background-color: blue;
     left: 15px;
 }
 
 .paddle__right {
-    background-color: red;
     right: 15px;
 }
 
@@ -114,7 +111,6 @@
 .ball {
     width: 18px;
     height: 18px;
-    background-color: white;
     border-radius: 50%;
     position: absolute;
     left: 65%;
