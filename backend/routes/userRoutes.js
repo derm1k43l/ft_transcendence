@@ -5,25 +5,31 @@ const {
 	deleteUser,
 	updateUser,
 	getUserProfile,
-	updateUserProfile
+	updateUserProfile,
+	loginUser
 } = require('../controllers/userController');
 
-const { User } = require('../schemas/userSchema');
+// const { User } = require('../schemas/userSchema');
+const { User, loginBody, loginResponse } = require('../schemas/userSchema');
 
-// Options for get all Users
+const authPreHandler = require('./authPreHandlerRoutes');
+
+// Options for get all Users, not sure if it should be protected with auth
 const getUsersOpts = {
 	schema: {
 		response: {
 			200: {
 				type: 'array',
 				items: User
-			}
+			},
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: getUsers
 };
 
 const getUserOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -39,13 +45,15 @@ const getUserOpts = {
 				properties: {
 					message: { type: 'string' }
 				}
-			}
+			},
+			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: getUser
 };
 
-const getUserProfileOpts = {
+const getUserProfileOpts = { //not sure if this should be protected with auth
 	schema: {
 		params: {
 			type: 'object',
@@ -61,7 +69,9 @@ const getUserProfileOpts = {
 				properties: {
 					message: { type: 'string' }
 				}
-			}
+			},
+			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: getUserProfile
@@ -77,9 +87,9 @@ const postUserOpts = {
 				password: { type: 'string' },
 				display_name: { type: 'string' },
 				email: { type: 'string' },
-				bio: { type: 'string' },
-				avatar_url: { type: 'string' },
-				cover_photo_url: { type: 'string' }
+				bio: { type: 'string', nullable: true },
+				avatar_url: { type: 'string', nullable: true }, //check these if they are required
+				cover_photo_url: { type: 'string', nullable: true }
 			}
 		},
 		response: {
@@ -95,13 +105,16 @@ const postUserOpts = {
 				properties: {
 					message: { type: 'string' }
 				}
-			}
+			},
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: addUser
 };
 
+//controller needs to check if req.user.id matches req.params.id., so only the req user can update itself
 const updateUserOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -113,18 +126,20 @@ const updateUserOpts = {
 		body: {
 			type: 'object',
 			properties: {
-				username: { type: 'string' },
+				username: { type: 'string' }, // not sure if username update should be allowed UNIQUE constraints could have problems
 				display_name: { type: 'string' },
-				email: { type: 'string' },
-				bio: { type: 'string' },
-				avatar_url: { type: 'string' },
-				cover_photo_url: { type: 'string' },
-				has_two_factor_auth: { type: 'integer' },
+				email: { type: 'string' }, // not sure if email update should be allowed UNIQUE constraints could have problems
+				bio: { type: 'string', nullable: true },
+				avatar_url: { type: 'string', nullable: true },
+				cover_photo_url: { type: 'string', nullable: true },
+				has_two_factor_auth: { type: 'integer', enum: [0, 1] }, // has to be 0 or 1
 				status: { type: 'string' }
-			}
+			},
+			minProperties: 1 // must provide at least one field to update
 		},
 		response: {
 			200: User,
+			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } }, // check errors
 			404: {
 				type: 'object',
 				properties: {
@@ -136,13 +151,15 @@ const updateUserOpts = {
 				properties: {
 					message: { type: 'string' }
 				}
-			}
+			},
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: updateUser
 };
 
 const updateUserProfileOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -155,25 +172,29 @@ const updateUserProfileOpts = {
 			type: 'object',
 			properties: {
 				display_name: { type: 'string' },
-				bio: { type: 'string' },
-				avatar_url: { type: 'string' },
-				cover_photo_url: { type: 'string' }
-			}
+				bio: { type: 'string', nullable: true },
+				avatar_url: { type: 'string', nullable: true },
+				cover_photo_url: { type: 'string', nullable: true }
+			},
+			minProperties: 1 // at least 1
 		},
 		response: {
 			200: User,
+			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
 			404: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
 				}
-			}
+			},
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: updateUserProfile
 };
 
 const deleteUserOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -189,37 +210,66 @@ const deleteUserOpts = {
 					message: { type: 'string' }
 				}
 			},
+			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
 			404: {
 				type: 'object',
 				properties: {
 					message: { type: 'string' }
 				}
-			}
+			},
+			500: { type: 'object', properties: { message: { type: 'string' } } }
 		}
 	},
 	handler: deleteUser
 };
 
+const loginUserOpts = {
+	schema: {
+		body: loginBody,
+		response: {
+			200: loginResponse,
+			400: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' },
+					errors: { type: 'array' }
+				}
+			},
+			401: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: { type: 'object', properties: { message: { type: 'string' } } }
+		}
+	},
+	handler: loginUser,
+};
+
 function userRoutes(fastify, options, done) {
-	// Get all Users
+	// Get all Users (verify if auth is needed)
 	fastify.get('/users', getUsersOpts);
 
-	// Get single User
+	// Get single User - Protected
 	fastify.get('/users/:id', getUserOpts);
 
-	// Get user profile (same as getUser but might include more data in future)
+	// Get user profile (same as getUser but might include more data in future) - (verify if auth is needed)
 	fastify.get('/users/:id/profile', getUserProfileOpts);
 
-	// Add User
+	// Add User - Public
 	fastify.post('/users', postUserOpts);
 
-	// Update User (full update)
+	// Login User - Public WRITE TEST FOR IT
+	fastify.post('/users/login', loginUserOpts);
+
+	// Update User (full update) - Protected, make sure only authenticated user's data can be updated
 	fastify.put('/users/:id', updateUserOpts);
 
-	// Update User Profile (partial update)
+	// Update User Profile (partial update) - Protected, make sure only authenticated user's data can be updated
 	fastify.patch('/users/:id/profile', updateUserProfileOpts);
 
-	// Delete User
+	// Delete User - protected, should only delete authenticated user's account
 	fastify.delete('/users/:id', deleteUserOpts);
 
 	done();

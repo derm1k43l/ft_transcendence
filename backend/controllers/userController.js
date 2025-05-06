@@ -138,7 +138,14 @@ const addUser = async (req, reply) => {
 
 const updateUser = async (req, reply) => {
 	try {
-		const { id } = req.params;
+		const { id } = req.params; // target user ID
+		const authenticatedUserId = req.user.id; // Authenticated user ID from JWT (user not showing up)
+
+		// Authorization Check - ADD ALSO IN updateUserProfile and deleteUser!
+		if (parseInt(id, 10) !== authenticatedUserId) {
+			return reply.code(403).send({ message: 'Unauthorized: You can only update your own profile.' });
+		}
+
 		const updates = req.body;
 		const db = req.server.betterSqlite3;
 
@@ -159,8 +166,10 @@ const updateUser = async (req, reply) => {
 			return reply.code(400).send({ message: 'No valid updates provided' });
 		}
 
-		params.push(id);
-		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+		// const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ? AND id = ?`; // updated
+		params.push(id); // param ID
+		params.push(authenticatedUserId); // auth ID
 
 		try {
 			const result = db.prepare(sql).run(...params);
@@ -270,7 +279,7 @@ const deleteUser = async (req, reply) => {
 	}
 };
 
-const loginUser = async (req, reply) => {
+const loginUser = async (req, reply) => { //test it!!! login fails for now
 	try {
 		const { username, password } = req.body;
 
@@ -311,5 +320,6 @@ module.exports = {
 	addUser,
 	deleteUser,
 	updateUser,
-	updateUserProfile
+	updateUserProfile,
+	loginUser
 };
