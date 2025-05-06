@@ -7,6 +7,7 @@ TODO:
 	define generic error schema
 	implement stricter schema validation
 	create user authentication, no handlers for it yet
+	include better err.message && checkig
 */
 
 const fastify = require('fastify')( {logger: true} );
@@ -45,6 +46,14 @@ try {
 // decorate fastify instance with db connection
 fastify.decorate('betterSqlite3', db);
 
+// adding JWT registration
+fastify.register(require('@fastify/jwt'), {
+	secret: 'notsurehowthisworksyet!', // should be a secure random key
+});
+
+// we define/import the authPreHandler
+const authPreHandler = require('./routes/authPreHandlerRoutes');
+
 fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
 fastify.register(require('./routes/gameSettingsRoutes'));
@@ -53,6 +62,7 @@ fastify.register(require('./routes/achievementsRoutes'));
 fastify.register(require('./routes/friendsRoutes'));
 fastify.register(require('./routes/friendRequestsRoutes'));
 fastify.register(require('./routes/chatMessagesRoutes'));
+fastify.register(require('./routes/notificationsRoutes')); // wip
 
 const PORT = process.env.PORT ||  3000;
 
