@@ -11,6 +11,7 @@ import { DashboardView } from './views/Dashboard.js';
 import { NotificationManager } from './components/Notification.js';
 import { findUserByUsername, getUserById } from './data/UserService.js';
 import { UserProfile } from './data/Types.js';
+import { GoogleSignIn } from './views/GoogleSignIn.js';
 
 // --- State ---
 let isLoggedIn = false;
@@ -435,12 +436,13 @@ function setupEventListeners(): void {
     googleButton?.addEventListener('click', () => {
         // this will redirect to Google OAuth
         console.log('Google login clicked');
-        NotificationManager.show({
-            title: 'Google Login',
-            message: 'Google login would be implemented here. ',
-            type: 'info',
-            duration: 3000
-        });
+        // NotificationManager.show({
+        //     title: 'Google Login',
+        //     message: 'Google login would be implemented here. ',
+        //     type: 'info',
+        //     duration: 3000
+        // });
+        GoogleSignIn(router);
     });
 
     // Logout Button
