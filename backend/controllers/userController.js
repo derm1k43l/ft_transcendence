@@ -1,3 +1,5 @@
+// Authorization Check - ADD ALSO IN updateUserProfile and deleteUser!
+
 const argon2 = require('argon2');
 
 const getUsers = async (req, reply) => {

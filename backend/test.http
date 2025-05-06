@@ -348,3 +348,33 @@ PUT http://localhost:3000/chat-messages/1/read HTTP/1.1
 ### DELETE CHAT MESSAGE BY ID
 DELETE http://localhost:3000/chat-messages/1 HTTP/1.1
 
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+### GET NOTIFICATIONS (Authenticated)
+GET http://localhost:3000/api/notifications HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzNjU2OX0.QO-toTtCxAYX_G3-cn03Q4fm84mHS7AILpg4Uw46P5I
+
+
+### CREATE NOTIFICATION (Authenticated)
+POST http://localhost:3000/api/notifications HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzNjU2OX0.QO-toTtCxAYX_G3-cn03Q4fm84mHS7AILpg4Uw46P5I
+
+{
+	"user_id": 2,
+	"type": "friendRequest",
+	"message": "User1 sent you a friend request",
+	"action_url": "/friends/requests",
+	"related_user_id": 1
+}
+
+### MARK NOTIFICATION AS READ (Authenticated)
+PATCH http://localhost:3000/api/notifications/1/read HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzNjU2OX0.QO-toTtCxAYX_G3-cn03Q4fm84mHS7AILpg4Uw46P5I
+
+{
+	"read": 1
+}
+

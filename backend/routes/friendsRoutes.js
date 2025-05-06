@@ -7,6 +7,8 @@ const {
 
 const { Friend, FriendDetails } = require('../schemas/friendsSchema');
 
+//use friend schema
+
 // Options for get friends for a specific user
 const getUserFriendsOpts = {
 	schema: {
