@@ -46,13 +46,19 @@ try {
 // decorate fastify instance with db connection
 fastify.decorate('betterSqlite3', db);
 
+// create secret key (only need to run it once and copy the output and it's useable as the secret)
+const crypto = require('crypto');
+const jwtSecret = crypto.randomBytes(32).toString('hex');
+console.log("Generated JWT Secret:", jwtSecret);
+
 // adding JWT registration
 fastify.register(require('@fastify/jwt'), {
-	secret: 'notsurehowthisworksyet!', // should be a secure random key
+	secret: 'notsurehowthisworksyet!', // should be a secure random key (stored in an ENV file)
+	// secret: process.env.JWT_SECRET, // like this (set env var while running the app)
 });
 
 // we define/import the authPreHandler
-const authPreHandler = require('./routes/authPreHandlerRoutes');
+// const authPreHandler = require('./routes/authPreHandlerRoutes');
 
 fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
@@ -62,7 +68,7 @@ fastify.register(require('./routes/achievementsRoutes'));
 fastify.register(require('./routes/friendsRoutes'));
 fastify.register(require('./routes/friendRequestsRoutes'));
 fastify.register(require('./routes/chatMessagesRoutes'));
-fastify.register(require('./routes/notificationsRoutes')); // wip
+// fastify.register(require('./routes/notificationsRoutes')); // wip (add prehandler to notification routes)
 
 const PORT = process.env.PORT ||  3000;
 
