@@ -304,7 +304,7 @@ const loginUser = async (req, reply) => { //test it!!! login fails for now
 		}
 
 		// generate JWT if credentials are valid
-		const token = req.jwtSign({ id: user.id, username: user.username });
+		const token = req.server.jwt.sign({ id: user.id, username: user.username });
 
 		reply.code(200).send({ token: token, user: { id: user.id, username: user.username, display_name: user.display_name} });
 	} catch (error) {

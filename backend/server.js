@@ -1,13 +1,16 @@
 /*
 TODO: 
-	password not hashed yet! (use argon2?)
-	create login user function for safety
-	user updates might have some issues
-	friend request accepting has isses
+	password not hashed yet! (should be hashed correctly)
+	create login user function for safety (seems mostly functional)
+	user updates might have some issues (seems redundant)
+	friend request accepting has isses (seems fixed)
 	define generic error schema
 	implement stricter schema validation
-	create user authentication, no handlers for it yet
+	create user authentication, (mostyly working, needs frontend work)
 	include better err.message && checkig
+	test more and clean things up, implement notifications
+	TODO notes also in test.http
+	maybe make the DB be ignored by git?
 */
 
 const fastify = require('fastify')( {logger: true} );
@@ -56,9 +59,6 @@ fastify.register(require('@fastify/jwt'), {
 	secret: 'notsurehowthisworksyet!', // should be a secure random key (stored in an ENV file)
 	// secret: process.env.JWT_SECRET, // like this (set env var while running the app)
 });
-
-// we define/import the authPreHandler
-// const authPreHandler = require('./routes/authPreHandlerRoutes');
 
 fastify.register(require('./routes/userRoutes'));
 fastify.register(require('./routes/userStatsRoutes'));
