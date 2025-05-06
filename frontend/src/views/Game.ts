@@ -15,9 +15,9 @@ export class GameView {
     render(container: HTMLElement) {
         container.innerHTML = `
             <div id="modeContainer">
-                <button id="singleplayerButton">Single Player (AI)</button>
-                <button id="multiplayerKeyboardButton">Multiplayer (Same Keyboard)</button>
-                <button id="multiplayerButton">Multiplayer (Remote players)</button>
+                <button id="singleplayerButton">Play Against AI</button>
+                <button id="multiplayerKeyboardButton">Local 2-Player</button>
+                <button id="multiplayerRemoteButton">Remote Play</button>
             </div>
             <div id="game-container"></div>
         `;
@@ -38,6 +38,11 @@ export class GameView {
         multiplayerKeyboardButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
             this.startGame(gameContainer, false);
+        });
+
+        multiplayerRemoteButton.addEventListener('click', () => {
+            modeContainer.style.display = 'none';
+            // invite friend window
         });
     }
 
