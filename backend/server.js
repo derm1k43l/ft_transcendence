@@ -2,10 +2,9 @@
 TODO: 
 	define generic error schema
 	implement stricter schema validation
-	create user authentication done, (needs frontend work)
 	maybe make the DB be ignored by git?
-	implement log out function (or maybe frontend has to do it?)
-	update user stats logic && gameSettings logic
+	implement login/out functions done. frontend has to do the rest, with JWT
+	update user stats logic && gameSettings logic (maybe)
 	make .js into .ts?
 */
 

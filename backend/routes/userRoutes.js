@@ -6,7 +6,8 @@ const {
 	updateUser,
 	getUserProfile,
 	updateUserProfile,
-	loginUser
+	loginUser,
+	logoutUser
 } = require('../controllers/userController');
 
 // const { User } = require('../schemas/userSchema');
@@ -247,6 +248,33 @@ const loginUserOpts = {
 	handler: loginUser,
 };
 
+const logoutUserOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			401: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		}
+	},
+	handler: logoutUser,
+};
+
 function userRoutes(fastify, options, done) {
 	// Get all Users (verify if auth is needed)
 	fastify.get('/', getUsersOpts);
@@ -262,6 +290,9 @@ function userRoutes(fastify, options, done) {
 
 	// Login User - Public
 	fastify.post('/login', loginUserOpts);
+
+	// Log out User
+	fastify.post('/log-out', logoutUserOpts);
 
 	// Update User (full update) - Protected, make sure only authenticated user's data can be updated
 	fastify.put('/:id', updateUserOpts);

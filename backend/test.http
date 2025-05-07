@@ -27,9 +27,19 @@ Content-Type: application/json
 	"email": "big@gmail.com"
 }
 
-### LOGIN USER (change status after loggin in? implement log out?)
+### LOGIN USER (check if user is logged in already)
 POST http://localhost:3000/api/users/login HTTP/1.1
 Content-Type: application/json
+
+{
+	"username": "user2",
+	"password": "test"
+}
+
+### LOG OUT USER (check if user is loged out)
+POST http://localhost:3000/api/users/log-out HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
 	"username": "user2",
