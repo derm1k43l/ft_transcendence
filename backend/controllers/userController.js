@@ -305,6 +305,9 @@ const loginUser = async (req, reply) => { //test it!!! login fails for now
 			return reply.code(401).send({ message: 'Invalid credentials' });
 		}
 
+		// update user status
+		db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('online', user.id);
+
 		// generate JWT if credentials are valid
 		const token = req.server.jwt.sign({ id: user.id, username: user.username });
 
