@@ -1,8 +1,6 @@
 const getUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
-		// const db = req.server.betterSqlite3;
-		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 		const stat = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get(userId);
 
@@ -20,13 +18,11 @@ const getUserStat = async (req, reply) => {
 const addUserStat = async (req, reply) => {
 	try {
 		const { user_id, wins = 0, losses = 0, rank, level = 1 } = req.body;
-		// const db = req.server.betterSqlite3;
-		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		if (!user_id) {
-			 reply.code(400).send({ message: 'user_id is required' });
-			 return;
+			reply.code(400).send({ message: 'user_id is required' });
+			return;
 		}
 
 		// Check if user exists
@@ -37,7 +33,7 @@ const addUserStat = async (req, reply) => {
 		}
 
 		try {
-			const result = db.prepare('INSERT INTO user_stats (user_id, wins, losses, rank, level) VALUES (?, ?, ?, ?, ?)').run(user_id, wins, losses, rank, level);
+			db.prepare('INSERT INTO user_stats (user_id, wins, losses, rank, level) VALUES (?, ?, ?, ?, ?)').run(user_id, wins, losses, rank, level);
 			const newUserStat = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get(user_id);
 			reply.code(201).send(newUserStat);
 		} catch (err) {
@@ -60,8 +56,6 @@ const updateUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
 		const { wins, losses, rank, level } = req.body;
-		// const db = req.server.betterSqlite3;
-		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		// Build the update query dynamically based on provided fields
@@ -113,8 +107,6 @@ const updateUserStat = async (req, reply) => {
 const deleteUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
-		// const db = req.server.betterSqlite3;
-		// const db = req.betterSqlite3;
 		const db = req.server.betterSqlite3;
 
 		const result = db.prepare('DELETE FROM user_stats WHERE user_id = ?').run(userId);

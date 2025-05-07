@@ -13,7 +13,6 @@ TODO:
 	implement notifications (done-ish)
 	TODO notes also in test.http
 	maybe make the DB be ignored by git?
-	change user status after logging in
 	implement log out function (or maybe frontend has to do it?)
 	implement prefix to other groups!
 	test notifications more!

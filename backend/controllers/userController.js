@@ -99,7 +99,6 @@ const addUser = async (req, reply) => {
 			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			`).run(
 				username,
-				// password,
 				paswordHash,
 				display_name,
 				email || null,
@@ -121,9 +120,8 @@ const addUser = async (req, reply) => {
 			// omit password hash from response
 			const { password: _, ...userResponse } = newUser;
 
-			// reply.code(201).send(newUser);
 			reply.code(201).send(userResponse);
-		} catch (err) { // better checking with err.message && 
+		} catch (err) {
 			if (err.message && err.message.includes('UNIQUE constraint failed: users.username')) {
 				reply.code(409).send({ message: 'Username already exists' });
 			} else if (err.message && err.message.includes('UNIQUE constraint failed: users.email') && email) {
@@ -143,7 +141,6 @@ const updateUser = async (req, reply) => {
 		const { id } = req.params; // target user ID
 		const authenticatedUserId = req.user.id; // Authenticated user ID from JWT (user not showing up)
 
-		// Authorization Check - ADD ALSO IN updateUserProfile and deleteUser!
 		if (parseInt(id, 10) !== authenticatedUserId) {
 			return reply.code(403).send({ message: 'Unauthorized: You can only update your own profile.' });
 		}
@@ -168,7 +165,6 @@ const updateUser = async (req, reply) => {
 			return reply.code(400).send({ message: 'No valid updates provided' });
 		}
 
-		// const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
 		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ? AND id = ?`; // updated
 		params.push(id); // param ID
 		params.push(authenticatedUserId); // auth ID
@@ -209,18 +205,25 @@ const updateUser = async (req, reply) => {
 const updateUserProfile = async (req, reply) => {
 	try {
 		const { id } = req.params;
+		const authenticatedUserId = req.user.id;
+
+		// Auth check
+		if (parseInt(id, 10) !== authenticatedUserId) {
+			return reply.code(403).send({ message: 'Unauthorized: You can only update your own profile.' });
+		}
+
 		const { display_name, bio, avatar_url, cover_photo_url } = req.body;
 		const db = req.server.betterSqlite3;
 
 		// Validate at least one field is being updated
-		if (!display_name && !bio && !avatar_url && !cover_photo_url) {
+		if (!display_name && bio === undefined && avatar_url === undefined && cover_photo_url === undefined) {
 			return reply.code(400).send({ message: 'No profile updates provided' });
 		}
 
 		const setClauses = [];
 		const params = [];
 		
-		if (display_name) {
+		if (display_name !== undefined) {
 			setClauses.push('display_name = ?');
 			params.push(display_name);
 		}
@@ -237,8 +240,9 @@ const updateUserProfile = async (req, reply) => {
 			params.push(cover_photo_url);
 		}
 
-		params.push(id);
-		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ? AND id = ?`;
+		params.push(id); // param ID
+		params.push(authenticatedUserId); // auth ID
 
 		const result = db.prepare(sql).run(...params);
 
@@ -266,12 +270,21 @@ const updateUserProfile = async (req, reply) => {
 const deleteUser = async (req, reply) => {
 	try {
 		const { id } = req.params;
+
+		const authenticatedUserId = req.user.id; // auth id from JWT
+		// Auth check
+		if (parseInt(id, 10) !== authenticatedUserId) {
+			return reply.code(403).send({ message: 'Unauthorized: You can only delete your own account.' }); // 403 Forbidden
+		}
+
 		const db = req.server.betterSqlite3;
-		
-		const result = db.prepare('DELETE FROM users WHERE id = ?').run(id);
+		// Make sure we don't delete the wrong user
+		const sql = 'DELETE FROM users WHERE id = ? AND id = ?';
+
+		const result = db.prepare(sql).run(id, authenticatedUserId);
 
 		if (result.changes === 0) {
-			reply.code(404).send({ message: 'User not found' });
+			reply.code(404).send({ message: 'User not found or does not match authenticated user.' });
 		} else {
 			reply.send({ message: `User ${id} has been removed` });
 		}
@@ -281,7 +294,7 @@ const deleteUser = async (req, reply) => {
 	}
 };
 
-const loginUser = async (req, reply) => { //test it!!! login fails for now
+const loginUser = async (req, reply) => {
 	try {
 		const { username, password } = req.body;
 
@@ -313,7 +326,7 @@ const loginUser = async (req, reply) => { //test it!!! login fails for now
 
 		reply.code(200).send({ token: token, user: { id: user.id, username: user.username, display_name: user.display_name} });
 	} catch (error) {
-		req.log.error('Login error', error);
+		req.log.error(error, 'Login error details:');
 		reply.code(500).send({ message: 'Login failed' });
 	}
 };

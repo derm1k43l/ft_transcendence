@@ -43,16 +43,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hb
 ### UPDATE USER FULL (check with valid user id, that doesn't belong to the updating user)
 PUT http://localhost:3000/users/2 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUyOTczMX0.34az2DmkgWv4P3hXQ-6_xKU6X8Fp9zoZpAtQ9lu5bRg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
 	"username": "Sexy Cool Updated user"
 }
 
 ### UPDATE USER PARTIAL (maybe shouldn't allow username updates)
-PATCH http://localhost:3000/users/1/profile HTTP/1.1
+PATCH http://localhost:3000/users/2/profile HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyOTYzMX0.jGNtcYA6j1ViqkXnpi71aLJ2t8VGTuBqpuwCMIhdI10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
 	"display_name": "New Name Joe",
