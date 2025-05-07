@@ -28,6 +28,7 @@ export class PongGame {
 
     // Game mode and key tracking
     private isSinglePlayer = false;
+    private remotePlayer = false;
     private keyState: Record<string, boolean> = {};
     private aiTargetY: number = 250;
     private aiViewIntervalId: number | null = null;
@@ -179,6 +180,8 @@ export class PongGame {
                 this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
             if (this.keyState['ArrowDown']) 
                 this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
+        } else if (this.remotePlayer) {
+            //implementing remote keys
         } else {
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);

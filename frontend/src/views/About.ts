@@ -49,7 +49,7 @@ export class AboutView {
                         <div class="member-image">
                             <img src="https://cdn.intra.42.fr/users/eb9f45c7ec8c0eae8fa3506ff1091a33/sgeiger.jpg" alt="Sören Geiger">
                         </div>
-                        <h3>Jane Smith</h3>
+                        <h3>Sören Geiger</h3>
                         <p class="member-role">Tournament development</p>
                     </div>
 

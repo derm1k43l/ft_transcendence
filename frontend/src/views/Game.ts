@@ -42,7 +42,7 @@ export class GameView {
 
         multiplayerRemoteButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
-            // invite friend window
+            this.router.navigate('/friends');
         });
     }
 
