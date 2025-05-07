@@ -131,13 +131,13 @@ const updateGameSettingsOpts = {
 
 function gameSettingsRoutes (fastify, options, done) {
 	// Get user game settings by user ID
-	fastify.get('/users/:userId/settings', getUserGameSettingsOpts);
+	fastify.get('/users/:userId', getUserGameSettingsOpts);
 
-	// Add game settings (requires user_id in body)
-	fastify.post('/game-settings', addGameSettingsOpts);
+	// Add game settings (requires user_id in body) (could implement logic to be in url)
+	fastify.post('/', addGameSettingsOpts);
 
 	// Update game settings by user ID
-	fastify.put('/users/:userId/settings', updateGameSettingsOpts);
+	fastify.put('/users/:userId', updateGameSettingsOpts);
 
 	// Delete only when user is deleted
 	done();

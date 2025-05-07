@@ -203,22 +203,22 @@ const deleteMatchHistoryItemOpts = {
 
 function matchHistoryRoutes (fastify, options, done) {
 	// Get all match history
-	fastify.get('/match-history', getMatchHistoryOpts);
+	fastify.get('/', getMatchHistoryOpts);
 
 	// Get single match history item by ID
-	fastify.get('/match-history/:id', getMatchHistoryItemOpts);
+	fastify.get('/:id', getMatchHistoryItemOpts);
 
 	// Get match history for a specific user
-	fastify.get('/users/:userId/match-history', getMatchHistoryForUserOpts);
+	fastify.get('/users/:userId', getMatchHistoryForUserOpts);
 
 	// Add match history item
-	fastify.post('/match-history', addMatchHistoryItemOpts);
+	fastify.post('/', addMatchHistoryItemOpts);
 
 	// Update match history item by ID
-	fastify.put('/match-history/:id', updateMatchHistoryItemOpts);
+	fastify.put('/:id', updateMatchHistoryItemOpts);
 
 	// Delete match history item by ID
-	fastify.delete('/match-history/:id', deleteMatchHistoryItemOpts);
+	fastify.delete('/:id', deleteMatchHistoryItemOpts);
 
 	done();
 }

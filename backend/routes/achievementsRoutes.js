@@ -199,22 +199,22 @@ const deleteAchievementOpts = {
 
 function achievementsRoutes (fastify, options, done) {
 	// Get all achievements
-	fastify.get('/achievements', getAchievementsOpts);
+	fastify.get('/', getAchievementsOpts);
 
 	// Get single achievement by ID
-	fastify.get('/achievements/:id', getAchievementOpts);
+	fastify.get('/:id', getAchievementOpts);
 
 	// Get achievements for a specific user
-	fastify.get('/users/:userId/achievements', getUserAchievementsOpts);
+	fastify.get('/users/:userId', getUserAchievementsOpts);
 
 	// Add achievement
-	fastify.post('/achievements', addAchievementOpts);
+	fastify.post('/', addAchievementOpts);
 
 	// Update achievement by ID
-	fastify.put('/achievements/:id', updateAchievementOpts);
+	fastify.put('/:id', updateAchievementOpts);
 
 	// Delete achievement by ID
-	fastify.delete('/achievements/:id', deleteAchievementOpts);
+	fastify.delete('/:id', deleteAchievementOpts);
 
 	done();
 }

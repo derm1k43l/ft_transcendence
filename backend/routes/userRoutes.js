@@ -6,7 +6,8 @@ const {
 	updateUser,
 	getUserProfile,
 	updateUserProfile,
-	loginUser
+	loginUser,
+	logoutUser
 } = require('../controllers/userController');
 
 // const { User } = require('../schemas/userSchema');
@@ -247,30 +248,60 @@ const loginUserOpts = {
 	handler: loginUser,
 };
 
+const logoutUserOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			401: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			500: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			}
+		}
+	},
+	handler: logoutUser,
+};
+
 function userRoutes(fastify, options, done) {
 	// Get all Users (verify if auth is needed)
-	fastify.get('/users', getUsersOpts);
+	fastify.get('/', getUsersOpts);
 
 	// Get single User - Protected
-	fastify.get('/users/:id', getUserOpts);
+	fastify.get('/:id', getUserOpts);
 
 	// Get user profile (same as getUser but might include more data in future) - (verify if auth is needed)
-	fastify.get('/users/:id/profile', getUserProfileOpts);
+	fastify.get('/:id/profile', getUserProfileOpts);
 
 	// Add User - Public
-	fastify.post('/users', postUserOpts);
+	fastify.post('/', postUserOpts);
 
-	// Login User - Public WRITE TEST FOR IT
-	fastify.post('/users/login', loginUserOpts);
+	// Login User - Public
+	fastify.post('/login', loginUserOpts);
+
+	// Log out User
+	fastify.post('/log-out', logoutUserOpts);
 
 	// Update User (full update) - Protected, make sure only authenticated user's data can be updated
-	fastify.put('/users/:id', updateUserOpts);
+	fastify.put('/:id', updateUserOpts);
 
 	// Update User Profile (partial update) - Protected, make sure only authenticated user's data can be updated
-	fastify.patch('/users/:id/profile', updateUserProfileOpts);
+	fastify.patch('/:id/profile', updateUserProfileOpts);
 
 	// Delete User - protected, should only delete authenticated user's account
-	fastify.delete('/users/:id', deleteUserOpts);
+	fastify.delete('/:id', deleteUserOpts);
 
 	done();
 }

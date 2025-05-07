@@ -148,16 +148,16 @@ const removeFriendshipOpts = {
 
 function friendsRoutes (fastify, options, done) {
 	// Get friends for a specific user
-	fastify.get('/users/:userId/friends', getUserFriendsOpts);
+	fastify.get('/users/:userId', getUserFriendsOpts);
 
 	// Check if two users are friends
-	fastify.get('/users/:userId/friends/:friendId', checkFriendshipOpts);
+	fastify.get('/users/:userId/:friendId', checkFriendshipOpts);
 
 	// Add friendship (requires user_id and friend_id in body)
-	fastify.post('/friends', addFriendshipOpts);
+	fastify.post('/', addFriendshipOpts);
 
 	// Remove friendship between two users
-	fastify.delete('/users/:userId/friends/:friendId', removeFriendshipOpts);
+	fastify.delete('/users/:userId/:friendId', removeFriendshipOpts);
 
 	done();
 }

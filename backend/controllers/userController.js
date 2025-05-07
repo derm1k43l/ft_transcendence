@@ -1,5 +1,3 @@
-// Authorization Check - ADD ALSO IN updateUserProfile and deleteUser!
-
 const argon2 = require('argon2');
 
 const getUsers = async (req, reply) => {
@@ -294,6 +292,8 @@ const deleteUser = async (req, reply) => {
 	}
 };
 
+//frontend code must immediately clear the JWT from localStorage after logging out
+// user is logged in when they have a valid JWT token, this is mostly aesthetic
 const loginUser = async (req, reply) => {
 	try {
 		const { username, password } = req.body;
@@ -305,11 +305,19 @@ const loginUser = async (req, reply) => {
 		}
 
 		const user = db.prepare(`
-			SELECT id, username, password, display_name FROM users WHERE username = ?
+			SELECT id, username, password, display_name, status FROM users WHERE username = ?
 		`).get(username);
 
 		if (!user) { // user not found, we don't reveal that much for security
 			return reply.code(401).send({ message: 'Invalid credentials' });
+		}
+
+		if (user.status === 'online') {
+			req.log.info(`Login attempted for user ${user.id} but they are already online.`);
+			// just issue a new token
+			const token = req.server.jwt.sign({ id: user.id, username: user.username });
+ 			// send the same response structure as a fresh login
+			return reply.code(200).send({ token: token, user: { id: user.id, username: user.username, display_name: user.display_name} });
 		}
 
 		const isPasswordValid = await argon2.verify(user.password, password);
@@ -331,6 +339,32 @@ const loginUser = async (req, reply) => {
 	}
 };
 
+// user is logged out when they don' have a valid JWT token, this is mostly aesthetic
+const logoutUser = async (req, reply) => {
+	try {
+		const authenticatedUserId = req.user.id;
+
+		const db = req.server.betterSqlite3; // Access the database connection
+
+		const userStatus = db.prepare('SELECT status FROM users WHERE id = ?').get(authenticatedUserId);
+		if (!userStatus || userStatus.status === 'offline') {
+			req.log.info(`Logout attempted for user ${authenticatedUserId} but they are already offline.`);
+			return reply.code(200).send({ message: 'User is already logged out.' });
+		}
+
+		// update status
+		db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('offline', authenticatedUserId);
+
+		req.log.info(`User ${authenticatedUserId} status updated to offline.`);
+
+		reply.code(200).send({ message: 'Logged out successfully' });
+
+	} catch (error) {
+		req.log.error(error, 'Logout error details:');
+		reply.code(500).send({ message: 'Logout failed' });
+	}
+};
+
 module.exports = {
 	getUsers,
 	getUser,
@@ -339,5 +373,6 @@ module.exports = {
 	deleteUser,
 	updateUser,
 	updateUserProfile,
-	loginUser
+	loginUser,
+	logoutUser
 };
