@@ -235,25 +235,25 @@ const deleteFriendRequestOpts = {
 
 function friendRequestsRoutes (fastify, options, done) {
 	// Get all friend requests
-	fastify.get('/friend-requests', getFriendRequestsOpts);
+	fastify.get('/', getFriendRequestsOpts);
 
 	// Get single friend request by ID
-	fastify.get('/friend-requests/:id', getFriendRequestOpts);
+	fastify.get('/:id', getFriendRequestOpts);
 
 	// Get friend requests sent by a user
-	fastify.get('/users/:userId/sent-friend-requests', getSentFriendRequestsOpts);
+	fastify.get('/sent/users/:userId', getSentFriendRequestsOpts);
 
 	// Get friend requests received by a user (pending)
-	fastify.get('/users/:userId/received-friend-requests', getReceivedFriendRequestsOpts);
+	fastify.get('/received/users/:userId', getReceivedFriendRequestsOpts);
 
 	// Add friend request
-	fastify.post('/friend-requests', addFriendRequestOpts);
+	fastify.post('/', addFriendRequestOpts);
 
 	// Update friend request status (accept/reject)
-	fastify.put('/friend-requests/:id/status', updateFriendRequestStatusOpts);
+	fastify.put('/status/:id', updateFriendRequestStatusOpts);
 
 	// Delete friend request
-	fastify.delete('/friend-requests/:id', deleteFriendRequestOpts);
+	fastify.delete('/:id', deleteFriendRequestOpts);
 
 	done();
 }

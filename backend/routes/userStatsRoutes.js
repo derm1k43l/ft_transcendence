@@ -162,16 +162,16 @@ const deleteUserStatOpts = {
 
 function userStatsRoutes (fastify, options, done) {
 	// Get user stats by user ID
-	fastify.get('/users/:userId/stats', getUserStatOpts);
+	fastify.get('/:userId', getUserStatOpts);
 
-	// Add user stats (assumes user ID in the body, instead of URL, can be changed if necessary)
-	fastify.post('/user-stats', addUserStatOpts);
+	// Add user stats by user ID (currently expects ID in the body still in the logic)
+	fastify.post('/:userId', addUserStatOpts);
 
 	// Update user stats by user ID
-	fastify.put('/users/:userId/stats', updateUserStatOpts);
+	fastify.put('/:userId', updateUserStatOpts);
 
 	// Delete user stats by user ID
-	fastify.delete('/users/:userId/stats', deleteUserStatOpts);
+	fastify.delete('/:userId', deleteUserStatOpts);
 
 	done();
 }

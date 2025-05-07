@@ -1,3 +1,6 @@
+// TODO
+// pending friend requests should be automatically deleted after status update, reject/accept
+
 const getFriendRequests = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;

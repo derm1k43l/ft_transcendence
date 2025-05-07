@@ -165,19 +165,19 @@ const deleteChatMessageOpts = {
 
 function chatMessagesRoutes (fastify, options, done) {
 	// Get chat messages between two users
-	fastify.get('/users/:userId1/chat/:userId2', getChatMessagesBetweenUsersOpts);
+	fastify.get('/chat/users/:userId1/:userId2', getChatMessagesBetweenUsersOpts);
 
 	// Get single chat message by ID
-	fastify.get('/chat-messages/:id', getChatMessageOpts);
+	fastify.get('/:id', getChatMessageOpts);
 
 	// Add chat message
-	fastify.post('/chat-messages', addChatMessageOpts);
+	fastify.post('/', addChatMessageOpts);
 
 	// Mark a chat message as read
-	fastify.put('/chat-messages/:id/read', markChatMessageAsReadOpts);
+	fastify.put('/read/:id', markChatMessageAsReadOpts);
 
 	// Delete chat message
-	fastify.delete('/chat-messages/:id', deleteChatMessageOpts);
+	fastify.delete('/:id', deleteChatMessageOpts);
 
 	done();
 }
