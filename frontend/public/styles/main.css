@@ -8,6 +8,7 @@
 @import url('./settings.css');
 @import url('./responsive.css');
 @import url('./game.css');
+@import url('./tournament.css');
 
 * {
     margin: 0;

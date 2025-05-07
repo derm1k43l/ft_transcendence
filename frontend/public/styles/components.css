@@ -2,7 +2,8 @@
 /* Main container styles - consistent across all views */
 .friends-view,
 .chat-view,
-.settings-view {
+.settings-view,
+.tournament-view {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -10,26 +11,30 @@
 
 .friends-header,
 .chat-header,
-.settings-header {
+.settings-header,
+.tournament-header {
     margin-bottom: 2rem;
 }
 
 .friends-header h2,
 .chat-header h2,
-.settings-header h2 {
+.settings-header h2,
+.tournament-header h2 {
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
 }
 
 .friends-header p,
 .chat-header p,
-.settings-header p {
+.settings-header p,
+.tournament-header p {
     color: rgba(255, 255, 255, 0.7);
 }
 
 .friends-container,
 .chat-container,
-.settings-container {
+.settings-container,
+.tournament-container {
     display: grid;
     grid-template-columns: 250px 1fr;
     gap: 2rem;
@@ -39,7 +44,8 @@
 
 .friends-sidebar,
 .chat-sidebar,
-.settings-sidebar {
+.settings-sidebar,
+.tournament-sidebar {
     background-color: var(--bg-color-medium);
     border-radius: var(--border-radius);
     padding: 1.5rem;
@@ -51,7 +57,8 @@
 
 .friends-content,
 .chat-content,
-.settings-content {
+.settings-content,
+.tournament-content {
     background-color: var(--bg-color-medium);
     border-radius: var(--border-radius);
     overflow: hidden;
@@ -61,7 +68,8 @@
 
 .friends-nav,
 .chat-contacts,
-.settings-nav {
+.settings-nav,
+.tournament-nav {
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
@@ -70,26 +78,30 @@
 
 .friends-nav::-webkit-scrollbar,
 .chat-contacts::-webkit-scrollbar,
-.settings-nav::-webkit-scrollbar {
+.settings-nav::-webkit-scrollbar,
+.tournament-nav::-webkit-scrollbar {
     width: 6px;
 }
 
 .friends-nav::-webkit-scrollbar-thumb,
 .chat-contacts::-webkit-scrollbar-thumb,
-.settings-nav::-webkit-scrollbar-thumb {
+.settings-nav::-webkit-scrollbar-thumb,
+.tournament-nav::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
 }
 
 .friends-nav::-webkit-scrollbar-track,
 .chat-contacts::-webkit-scrollbar-track,
-.settings-nav::-webkit-scrollbar-track {
+.settings-nav::-webkit-scrollbar-track,
+.tournament-nav::-webkit-scrollbar-track {
     background: transparent;
 }
 
 .friends-panel,
 .chat-panel,
-.settings-panel {
+.settings-panel,
+.tournament-panel {
     display: none;
     height: 100%;
     overflow-y: auto;
@@ -99,26 +111,30 @@
 
 .friends-panel::-webkit-scrollbar,
 .chat-panel::-webkit-scrollbar,
-.settings-panel::-webkit-scrollbar {
+.settings-panel::-webkit-scrollbar,
+.tournament-panel::-webkit-scrollbar {
     width: 6px;
 }
 
 .friends-panel::-webkit-scrollbar-thumb,
 .chat-panel::-webkit-scrollbar-thumb,
-.settings-panel::-webkit-scrollbar-thumb {
+.settings-panel::-webkit-scrollbar-thumb,
+.tournament-panel::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
 }
 
 .friends-panel::-webkit-scrollbar-track,
 .chat-panel::-webkit-scrollbar-track,
-.settings-panel::-webkit-scrollbar-track {
+.settings-panel::-webkit-scrollbar-track,
+.tournament-panel::-webkit-scrollbar-track {
     background: transparent;
 }
 
 .friends-panel.active,
 .chat-panel.active,
-.settings-panel.active {
+.settings-panel.active,
+.tournament-panel.active {
     display: block;
     animation: fadeIn 0.3s ease;
 }
