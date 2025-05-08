@@ -6,6 +6,10 @@ const {
 	deleteChatMessage,
 } = require('../controllers/chatMessagesController');
 
+const {
+	BasicErrorSchema,
+} = require('../schemas/errorSchema');
+
 const { ChatMessage, ChatMessageDetails } = require('../schemas/chatMessagesSchema');
 
 // Options for get chat messages between two users
@@ -24,12 +28,7 @@ const getChatMessagesBetweenUsersOpts = {
 				type: 'array',
 				items: ChatMessageDetails,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getChatMessagesBetweenUsers,
@@ -47,18 +46,8 @@ const getChatMessageOpts = {
 		},
 		response: {
 			200: ChatMessageDetails,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: getChatMessage,
@@ -78,18 +67,8 @@ const addChatMessageOpts = {
 		},
 		response: {
 			201: ChatMessage, // Return the basic message object on creation
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addChatMessage,
@@ -112,18 +91,8 @@ const markChatMessageAsReadOpts = {
 					message: {type: 'string'}
 				},
 			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: markChatMessageAsRead,
@@ -146,18 +115,8 @@ const deleteChatMessageOpts = {
 					message: {type: 'string'}
 				},
 			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: deleteChatMessage,

@@ -10,7 +10,12 @@ const {
 	logoutUser
 } = require('../controllers/userController');
 
-// const { User } = require('../schemas/userSchema');
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+	UnauthorizedErrorSchema,
+} = require('../schemas/errorSchema');
+
 const { User, loginBody, loginResponse } = require('../schemas/userSchema');
 
 const authPreHandler = require('./authPreHandlerRoutes');
@@ -23,7 +28,7 @@ const getUsersOpts = {
 				type: 'array',
 				items: User
 			},
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			500: BasicErrorSchema
 		}
 	},
 	handler: getUsers
@@ -41,14 +46,9 @@ const getUserOpts = {
 		},
 		response: {
 			200: User,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			404: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: getUser
@@ -65,14 +65,9 @@ const getUserProfileOpts = { //not sure if this should be protected with auth
 		},
 		response: {
 			200: User,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: getUserProfile
@@ -95,19 +90,9 @@ const postUserOpts = {
 		},
 		response: {
 			201: User,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			400: ValidationErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: addUser
@@ -140,20 +125,11 @@ const updateUserOpts = {
 		},
 		response: {
 			200: User,
-			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } }, // check errors
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			404: BasicErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: updateUser
@@ -181,14 +157,10 @@ const updateUserProfileOpts = {
 		},
 		response: {
 			200: User,
-			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: updateUserProfile
@@ -205,20 +177,11 @@ const deleteUserOpts = {
 			required: ['id']
 		},
 		response: {
-			200: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: { type: 'object', properties: { message: { type: 'string' }, errors: { type: 'array' } } },
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			200: BasicErrorSchema, // fine for just the message
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: deleteUser
@@ -229,20 +192,9 @@ const loginUserOpts = {
 		body: loginBody,
 		response: {
 			200: loginResponse,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' },
-					errors: { type: 'array' }
-				}
-			},
-			401: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: { type: 'object', properties: { message: { type: 'string' } } }
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: loginUser,
@@ -252,24 +204,9 @@ const logoutUserOpts = {
 	preHandler: [authPreHandler],
 	schema: {
 		response: {
-			200: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			401: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			200: BasicErrorSchema,
+			401: UnauthorizedErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: logoutUser,

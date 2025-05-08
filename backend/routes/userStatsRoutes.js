@@ -7,6 +7,11 @@ const {
 
 const { UserStat } = require('../schemas/userStatsSchema');
 
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+} = require('../schemas/errorSchema');
+
 // Options for get single User Stat by user_id
 const getUserStatOpts = {
 	schema: {
@@ -19,18 +24,8 @@ const getUserStatOpts = {
 		},
 		response: {
 			200: UserStat,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: getUserStat,
@@ -52,30 +47,10 @@ const addUserStatOpts = {
 		},
 		response: {
 			201: UserStat,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addUserStat,
@@ -103,24 +78,9 @@ const updateUserStatOpts = {
 		},
 		response: {
 			200: UserStat,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			 404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: updateUserStat,
@@ -143,18 +103,8 @@ const deleteUserStatOpts = {
 					message: {type: 'string'}
 				},
 			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: deleteUserStat,

@@ -4,6 +4,11 @@ const {
 	updateGameSettings,
 } = require('../controllers/gameSettingsController');
 
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+} = require('../schemas/errorSchema');
+
 const { GameSetting } = require('../schemas/gameSettingsSchema');
 
 // Options for get single User Game Settings by user_id
@@ -18,18 +23,8 @@ const getUserGameSettingsOpts = {
 		},
 		response: {
 			200: GameSetting,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			 500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: getUserGameSettings,
@@ -53,30 +48,10 @@ const addGameSettingsOpts = {
 		},
 		response: {
 			201: GameSetting,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			 500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addGameSettings,
@@ -102,28 +77,14 @@ const updateGameSettingsOpts = {
 				score_color: { type: 'string'},
 				sound_enabled: { type: 'integer'},
 				vibration_enabled: { type: 'integer'},
-			}
+			},
+			minProperties: 1 // but should have something at least
 		},
 		response: {
 			200: GameSetting,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			 500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: updateGameSettings,

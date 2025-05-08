@@ -8,6 +8,11 @@ const {
 	deleteFriendRequest,
 } = require('../controllers/friendRequestsController');
 
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+} = require('../schemas/errorSchema');
+
 const { FriendRequest, FriendRequestDetails } = require('../schemas/friendRequestsSchema');
 
 // Options for get all Friend Requests
@@ -18,12 +23,7 @@ const getFriendRequestsOpts = {
 				type: 'array',
 				items: FriendRequestDetails, // Return detailed request objects
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getFriendRequests,
@@ -41,18 +41,8 @@ const getFriendRequestOpts = {
 		},
 		response: {
 			200: FriendRequestDetails, // Return detailed request object
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: getFriendRequest,
@@ -73,12 +63,7 @@ const getSentFriendRequestsOpts = {
 				type: 'array',
 				items: FriendRequestDetails,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getSentFriendRequests,
@@ -99,12 +84,7 @@ const getReceivedFriendRequestsOpts = {
 				type: 'array',
 				items: FriendRequestDetails,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getReceivedFriendRequests,
@@ -123,24 +103,9 @@ const addFriendRequestOpts = {
 		},
 		response: {
 			201: FriendRequest, // Return the basic request object on creation
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addFriendRequest,
@@ -164,36 +129,11 @@ const updateFriendRequestStatusOpts = {
 			}
 		},
 		response: {
-			200: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: { // For cases where friendship already exists on accept
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			200: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: updateFriendRequestStatus,
@@ -216,18 +156,8 @@ const deleteFriendRequestOpts = {
 					message: {type: 'string'}
 				},
 			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: deleteFriendRequest,

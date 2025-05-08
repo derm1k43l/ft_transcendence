@@ -5,9 +5,12 @@ const {
 	removeFriendship,
 } = require('../controllers/friendsController');
 
-const { Friend, FriendDetails } = require('../schemas/friendsSchema');
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+} = require('../schemas/errorSchema');
 
-//use friend schema
+const { Friend, FriendDetails } = require('../schemas/friendsSchema');
 
 // Options for get friends for a specific user
 const getUserFriendsOpts = {
@@ -24,12 +27,7 @@ const getUserFriendsOpts = {
 				type: 'array',
 				items: FriendDetails, // Return friend details
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getUserFriends,
@@ -53,12 +51,7 @@ const checkFriendshipOpts = {
 					isFriend: { type: 'boolean' }
 				}
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: checkFriendship,
@@ -68,38 +61,14 @@ const checkFriendshipOpts = {
 const addFriendshipOpts = {
 	schema: {
 		body: {
-			type: 'object',
+			...Friend,
 			required: ['user_id', 'friend_id'],
-			properties: {
-				user_id: { type: 'integer'},
-				friend_id: { type: 'integer'},
-			},
 		},
 		response: {
-			201: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			409: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			201: BasicErrorSchema, // it's fine for just a message
+			400: ValidationErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addFriendship,
@@ -123,24 +92,9 @@ const removeFriendshipOpts = {
 					message: {type: 'string'}
 				},
 			},
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: removeFriendship,

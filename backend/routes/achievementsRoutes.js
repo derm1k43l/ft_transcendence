@@ -7,6 +7,11 @@ const {
 	deleteAchievement,
 } = require('../controllers/achievementsController');
 
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+} = require('../schemas/errorSchema');
+
 const { Achievement } = require('../schemas/achievementsSchema');
 
 // Options for get all Achievements
@@ -17,12 +22,7 @@ const getAchievementsOpts = {
 				type: 'array',
 				items: Achievement,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getAchievements,
@@ -40,18 +40,8 @@ const getAchievementOpts = {
 		},
 		response: {
 			200: Achievement,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: getAchievement,
@@ -72,12 +62,7 @@ const getUserAchievementsOpts = {
 				type: 'array',
 				items: Achievement,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getUserAchievements,
@@ -100,18 +85,8 @@ const addAchievementOpts = {
 		},
 		response: {
 			201: Achievement,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addAchievement,
@@ -140,24 +115,9 @@ const updateAchievementOpts = {
 		},
 		response: {
 			200: Achievement,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: updateAchievement,
@@ -180,18 +140,8 @@ const deleteAchievementOpts = {
 					message: {type: 'string'}
 				},
 			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: deleteAchievement,

@@ -7,6 +7,11 @@ const {
 	deleteMatchHistoryItem,
 } = require('../controllers/matchHistoryController');
 
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+} = require('../schemas/errorSchema');
+
 const { MatchHistoryItem } = require('../schemas/matchHistorySchema');
 
 // Options for get all Match History
@@ -17,12 +22,7 @@ const getMatchHistoryOpts = {
 				type: 'array',
 				items: MatchHistoryItem,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getMatchHistory,
@@ -40,18 +40,8 @@ const getMatchHistoryItemOpts = {
 		},
 		response: {
 			200: MatchHistoryItem,
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: getMatchHistoryItem,
@@ -72,12 +62,7 @@ const getMatchHistoryForUserOpts = {
 				type: 'array',
 				items: MatchHistoryItem,
 			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			500: BasicErrorSchema
 		},
 	},
 	handler: getMatchHistoryForUser,
@@ -93,7 +78,7 @@ const addMatchHistoryItemOpts = {
 				user_id: { type: 'integer'},
 				opponent_id: { type: 'integer'},
 				opponent_name: { type: 'string'},
-				result: { type: 'string'}, // Add validation for enum 'win', 'loss', 'draw' if needed
+				result: { type: 'string'}, // Add validation for enum 'win', 'loss', 'draw' maybe
 				score: { type: 'string'},
 				date: { type: 'string'},
 				duration: { type: 'string'},
@@ -102,18 +87,8 @@ const addMatchHistoryItemOpts = {
 		},
 		response: {
 			201: MatchHistoryItem,
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: addMatchHistoryItem,
@@ -144,24 +119,9 @@ const updateMatchHistoryItemOpts = {
 		},
 		response: {
 			200: MatchHistoryItem,
-			 404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			400: ValidationErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: updateMatchHistoryItem,
@@ -184,18 +144,8 @@ const deleteMatchHistoryItemOpts = {
 					message: {type: 'string'}
 				},
 			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		},
 	},
 	handler: deleteMatchHistoryItem,

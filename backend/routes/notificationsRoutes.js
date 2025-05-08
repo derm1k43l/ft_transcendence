@@ -10,6 +10,13 @@ const {
 	MarkAsReadBody,
 } = require('../schemas/notificationsSchema');
 
+const {
+	BasicErrorSchema,
+	ValidationErrorSchema,
+	UnauthorizedErrorSchema,
+	ForbiddenErrorSchema,
+} = require('../schemas/errorSchema');
+
 const authPreHandler = require('./authPreHandlerRoutes');
 
 const getNotificationsOpts = {
@@ -21,18 +28,8 @@ const getNotificationsOpts = {
 				type: 'array',
 				items: NotificationDetails
 			},
-			401: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			401: UnauthorizedErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: getNotifications,
@@ -55,18 +52,8 @@ const createNotificationOpts = {
 					}
 				}
 			},
-			401: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			401: UnauthorizedErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: createNotification,
@@ -86,37 +73,12 @@ const markAsReadOpts = {
 		body: MarkAsReadBody,
 		response: {
 			// 204 has no content, so schema is just null
-			204: {
-				type: 'null'
-			},
-			400: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' },
-					errors: {
-						type: 'array',
-						items: { type: 'object' }
-					}
-				}
-			},
-			401: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			404: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			},
-			500: {
-				type: 'object',
-				properties: {
-					message: { type: 'string' }
-				}
-			}
+			204: { type: 'null' },
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
 		}
 	},
 	handler: markNotificationAsRead,
