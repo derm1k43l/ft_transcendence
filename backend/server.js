@@ -1,12 +1,11 @@
 /*
 TODO: 
-	define generic error schema (done, needs more testing, but should be fine)
-	implement stricter schema validation
 	add authentication to many schemas maybe (add forbidden(when in controllers) and unauth errors(ALWAYS) to protected schemas)
 	maybe make the DB be ignored by git?
 	implement login/out functions done. frontend has to do the rest, with JWT
 	update user stats logic && gameSettings logic (maybe)
 	make .js into .ts?
+	delete friend requests automatically after it's updated
 */
 
 const fastify = require('fastify')( {logger: true} );

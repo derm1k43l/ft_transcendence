@@ -1,13 +1,15 @@
 const Notification = {
 	type: 'object',
+	additionalProperties: false,
 	properties: {
-		id: { type: 'integer' },
-		user_id: { type: 'integer' },
+		id: { type: 'integer', minimum: 1 },
+		user_id: { type: 'integer', minimum: 1 },
 		type: {
 			type: 'string',
 			enum: ['friendRequest', 'gameInvite', 'achievement', 'system'],
+			minLength: 1
 		},
-		message: { type: 'string' },
+		message: { type: 'string', minLength: 1 },
 		read: {
 			type: 'integer',
 			enum: [0, 1],
@@ -16,8 +18,8 @@ const Notification = {
 			type: 'string',
 			format: 'date-time',
 		},
-		action_url: { type: 'string', nullable: true },
-		related_user_id: { type: 'integer', nullable: true },
+		action_url: { type: 'string', format: 'uri-reference', nullable: true },
+		related_user_id: { type: 'integer', minimum: 1, nullable: true },
 	},
 	required: [
 		'id',
@@ -32,11 +34,12 @@ const Notification = {
 // Schema for notification objects when retrieved, including related user details
 const NotificationDetails = {
 	type: 'object',
+	additionalProperties: false,
 	properties: {
 		...Notification.properties, // Include all properties from the base Notification schema
-		related_username: { type: 'string', nullable: true },
-		related_display_name: { type: 'string', nullable: true },
-		related_avatar_url: { type: 'string', nullable: true },
+		related_username: { type: 'string', minLength: 1, nullable: true },
+		related_display_name: { type: 'string', minLength: 1, nullable: true },
+		related_avatar_url: { type: 'string', format: 'uri-reference', nullable: true },
 	},
 	required: [
 		...Notification.required, // Include all required fields from the base schema
@@ -46,28 +49,29 @@ const NotificationDetails = {
 // Schema for the request body when creating a notification
 const CreateNotificationBody = {
 	type: 'object',
+	additionalProperties: false,
 	properties: {
-		user_id: { type: 'integer' }, // Required: recipient user ID
-		type: { // Required: notification type from enum
+		user_id: { type: 'integer', minimum: 1 },
+		type: {
 			type: 'string',
 			enum: ['friendRequest', 'gameInvite', 'achievement', 'system'],
+			minLength: 1
 		},
-		message: { type: 'string' }, // Required: notification message
-		action_url: { type: 'string', nullable: true }, // Optional
-		related_user_id: { type: 'integer', nullable: true }, // Optional
+		message: { type: 'string', minLength: 1 },
+		action_url: { type: 'string', format: 'uri-reference', nullable: true }, // Optional
+		related_user_id: { type: 'integer', minimum: 1, nullable: true }, // Optional
 	},
 	required: ['user_id', 'type', 'message'],
-	additionalProperties: false,
 };
 
 // Schema for the request body when marking a notification as read
 const MarkAsReadBody = {
 	type: 'object',
+	additionalProperties: false,
 	properties: {
 		read: { type: 'integer', const: 1 } // Must be integer 1
 	},
 	required: ['read'],
-	additionalProperties: false, // Only allow the 'read' field
 };
 
 module.exports = {
