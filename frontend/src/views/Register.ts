@@ -1,6 +1,12 @@
 import { Router } from '../core/router.js';
 import { findUserByUsername, findUserByEmail, createUser } from '../data/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
+import { UserProfile } from '../data/Types.js';
+import axios from 'https://esm.sh/axios';
+
+// this only works on localhost. baseURL will have to point to the backend server also when not running on localhost (e.g. accessing through 42 intra on another computer)
+// might be easiest to set up a proxy for this purpose to route api request from the browser -> frontend container -> docker network -> backend container
+const api = axios.create({ baseURL: 'http://localhost:3000/api' });
 
 export class RegisterView {
     private element: HTMLElement | null = null;
@@ -10,7 +16,16 @@ export class RegisterView {
         this.router = router;
     }
 
-    render(rootElement: HTMLElement): void {
+    async render(rootElement: HTMLElement): Promise<void> {
+
+        // temporary API test
+        const tmp = await api.get('/users/');
+        const tmp2 = tmp.data as UserProfile[];
+        console.log(tmp2[0].username);
+        console.log(tmp2[1].username);
+
+
+
         this.element = document.createElement('div');
         this.element.classList.add('register-view');
         this.element.innerHTML = `

@@ -1,4 +1,16 @@
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - backend_data:/app/db
+    # networks:
+    #   - ft_transcendence_network
   frontend:
     build:
       context: ./frontend
@@ -9,10 +21,28 @@ services:
       - "8080:8080"
     volumes:
       - frontend_data:/app/public
+    # networks:
+    #   - ft_transcendence_network
+    depends_on:
+      - backend
 
 volumes:
   frontend_data:
     driver: local
+  backend_data:
+    driver: local
+
+# network doesn't work at this point because the api calls are made from the browser and not from the docker container.
+# we would have to run a proxy server that forwards api calls made in the browser through the frontend docker container to the backend docker container through the docker network.
+# or we keep the backend port exposed, which is bad practice and less secure.
+
+# networks:
+#   ft_transcendence_network:
+#     name: ft_transcendence_network
+#     driver: bridge
+
+
+
 
 
 # old version for reference and future merging

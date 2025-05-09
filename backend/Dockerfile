@@ -4,11 +4,10 @@ FROM node:18
 # Create app directory
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy rest of the code
+#.dockerignore excludes node_modules from being copied (they will be built inside the container)
 COPY . .
 
 # Expose backend port

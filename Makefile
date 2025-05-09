@@ -28,7 +28,7 @@ start_containers:
 frontend_dev:
 	@echo "Building frontend..."
 	@echo "Starting frontend development server..."
-	cd frontend && npm run build && npm run serve:local
+	cd frontend && npm install && npm run build && npm run serve:local
 
 # Stop and remove containers (keep volumes)
 down: start_docker
