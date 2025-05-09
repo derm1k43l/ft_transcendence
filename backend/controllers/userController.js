@@ -312,19 +312,19 @@ const loginUser = async (req, reply) => {
 			return reply.code(401).send({ message: 'Invalid credentials' });
 		}
 
-		if (user.status === 'online') {
-			req.log.info(`Login attempted for user ${user.id} but they are already online.`);
-			// just issue a new token
-			const token = req.server.jwt.sign({ id: user.id, username: user.username });
- 			// send the same response structure as a fresh login
-			return reply.code(200).send({ token: token, user: { id: user.id, username: user.username, display_name: user.display_name} });
-		}
-
 		const isPasswordValid = await argon2.verify(user.password, password);
 
 		if (!isPasswordValid) { // invalid pass
 			return reply.code(401).send({ message: 'Invalid credentials' });
 		}
+
+		// if (user.status === 'online') {
+		// 	req.log.info(`Login attempted for user ${user.id} but they are already online.`);
+		// 	// just issue a new token
+		// 	const token = req.server.jwt.sign({ id: user.id, username: user.username });
+ 		// 	// send the same response structure as a fresh login
+		// 	return reply.code(200).send({ token: token, user: { id: user.id, username: user.username, display_name: user.display_name} });
+		// }
 
 		// update user status
 		db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('online', user.id);
