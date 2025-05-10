@@ -1,6 +1,8 @@
 const {
 	getUsers,
 	getUser,
+	getUserByName,
+	getUserByEmail,
 	addUser,
 	deleteUser,
 	updateUser,
@@ -35,7 +37,7 @@ const getUsersOpts = {
 };
 
 const getUserOpts = {
-	preHandler: [authPreHandler],
+	// preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -52,6 +54,46 @@ const getUserOpts = {
 		}
 	},
 	handler: getUser
+};
+
+const getUserByNameOpts = {
+	// preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				username: { type: 'string' }
+			},
+			required: ['username']
+		},
+		response: {
+			200: User,
+			404: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			500: BasicErrorSchema
+		}
+	},
+	handler: getUserByName
+};
+
+const getUserByEmailOpts = {
+	// preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				email: { type: 'string' }
+			},
+			required: ['email']
+		},
+		response: {
+			200: User,
+			404: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			500: BasicErrorSchema
+		}
+	},
+	handler: getUserByEmail
 };
 
 const getUserProfileOpts = { //not sure if this should be protected with auth
@@ -216,8 +258,10 @@ function userRoutes(fastify, options, done) {
 	// Get all Users (verify if auth is needed)
 	fastify.get('/', getUsersOpts);
 
-	// Get single User - Protected
+	// Get single User - Public
 	fastify.get('/:id', getUserOpts);
+	fastify.get('/byname/:username', getUserByNameOpts);
+	fastify.get('/byemail/:email', getUserByEmailOpts);
 
 	// Get user profile (same as getUser but might include more data in future) - (verify if auth is needed)
 	fastify.get('/:id/profile', getUserProfileOpts);
