@@ -23,43 +23,43 @@ import { NotificationManager } from '../components/Notification.js';
 // ===== User Management Functions =====
 
 // User lookup functions
-export async function findUserByUsername(username: string): Promise<UserProfile | undefined> {
+export async function findUserByUsername(username: string): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/byname/${username}`)).data as UserProfile;
 		return user;
 	} catch (error) {
 		console.error(`Failed to fetch user with Username ${username}:`);
-		return undefined;
+		return null;
 	}
 }
 
-export async function findUserByEmail(email: string): Promise<UserProfile | undefined> {
+export async function findUserByEmail(email: string): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/byemail/${email}`)).data as UserProfile;
 		return user;
 	} catch (error) {
 		console.error(`Failed to fetch user with Email ${email}:`);
-		return undefined;
+		return null;
 	}
 }
 
-export async function getUserById(id: number): Promise<UserProfile | undefined> {
+export async function getUserById(id: number): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/${id}`)).data as UserProfile;
 		return user;
 	} catch (error) {
 		console.error(`Failed to fetch user with ID ${id}:`);
-		return undefined;
+		return null;
 	}
 }
 
-export async function getUserGameSettings(userId: number): Promise<GameSettings | undefined> {
+export async function getUserGameSettings(userId: number): Promise<GameSettings | null> {
 	try {
 		const user = await getUserById(userId);
-		return user?.game_settings;
+		return user?.game_settings || DEFAULT_GAME_SETTINGS;
 	} catch (error) {
 		console.error("Error retrieving game settings:", error);
-		return undefined;
+		return null;
 	}
 }
 
@@ -78,32 +78,41 @@ export async function registerUser(userData: {
 	}
 }
 
-
-
-
-
-
-
-
 export async function login(credentials: {
 	username: string;
 	password: string;
   }): Promise<LoginResponse> {
 	try {
-	  const response = await api.post<LoginResponse>('/users/login', credentials);
-	  
-	  // Store token for future requests
-	  if (response.data.token) {
-		localStorage.setItem('auth_token', response.data.token);
-	  }
-	  
-	  return response.data;
-	} catch (error) {
-	  console.error('Login error:', error);
-	  throw error;
+		const response = await api.post('/users/login', credentials);
+		// Store token for future requests
+		if (response.data.token) {
+			localStorage.setItem('auth_token', response.data.token);
+		}
+		return response.data;
+	} catch (error: any) {
+		console.error('Login error:', error.response.data.message);
+		throw error.response.data.message;
 	}
 }
-  
+
+
+
+
+// above functions are tested and working
+
+
+// need to test following functions
+
+export async function resetUserStats(userId: number): Promise<boolean> {
+	try {
+		await api.put(`/user-stats/${userId}/reset`);
+		return true;
+	} catch (error: any) {
+		console.error('Error resetting user stats:', error.response.data.message);
+		return false;
+	}
+}
+
   export async function logout(): Promise<void> {
 	try {
 	  // Call the logout endpoint if it exists
@@ -135,14 +144,4 @@ export function getRankTitle(rank: string): string {
     if (rankNum <= 50) return 'Master';
     if (rankNum <= 100) return 'Expert';
     return 'Amateur';
-}
-
-export async function resetUserStats(userId: number): Promise<boolean> {
-	try {
-		await api.put(`/user-stats/${userId}/reset`);
-		return true;
-	} catch (error) {
-		console.error('Error resetting user stats:', error);
-		return false;
-	}
 }

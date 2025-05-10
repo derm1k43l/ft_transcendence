@@ -1,10 +1,10 @@
 import { Router } from '../core/router.js';
-import { getUserById, getTopPlayers } from '../data/UserService.js';
+import { getTopPlayers } from '../data/UserService.js';
+import { user } from '../main.js';
 
 export class DashboardView {
     private element: HTMLElement | null = null;
     private router: Router;
-    private currentUserId: number = 1; //changeme
     private charts: any[] = [];
     
     constructor(router: Router) {
@@ -15,7 +15,6 @@ export class DashboardView {
         this.element = document.createElement('div');
         this.element.className = 'dashboard-view';
         
-        const user = getUserById(this.currentUserId);
         if (!user) {
             this.element.innerHTML = '<p>User not found</p>';
             rootElement.appendChild(this.element);
@@ -29,7 +28,7 @@ export class DashboardView {
         
         this.element.innerHTML = `
             <div class="dashboard-header">
-                <h2>Welcome back, ${user.displayName}!</h2>
+                <h2>Welcome back, ${user.display_name}!</h2>
                 <p class="last-login">Last login: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
             </div>
             
@@ -120,8 +119,8 @@ export class DashboardView {
                 <div class="recent-activity card">
                     <h3>Recent Activity</h3>
                     <div class="activity-list">
-                        ${user.matchHistory && user.matchHistory.length > 0 ? 
-                            user.matchHistory.slice(0, 5).map(match => `
+                        ${user.match_history && user.match_history.length > 0 ? 
+                            user.match_history.slice(0, 5).map(match => `
                                 <div class="activity-item ${match.result}">
                                     <div class="activity-icon">
                                         <i class="fas fa-${match.result === 'win' ? 'trophy' : 'times-circle'}"></i>
@@ -228,9 +227,9 @@ private initializeCharts(user: any): void {
     }
         
     const performanceChartCanvas = document.getElementById('performance-chart') as HTMLCanvasElement;
-    if (performanceChartCanvas && user.matchHistory && user.matchHistory.length > 0) {
+    if (performanceChartCanvas && user.match_history && user.match_history.length > 0) {
         // Process match history data
-        const matchData = [...user.matchHistory].reverse().slice(0, 10).reverse();
+        const matchData = [...user.match_history].reverse().slice(0, 10).reverse();
         const labels = matchData.map((_, index) => `Match ${index + 1}`);
         
         const matchResults = [1, 0, 1, 1, 0]; // Example array
@@ -409,7 +408,7 @@ private renderLeaderboard(containerId: string, players: any[], type: 'wins' | 'w
             const totalGames = (player.stats?.wins || 0) + (player.stats?.losses || 0);
             const winRate = totalGames > 0 ? ((player.stats?.wins || 0) / totalGames * 100).toFixed(1) : '0.0';
             
-            const isCurrentUser = player.id === this.currentUserId;
+            const isCurrentUser = player === user;
             
             html += `
                 <tr class="${isCurrentUser ? 'current-user' : ''}">
