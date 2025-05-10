@@ -5,22 +5,22 @@ export interface UserProfile {
     id: number;
     username: string;
     password?: string;
-    displayName: string;
+    display_name: string;
     email?: string;
     bio?: string;
-    avatarUrl?: string;
-    coverPhotoUrl?: string;
-    joinDate?: string;
-    hasTwoFactorAuth?: boolean;
+    avatar_url?: string;
+    cover_photo_url?: string;
+    join_date?: string;
+    has_two_factor_auth?: boolean;
     stats?: UserStats;
-    matchHistory?: MatchRecord[];
+    match_history?: MatchRecord[];
     achievements?: Achievement[];
     friends?: number[];
-    friendRequests?: FriendRequest[];
-    gameSettings?: GameSettings;
+    friend_requests?: FriendRequest[];
+    game_settings?: GameSettings;
     notifications?: AppNotification[];
     status?: 'online' | 'offline' | 'in-game';
-    lastActive?: Date;
+    last_active?: Date;
 }
 
 // maybe need more

@@ -28,7 +28,7 @@ export async function findUserByUsername(username: string): Promise<UserProfile 
 		const user = (await api.get(`/users/byname/${username}`)).data as UserProfile;
 		return user;
 	} catch (error) {
-		console.error(`Failed to fetch user with ID ${username}:`);
+		console.error(`Failed to fetch user with Username ${username}:`);
 		return undefined;
 	}
 }
@@ -38,7 +38,7 @@ export async function findUserByEmail(email: string): Promise<UserProfile | unde
 		const user = (await api.get(`/users/byemail/${email}`)).data as UserProfile;
 		return user;
 	} catch (error) {
-		console.error(`Failed to fetch user with ID ${email}:`);
+		console.error(`Failed to fetch user with Email ${email}:`);
 		return undefined;
 	}
 }
@@ -56,36 +56,34 @@ export async function getUserById(id: number): Promise<UserProfile | undefined> 
 export async function getUserGameSettings(userId: number): Promise<GameSettings | undefined> {
 	try {
 		const user = await getUserById(userId);
-		return user?.gameSettings;
+		return user?.game_settings;
 	} catch (error) {
 		console.error("Error retrieving game settings:", error);
 		return undefined;
 	}
 }
 
-
-
-
-
-
-
-
-
-
 export async function registerUser(userData: {
 	username: string;
-	displayName: string;
 	password: string;
-	email?: string;
-  }): Promise<UserProfile> {
+	display_name: string;
+	email: string;
+}): Promise<UserProfile> {
 	try {
-	  const response = await api.post<UserProfile>('/users', userData);
+	  const response = await api.post('/users', userData);
 	  return response.data;
-	} catch (error) {
-	  console.error('Error registering user:', error);
-	  throw error;
+	} catch (error: any) {
+	  console.error('Error registering user:', error.response.data.message);
+	  throw error.response.data.message;
 	}
 }
+
+
+
+
+
+
+
 
 export async function login(credentials: {
 	username: string;
