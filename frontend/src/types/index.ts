@@ -23,6 +23,13 @@ export interface UserProfile {
     lastActive?: Date;
 }
 
+// maybe need more
+export interface LoginResponse {
+    token: string;
+    user: UserProfile;
+}
+
+
 export interface UserStats {
     wins: number;
     losses: number;

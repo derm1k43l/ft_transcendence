@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { findUserByUsername, findUserByEmail, createUser } from '../data/UserService.js';
+import { findUserByUsername, findUserByEmail, registerUser } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 import { UserProfile } from '../types/index.js';
 import { api } from '../services/api.js'
@@ -101,7 +101,7 @@ export class RegisterView {
         });
     }
     
-    private handleRegister(event: Event): void {
+    private async handleRegister(event: Event): Promise<void> {
         event.preventDefault();
         
         // Get form elements
@@ -136,8 +136,8 @@ export class RegisterView {
             return;
         }
         
-        const existingUser = findUserByUsername(username);
-        if (existingUser) {
+        const existingUser = await findUserByUsername(username);
+        if (existingUser !== undefined) {
             if (errorElement) {
                 errorElement.textContent = "Username already exists";
                 errorElement.style.display = 'block';
@@ -145,8 +145,8 @@ export class RegisterView {
             return;
         }
 
-        const existingEmail = findUserByEmail(email);
-        if (existingEmail) {
+        const existingEmail = await findUserByEmail(email);
+        if (existingEmail !== undefined) {
             if (errorElement) {
                 errorElement.textContent = "Email already registered";
                 errorElement.style.display = 'block';
@@ -154,7 +154,7 @@ export class RegisterView {
             return;
         }
 
-        const newUser = createUser({
+        const newUser = registerUser({
             username,
             email,
             password,
