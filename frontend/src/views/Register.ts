@@ -4,8 +4,9 @@ import { NotificationManager } from '../components/Notification.js';
 import { UserProfile } from '../data/Types.js';
 import { api } from '../services/api.js'
 
-// this only works on localhost. baseURL will have to point to the backend server also when not running on localhost (e.g. accessing through 42 intra on another computer)
-// might be easiest to set up a proxy for this purpose to route api request from the browser -> frontend container -> docker network -> backend container
+//temp
+import { findUserByUsername as NEWfindUserByUsername, findUserByEmail as NEWfindUserByEmail,  getUserById as NEWgetUserById } from '../services/UserService.js';
+
 
 export class RegisterView {
     private element: HTMLElement | null = null;
@@ -18,10 +19,27 @@ export class RegisterView {
     async render(rootElement: HTMLElement): Promise<void> {
 
         // temporary API test
-        const tmp = await api.get('/users/');
-        const tmp2 = tmp.data as UserProfile[];
-        console.log(tmp2[0].username);
-        console.log(tmp2[1].username);
+        console.log("\n\nall users");
+        const tmp = (await api.get('/users')).data as UserProfile[];
+        console.log(tmp[0]);
+        console.log(tmp[1]);
+
+        console.log("\n\nuser with name 'user1'");
+        // const tmp2 = (await api.get('/users/byname/user1')).data as UserProfile;
+        const tmp2 = await NEWfindUserByUsername('user1');
+        console.log(tmp2);
+
+        console.log("\n\nuser with email 'test@gmail.com'");
+        const tmp3 = await NEWfindUserByEmail('test@gmail.com');
+        console.log(tmp3);
+
+        console.log("\n\nuser with ID '2'");
+        const tmp4 = await NEWgetUserById(1);
+        console.log(tmp4);
+
+        console.log("\n\nuser with ID '42'");
+        const tmp5 = await NEWgetUserById(42);
+        console.log(tmp5);
 
 
 

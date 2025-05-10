@@ -42,6 +42,56 @@ const getUser = async (req, reply) => {
 	}
 };
 
+const getUserByName = async (req, reply) => {
+	try {
+		const { username } = req.params;
+		const db = req.server.betterSqlite3;
+		
+		const user = db.prepare(`
+			SELECT 
+			id, username, display_name, email, bio,
+			avatar_url, cover_photo_url, join_date,
+			has_two_factor_auth, status, last_active, created_at
+			FROM users 
+			WHERE username = ?
+		`).get(username);
+
+		if (!user) {
+			reply.code(404).send({ message: 'User not found' });
+		} else {
+			reply.send(user);
+		}
+	} catch (error) {
+		req.log.error(error);
+		reply.code(500).send({ message: 'Error retrieving user' });
+	}
+};
+
+const getUserByEmail = async (req, reply) => {
+	try {
+		const { email } = req.params;
+		const db = req.server.betterSqlite3;
+		
+		const user = db.prepare(`
+			SELECT 
+			id, username, display_name, email, bio,
+			avatar_url, cover_photo_url, join_date,
+			has_two_factor_auth, status, last_active, created_at
+			FROM users 
+			WHERE email = ?
+		`).get(email);
+
+		if (!user) {
+			reply.code(404).send({ message: 'User not found' });
+		} else {
+			reply.send(user);
+		}
+	} catch (error) {
+		req.log.error(error);
+		reply.code(500).send({ message: 'Error retrieving user' });
+	}
+};
+
 const getUserProfile = async (req, reply) => {
 	try {
 		const { id } = req.params;
@@ -368,6 +418,8 @@ const logoutUser = async (req, reply) => {
 module.exports = {
 	getUsers,
 	getUser,
+	getUserByName,
+	getUserByEmail,
 	getUserProfile,
 	addUser,
 	deleteUser,
