@@ -30,6 +30,12 @@ frontend_dev:
 	@echo "Starting frontend development server..."
 	cd frontend && npm install && npm run build && npm run serve:local
 
+# Backend development commands
+backend_dev:
+	@echo "Building backend..."
+	@echo "Starting backend development server..."
+	cd backend && npm install && node server
+
 # Stop and remove containers (keep volumes)
 down: start_docker
 	@echo "Stopping containers..."
