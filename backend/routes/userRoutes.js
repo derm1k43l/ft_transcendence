@@ -22,6 +22,15 @@ const { User, loginBody, loginResponse } = require('../schemas/userSchema');
 
 const authPreHandler = require('./authPreHandlerRoutes');
 
+const normalizeEmail = async (req, reply) => {
+    if (req.body && req.body.email) {
+        req.body.email = req.body.email.toLowerCase();
+    }
+    if (req.params && req.params.email) {
+        req.params.email = req.params.email.toLowerCase();
+    }
+};
+
 // Options for get all Users, not sure if it should be protected with auth
 const getUsersOpts = {
 	schema: {
@@ -78,6 +87,7 @@ const getUserByNameOpts = {
 
 const getUserByEmailOpts = {
 	// preHandler: [authPreHandler],
+    preHandler: [normalizeEmail],
 	schema: {
 		params: {
 			type: 'object',
@@ -116,6 +126,7 @@ const getUserProfileOpts = { //not sure if this should be protected with auth
 };
 
 const postUserOpts = {
+    preHandler: [normalizeEmail],
 	schema: {
 		body: {
 			type: 'object',
