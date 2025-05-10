@@ -36,8 +36,6 @@ export interface GameSettings {
     paddleColor: string;
     ballColor: string;
     scoreColor: string;
-    soundEnabled: boolean;
-    vibrationEnabled: boolean;
 }
 
 export interface MatchRecord {

@@ -1,4 +1,4 @@
-import { getUserGameSettings } from '../data/UserService.js';
+import { getUserGameSettings } from '../services/UserService.js';
 
 export class PongGame {
     // DOM elements used in the game
@@ -35,7 +35,7 @@ export class PongGame {
     private intervalId: number | null = null;
     
     // --------------------------------------------------------------------------
-    private gameSettings = getUserGameSettings(1); // Here must be put currentUserId
+    private gameSettings: { ballColor: string; paddleColor: string; scoreColor: string; boardColor: string } | undefined;
     // --------------------------------------------------------------------------
 
     constructor(container: HTMLElement) {
@@ -52,12 +52,19 @@ export class PongGame {
         const gameContainer = this.container.querySelector('.game__container') as HTMLElement;
         
         // Apply settings from gameSettings
-        this.ball.style.backgroundColor = this.gameSettings.ballColor;
-        this.paddleLeft.style.backgroundColor = this.gameSettings.paddleColor;
-        this.paddleRight.style.backgroundColor = this.gameSettings.paddleColor;
-        this.leftScoreElement.style.color = this.gameSettings.scoreColor;
-        this.rightScoreElement.style.color = this.gameSettings.scoreColor;
-        gameContainer.style.backgroundColor = this.gameSettings.boardColor;
+        getUserGameSettings(1).then(settings => {
+            if (settings) {
+                this.gameSettings = settings;
+                this.ball.style.backgroundColor = settings.ballColor;
+                this.paddleLeft.style.backgroundColor = settings.paddleColor;
+                this.paddleRight.style.backgroundColor = settings.paddleColor;
+                this.leftScoreElement.style.color = settings.scoreColor;
+                this.rightScoreElement.style.color = settings.scoreColor;
+                gameContainer.style.backgroundColor = settings.boardColor;
+            }
+        }).catch(error => {
+            console.error('Failed to load game settings:', error);
+        });
 
         // Listen for key press and release events
         window.addEventListener('keydown', this.onKeyDown);

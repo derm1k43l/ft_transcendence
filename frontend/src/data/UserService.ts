@@ -13,8 +13,15 @@ import {
     mockMessages,
     mockNotifications,
     mockGameInvites,
-    DEFAULT_GAME_SETTINGS
 } from './mock_data.js';
+
+// we remove the above mock once the real api works
+import {
+    DEFAULT_GAME_SETTINGS,
+    DEFAULT_ACHIEVEMENTS,
+    DEFAULT_COVER_PHOTO,
+    DEFAULT_AVATAR
+} from '../constants/defaults.js';
 
 import { NotificationManager } from '../components/Notification.js';
 

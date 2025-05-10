@@ -1,7 +1,7 @@
 import { Router } from '../core/router.js';
 import { getUserById, getUserGameSettings, updateUserGameSettings, updateUserProfile, updateUserPassword, resetUserStats } from '../data/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
-import { GameSettings } from '../data/Types.js';
+import { GameSettings } from '../types/index.js';
 
 export class SettingsView {
     private element: HTMLElement | null = null;
@@ -215,30 +215,6 @@ export class SettingsView {
                                 </div>
                                 
                                 <button type="button" class="app-button" id="save-game-settings">Save Game Settings</button>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-section">
-                            <h4>Game Experience</h4>
-                            <div class="toggle-setting">
-                                <div>
-                                    <h5>Sound Effects</h5>
-                                    <p>Enable sound effects during gameplay.</p>
-                                </div>
-                                <label class="toggle">
-                                    <input type="checkbox" id="sound-enabled" ${this.gameSettings.soundEnabled ? 'checked' : ''}>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                            <div class="toggle-setting">
-                                <div>
-                                    <h5>Vibration</h5>
-                                    <p>Enable device vibration on mobile devices.</p>
-                                </div>
-                                <label class="toggle">
-                                    <input type="checkbox" id="vibration-enabled" ${this.gameSettings.vibrationEnabled ? 'checked' : ''}>
-                                    <span class="toggle-slider"></span>
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -550,16 +526,6 @@ export class SettingsView {
             });
         });
         
-        // Toggle settings
-        const soundToggle = this.element.querySelector('#sound-enabled') as HTMLInputElement;
-        const vibrationToggle = this.element.querySelector('#vibration-enabled') as HTMLInputElement;
-        
-        [soundToggle, vibrationToggle].forEach(toggle => {
-            toggle?.addEventListener('change', () => {
-                this.updateGameSettings();
-            });
-        });
-        
         // Save game settings
         const saveGameSettingsBtn = this.element.querySelector('#save-game-settings');
         saveGameSettingsBtn?.addEventListener('click', () => {
@@ -667,16 +633,12 @@ export class SettingsView {
         const paddleColor = (this.element.querySelector('#paddle-color') as HTMLInputElement)?.value;
         const ballColor = (this.element.querySelector('#ball-color') as HTMLInputElement)?.value;
         const scoreColor = (this.element.querySelector('#score-color') as HTMLInputElement)?.value;
-        const soundEnabled = (this.element.querySelector('#sound-enabled') as HTMLInputElement)?.checked;
-        const vibrationEnabled = (this.element.querySelector('#vibration-enabled') as HTMLInputElement)?.checked;
         
         this.gameSettings = {
             boardColor: boardColor || '#000000',
             paddleColor: paddleColor || '#FFFFFF',
             ballColor: ballColor || '#FFFFFF',
             scoreColor: scoreColor || '#FFFFFF',
-            soundEnabled: soundEnabled !== undefined ? soundEnabled : true,
-            vibrationEnabled: vibrationEnabled !== undefined ? vibrationEnabled : true
         };
     }
     

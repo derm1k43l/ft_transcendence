@@ -1,4 +1,4 @@
-import { api } from '../services/api.js';
+import { api } from './api.js';
 
 import { 
     UserProfile,
@@ -41,6 +41,16 @@ export async function getUserById(id: number): Promise<UserProfile | undefined> 
 		return user;
 	} catch (error) {
 		console.error(`Failed to fetch user with ID ${id}:`);
+		return undefined;
+	}
+}
+
+export async function getUserGameSettings(userId: number): Promise<GameSettings | undefined> {
+	try {
+		const user = await getUserById(userId);
+		return user?.gameSettings;
+	} catch (error) {
+		console.error("Error retrieving game settings:", error);
 		return undefined;
 	}
 }

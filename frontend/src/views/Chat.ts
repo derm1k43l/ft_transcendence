@@ -5,7 +5,7 @@ import {
     sendMessage,
     getUserConversations
 } from '../data/UserService.js';
-import { ChatMessage } from '../data/Types.js';
+import { ChatMessage } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
 import { mockMessages } from '../data/mock_data.js';
 

@@ -13,9 +13,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
     boardColor: '#000000',
     paddleColor: '#FFFFFF',
     ballColor: '#FFFFFF',
-    scoreColor: '#FFFFFF',
-    soundEnabled: true,
-    vibrationEnabled: true
+    scoreColor: '#FFFFFF'
 };
 
 // Mock achievements data for both users

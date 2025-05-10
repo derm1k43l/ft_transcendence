@@ -1,5 +1,5 @@
 // components/Notification.ts
-import { NotificationOptions } from '../data/Types.js';
+import { NotificationOptions } from '../types/index.js';
 
 /**
  * NotificationManager class for displaying toast notifications

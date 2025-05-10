@@ -1,7 +1,7 @@
 import { Router } from '../core/router.js';
 import { findUserByUsername, findUserByEmail, createUser } from '../data/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
-import { UserProfile } from '../data/Types.js';
+import { UserProfile } from '../types/index.js';
 import { api } from '../services/api.js'
 
 //temp
