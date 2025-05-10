@@ -9,8 +9,6 @@ const GameSetting = {
 		paddle_color: { type: 'string', pattern: hexColorPattern },
 		ball_color: { type: 'string', pattern: hexColorPattern },
 		score_color: { type: 'string', pattern: hexColorPattern },
-		sound_enabled: { type: 'integer', enum: [0, 1] },
-		vibration_enabled: { type: 'integer', enum: [0, 1] },
 	},
 };
 

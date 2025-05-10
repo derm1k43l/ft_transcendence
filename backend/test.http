@@ -131,9 +131,7 @@ Content-Type: application/json
 	"board_color": "#222222",
 	"paddle_color": "#ffffff",
 	"ball_color": "#ff0000",
-	"score_color": "#00ff00",
-	"sound_enabled": 1,
-	"vibration_enabled": 0
+	"score_color": "#00ff00"
 }
 
 ### Add Game Settings for ID 2
@@ -145,9 +143,7 @@ Content-Type: application/json
 	"board_color": "#333333",
 	"paddle_color": "#ffffff",
 	"ball_color": "#ff0000",
-	"score_color": "#00ff00",
-	"sound_enabled": 1,
-	"vibration_enabled": 0
+	"score_color": "#00ff00"
 }
 
 

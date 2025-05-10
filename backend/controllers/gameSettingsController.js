@@ -22,9 +22,7 @@ const addGameSettings = async (req, reply) => {
 			board_color = '#000000',
 			paddle_color = '#FFFFFF',
 			ball_color = '#FFFFFF',
-			score_color = '#FFFFFF',
-			sound_enabled = 1,
-			vibration_enabled = 1,
+			score_color = '#FFFFFF'
 		} = req.body;
 		const db = req.server.betterSqlite3;
 
@@ -41,7 +39,7 @@ const addGameSettings = async (req, reply) => {
 		}
 
 		try {
-			const result = db.prepare('INSERT INTO game_settings (user_id, board_color, paddle_color, ball_color, score_color, sound_enabled, vibration_enabled) VALUES (?, ?, ?, ?, ?, ?, ?)').run(user_id, board_color, paddle_color, ball_color, score_color, sound_enabled, vibration_enabled);
+			const result = db.prepare('INSERT INTO game_settings (user_id, board_color, paddle_color, ball_color, score_color) VALUES (?, ?, ?, ?, ?, ?, ?)').run(user_id, board_color, paddle_color, ball_color, score_color);
 			const newSettings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(user_id);
 			reply.code(201).send(newSettings);
 		} catch (err) {
@@ -62,12 +60,12 @@ const addGameSettings = async (req, reply) => {
 const updateGameSettings = async (req, reply) => {
 	try {
 		const { userId } = req.params;
-		const { board_color, paddle_color, ball_color, score_color, sound_enabled, vibration_enabled } = req.body;
+		const { board_color, paddle_color, ball_color, score_color} = req.body;
 		const db = req.server.betterSqlite3;
 
 		let query = 'UPDATE game_settings SET';
 		const params = [];
-		const fields = { board_color, paddle_color, ball_color, score_color, sound_enabled, vibration_enabled };
+		const fields = { board_color, paddle_color, ball_color, score_color};
 		let firstField = true;
 
 		for (const field in fields) {

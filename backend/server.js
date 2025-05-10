@@ -121,8 +121,6 @@ fastify.after((err) => {
 			paddle_color TEXT DEFAULT '#FFFFFF',
 			ball_color TEXT DEFAULT '#FFFFFF',
 			score_color TEXT DEFAULT '#FFFFFF',
-			sound_enabled INTEGER DEFAULT 1,
-			vibration_enabled INTEGER DEFAULT 1,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 

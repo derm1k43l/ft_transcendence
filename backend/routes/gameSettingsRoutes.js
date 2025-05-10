@@ -42,8 +42,6 @@ const addGameSettingsOpts = {
 				paddle_color: { type: 'string'},
 				ball_color: { type: 'string'},
 				score_color: { type: 'string'},
-				sound_enabled: { type: 'integer'},
-				vibration_enabled: { type: 'integer'},
 			},
 		},
 		response: {
@@ -75,8 +73,6 @@ const updateGameSettingsOpts = {
 				paddle_color: { type: 'string'},
 				ball_color: { type: 'string'},
 				score_color: { type: 'string'},
-				sound_enabled: { type: 'integer'},
-				vibration_enabled: { type: 'integer'},
 			},
 			minProperties: 1 // but should have something at least
 		},
