@@ -179,6 +179,70 @@ export async function getTopPlayers(sortBy: 'wins' | 'winrate' = 'wins', limit: 
 }
 
 
+// ===== Friend Management =====
+
+export async function getFriendsList(userId: number): Promise<number[]> {
+    try {
+        const response = await api.get(`/users/${userId}/friends`);
+        return response.data;
+    } catch (error: any) {
+        console.error(`Failed to get friends list for user ID: ${userId}`, error?.response?.data || error);
+        return [];
+    }
+}
+
+export async function sendFriendRequest(fromUserId: number, toUserId: number): Promise<boolean> {
+    try {
+        await api.post('/friend-requests', {
+            from_user_id: fromUserId,
+            to_user_id: toUserId
+        });
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to send friend request from ${fromUserId} to ${toUserId}`, error?.response?.data || error);
+        return false;
+    }
+}
+
+export async function getFriendRequests(userId: number, status?: 'pending' | 'accepted' | 'rejected'): Promise<FriendRequest[]> {
+    try {
+        let endpoint = `/users/${userId}/friend-requests`;
+        if (status) {
+            endpoint += `?status=${status}`;
+        }
+        const response = await api.get(endpoint);
+        return response.data;
+    } catch (error: any) {
+        console.error(`Failed to get friend requests for user ID: ${userId}`, error?.response?.data || error);
+        return [];
+    }
+}
+
+export async function acceptFriendRequest(userId: number, requestId: number): Promise<boolean> {
+    try {
+        await api.put(`/friend-requests/${requestId}/accept`, {
+            user_id: userId
+        });
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to accept friend request ID: ${requestId}`, error?.response?.data || error);
+        return false;
+    }
+}
+
+export async function rejectFriendRequest(userId: number, requestId: number): Promise<boolean> {
+    try {
+        await api.put(`/friend-requests/${requestId}/reject`, {
+            user_id: userId
+        });
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to reject friend request ID: ${requestId}`, error?.response?.data || error);
+        return false;
+    }
+}
+
+
 
 export async function logout(): Promise<void> {
 	try {
