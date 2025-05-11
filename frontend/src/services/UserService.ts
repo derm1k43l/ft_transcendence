@@ -104,6 +104,10 @@ export async function login(credentials: {
 // need to test following functions
 
 
+// here we need to add here the jwt
+export function getCurrentUserId() {
+	return localStorage.getItem('currentUserId');
+  }
 
 // ===== Chat-related Functions =====
 
@@ -165,6 +169,18 @@ export async function resetUserStats(userId: number): Promise<boolean> {
 		return false;
 	}
 }
+
+//testt
+export async function deleteUserAccount(userId: number): Promise<boolean> {
+    try {
+        await api.delete(`/users/${userId}`);
+        return true;
+    } catch (error: any) {
+        console.error(`Error deleting user account for ID ${userId}:`, error?.response?.data || error);
+        return false;
+    }
+}
+
 
 // ===== Leaderboard Functions =====
 
@@ -242,9 +258,6 @@ export async function rejectFriendRequest(userId: number, requestId: number): Pr
     }
 }
 
-
-
-
 export async function updateUserProfile(userId: number, updates: Partial<UserProfile>): Promise<boolean> {
     try {
         // some security concern here
@@ -256,6 +269,35 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
         return false;
     }
 }
+
+export async function updateUserGameSettings(userId: number, settings: GameSettings): Promise<boolean> {
+    try {
+        await api.put(`/users/${userId}/game-settings`, settings);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to update game settings for user ID: ${userId}`, error?.response?.data || error);
+        return false;
+    }
+}
+
+export async function resetUserGameSettings(userId: number): Promise<boolean> {
+    return updateUserGameSettings(userId, { ...DEFAULT_GAME_SETTINGS });
+}
+
+// mywbe here also soem security 
+export async function updateUserPassword(userId: number, currentPassword: string, newPassword: string): Promise<boolean> {
+    try {
+        await api.put(`/users/${userId}/password`, {
+            current_password: currentPassword,
+            new_password: newPassword
+        });
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to update password for user ID: ${userId}`, error?.response?.data || error);
+        return false;
+    }
+}
+
 
 
 
