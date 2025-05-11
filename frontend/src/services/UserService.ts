@@ -166,7 +166,21 @@ export async function resetUserStats(userId: number): Promise<boolean> {
 	}
 }
 
-  export async function logout(): Promise<void> {
+// ===== Leaderboard Functions =====
+
+export async function getTopPlayers(sortBy: 'wins' | 'winrate' = 'wins', limit: number = 10): Promise<UserProfile[]> {
+    try {
+        const response = await api.get(`/leaderboard?sort=${sortBy}&limit=${limit}`);
+        return response.data;
+    } catch (error: any) {
+        console.error(`Failed to get top players by ${sortBy}`, error?.response?.data || error);
+        return [];
+    }
+}
+
+
+
+export async function logout(): Promise<void> {
 	try {
 	  // Call the logout endpoint if it exists
 	  if (localStorage.getItem('auth_token')) {

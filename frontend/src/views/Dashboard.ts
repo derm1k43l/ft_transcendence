@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getTopPlayers } from '../data/UserService.js';
+import { getTopPlayers } from '../services/UserService.js';
 import { user } from '../main.js';
 
 export class DashboardView {
@@ -372,13 +372,13 @@ private initializeCharts(user: any): void {
     }
 }
     
-private loadLeaderboards(): void {
+private async loadLeaderboards(): Promise<void> {
     // Load top 10 by wins
-    const topPlayersByWins = getTopPlayers('wins', 10);
+    const topPlayersByWins = await getTopPlayers('wins', 10);
     this.renderLeaderboard('wins-leaderboard', topPlayersByWins, 'wins');
         
     // Load top 10 by win rate
-    const topPlayersByWinRate = getTopPlayers('winrate', 10);
+    const topPlayersByWinRate = await getTopPlayers('winrate', 10);
     this.renderLeaderboard('winrate-leaderboard', topPlayersByWinRate, 'winrate');
 }
     
