@@ -244,6 +244,21 @@ export async function rejectFriendRequest(userId: number, requestId: number): Pr
 
 
 
+
+export async function updateUserProfile(userId: number, updates: Partial<UserProfile>): Promise<boolean> {
+    try {
+        // some security concern here
+        const { id, username, password, ...allowedUpdates } = updates;
+        await api.put(`/users/${userId}`, allowedUpdates);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to update user profile for ID: ${userId}`, error?.response?.data || error);
+        return false;
+    }
+}
+
+
+
 export async function logout(): Promise<void> {
 	try {
 	  // Call the logout endpoint if it exists

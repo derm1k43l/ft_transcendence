@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getUserById, updateUserProfile } from '../data/UserService.js';
+import { getUserById, updateUserProfile } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 
 export class ProfileView {
@@ -16,170 +16,176 @@ export class ProfileView {
         this.profileUserId = userId ? parseInt(userId) : this.currentUserId;
     }
 
-    render(rootElement: HTMLElement): void {
+    async render(rootElement: HTMLElement): Promise<void> {
         this.element = document.createElement('div');
         this.element.className = 'profile-view';
-    
-        const user = getUserById(this.profileUserId);
-        if (!user) {
-            this.element.innerHTML = '<div class="profile-error"><h2>User Not Found</h2><p>The requested profile could not be found.</p></div>';
-            rootElement.appendChild(this.element);
-            return;
-        }
-
-        // Check if viewing own profile
-        const isOwnProfile = this.profileUserId === this.currentUserId;
-
-        // Calculate stats
-        const totalGames = (user.stats?.wins || 0) + (user.stats?.losses || 0);
-        const winRate = totalGames > 0 ? ((user.stats?.wins || 0) / totalGames * 100) : 0;
-    
-        this.element.innerHTML = `
-        <div class="profile-view">
-            <div class="profile-header">
-                <div class="profile-cover" style="background-image: url('${user.coverPhotoUrl || 'https://placehold.co/1200x300/7c00e3/ffffff?text=User+Profile'}');">
-                    <div class="profile-avatar-container">
-                        <img src="${user.avatarUrl || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.displayName}" class="profile-avatar">
-                    </div>
-                </div>
-                <div class="profile-info">
-                    <div class="profile-info-main">
-                        <h2>${user.displayName}</h2>
-                        <p class="username">@${user.username}</p>
-                        <p class="bio">${user.bio || 'No bio yet'}</p>
-                        <div class="profile-meta">
-                            <span><i class="fas fa-calendar-alt"></i> Member since: ${user.joinDate || 'Unknown'}</span>
-                            <span><i class="fas fa-envelope"></i> ${user.email || 'No email provided'}</span>
-                        </div>
-                    </div>
-                    ${isOwnProfile ? 
-                        `<button class="app-button" id="profile-edit-btn">
-                            <i class="fas fa-edit"></i> Edit Profile
-                        </button>` : 
-                        `<button class="app-button" id="add-friend-btn">
-                            <i class="fas fa-user-plus"></i> Add Friend
-                        </button>`
-                    }
-                </div>
-            </div>
-            
-            <div class="profile-content dashboard-content">
-                <!-- Player Stats (left column) -->
-                <div class="quick-stats card" style="grid-column: span 6;">
-                    <div class="quick-stats-grid">
-                        <div class="quick-stat">
-                            <div class="stat-icon rank">
-                                <i class="fas fa-medal"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h4>Rank</h4>
-                                <div class="stat-value">${user.stats?.rank || '-'}</div>
-                            </div>
-                        </div>
-                        <div class="quick-stat">
-                            <div class="stat-icon level">
-                                <i class="fas fa-level-up-alt"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h4>Level</h4>
-                                <div class="stat-value">${user.stats?.level || 1}</div>
-                            </div>
-                        </div>
-                        <div class="quick-stat">
-                            <div class="stat-icon games">
-                                <i class="fas fa-gamepad"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h4>Games</h4>
-                                <div class="stat-value">${totalGames}</div>
-                            </div>
-                        </div>
-                        <div class="quick-stat">
-                            <div class="stat-icon winrate">
-                                <i class="fas fa-percentage"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h4>Win Rate</h4>
-                                <div class="stat-value">${winRate.toFixed(1)}%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Achievements (right column) -->
-                <div class="profile-achievements card" style="grid-column: span 6;">
-                    <div class="card-header">
-                        <h3>Achievements</h3>
-                        <div class="card-actions">
-                            <span class="progress-text">
-                                ${user.achievements ? 
-                                    `${user.achievements.filter(a => a.completed).length} / ${user.achievements.length}` : '0 / 0'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="achievements-grid">
-                        ${user.achievements && user.achievements.length > 0 ? 
-                            user.achievements.map(achievement => `
-                                <div class="achievement-item ${achievement.completed ? 'completed' : 'incomplete'}">
-                                    <div class="achievement-icon">
-                                        <i class="${achievement.icon}"></i>
-                                    </div>
-                                    <div class="achievement-info">
-                                        <h4>${achievement.name}</h4>
-                                        <p>${achievement.description}</p>
-                                        ${achievement.dateCompleted ? 
-                                            `<small>Completed on ${achievement.dateCompleted}</small>` : ''}
-                                    </div>
-                                    <div class="achievement-status ${achievement.completed ? 'completed' : 'incomplete'}">
-                                        <i class="fas ${achievement.completed ? 'fa-check-circle' : 'fa-clock'}"></i>
-                                    </div>
-                                </div>
-                            `).join('') :
-                            '<p class="no-achievements">No achievements yet</p>'
-                        }
-                    </div>
-                </div>
-                
-                <!-- Match History (full width below) -->
-                <div class="profile-match-history card recent-activity" style="grid-column: span 12;">
-                    <div class="card-header">
-                        <h3>Match History</h3>
-                    </div>
-                    <div class="activity-list" id="match-list">
-                        ${user.matchHistory && user.matchHistory.length > 0 ? 
-                            user.matchHistory.slice(0, 5).map(match => `
-                                <div class="activity-item ${match.result}">
-                                    <div class="activity-icon">
-                                        <i class="fas fa-${match.result === 'win' ? 'trophy' : 'times'}"></i>
-                                    </div>
-                                    <div class="activity-details">
-                                        <div class="activity-primary">
-                                            <span class="game-result">vs ${match.opponent}</span>
-                                            <span class="game-score">${match.score}</span>
-                                        </div>
-                                        <div class="activity-meta">
-                                            <span class="game-date">${match.date}</span>
-                                            ${match.gameMode ? `<span class="game-mode">${match.gameMode}</span>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('') : 
-                            '<p class="no-activity">No matches played yet</p>'
-                        }
-                    </div>
-                    ${user.matchHistory && user.matchHistory.length > 5 ? 
-                        `<a href="#" class="view-all-link" id="load-more-matches">Load More Matches</a>` : ''}
-                </div>
-            </div>
-        </div>
-        `;
         
+        // Show loading state
+        this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
         rootElement.appendChild(this.element);
+    
+        try {
+            const user = await getUserById(this.profileUserId);
+            if (!user) {
+                this.element.innerHTML = '<div class="profile-error"><h2>User Not Found</h2><p>The requested profile could not be found.</p></div>';
+                return;
+            }
 
-        // Setup event listeners
-        this.setupEventListeners(isOwnProfile, user);
-    }
+            // Check if viewing own profile
+            const isOwnProfile = this.profileUserId === this.currentUserId;
+
+            // Calculate stats
+            const totalGames = (user.stats?.wins || 0) + (user.stats?.losses || 0);
+            const winRate = totalGames > 0 ? ((user.stats?.wins || 0) / totalGames * 100) : 0;
         
+            this.element.innerHTML = `
+            <div class="profile-view">
+                <div class="profile-header">
+                    <div class="profile-cover" style="background-image: url('${user.cover_photo_url || 'https://placehold.co/1200x300/7c00e3/ffffff?text=User+Profile'}');">
+                        <div class="profile-avatar-container">
+                            <img src="${user.avatar_url || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.display_name}" class="profile-avatar">
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-info-main">
+                            <h2>${user.display_name}</h2>
+                            <p class="username">@${user.username}</p>
+                            <p class="bio">${user.bio || 'No bio yet'}</p>
+                            <div class="profile-meta">
+                                <span><i class="fas fa-calendar-alt"></i> Member since: ${user.join_date || 'Unknown'}</span>
+                                <span><i class="fas fa-envelope"></i> ${user.email || 'No email provided'}</span>
+                            </div>
+                        </div>
+                        ${isOwnProfile ? 
+                            `<button class="app-button" id="profile-edit-btn">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>` : 
+                            `<button class="app-button" id="add-friend-btn">
+                                <i class="fas fa-user-plus"></i> Add Friend
+                            </button>`
+                        }
+                    </div>
+                </div>
+                
+                <div class="profile-content dashboard-content">
+                    <!-- Player Stats (left column) -->
+                    <div class="quick-stats card" style="grid-column: span 6;">
+                        <div class="quick-stats-grid">
+                            <div class="quick-stat">
+                                <div class="stat-icon rank">
+                                    <i class="fas fa-medal"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Rank</h4>
+                                    <div class="stat-value">${user.stats?.rank || '-'}</div>
+                                </div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="stat-icon level">
+                                    <i class="fas fa-level-up-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Level</h4>
+                                    <div class="stat-value">${user.stats?.level || 1}</div>
+                                </div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="stat-icon games">
+                                    <i class="fas fa-gamepad"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Games</h4>
+                                    <div class="stat-value">${totalGames}</div>
+                                </div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="stat-icon winrate">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Win Rate</h4>
+                                    <div class="stat-value">${winRate.toFixed(1)}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Achievements (right column) -->
+                    <div class="profile-achievements card" style="grid-column: span 6;">
+                        <div class="card-header">
+                            <h3>Achievements</h3>
+                            <div class="card-actions">
+                                <span class="progress-text">
+                                    ${user.achievements ? 
+                                        `${user.achievements.filter(a => a.completed).length} / ${user.achievements.length}` : '0 / 0'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="achievements-grid">
+                            ${user.achievements && user.achievements.length > 0 ? 
+                                user.achievements.map(achievement => `
+                                    <div class="achievement-item ${achievement.completed ? 'completed' : 'incomplete'}">
+                                        <div class="achievement-icon">
+                                            <i class="${achievement.icon}"></i>
+                                        </div>
+                                        <div class="achievement-info">
+                                            <h4>${achievement.name}</h4>
+                                            <p>${achievement.description}</p>
+                                            ${achievement.dateCompleted ? 
+                                                `<small>Completed on ${achievement.dateCompleted}</small>` : ''}
+                                        </div>
+                                        <div class="achievement-status ${achievement.completed ? 'completed' : 'incomplete'}">
+                                            <i class="fas ${achievement.completed ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                        </div>
+                                    </div>
+                                `).join('') :
+                                '<p class="no-achievements">No achievements yet</p>'
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Match History (full width below) -->
+                    <div class="profile-match-history card recent-activity" style="grid-column: span 12;">
+                        <div class="card-header">
+                            <h3>Match History</h3>
+                        </div>
+                        <div class="activity-list" id="match-list">
+                            ${user.match_history && user.match_history.length > 0 ? 
+                                user.match_history.slice(0, 5).map(match => `
+                                    <div class="activity-item ${match.result}">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-${match.result === 'win' ? 'trophy' : 'times'}"></i>
+                                        </div>
+                                        <div class="activity-details">
+                                            <div class="activity-primary">
+                                                <span class="game-result">vs ${match.opponent}</span>
+                                                <span class="game-score">${match.score}</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <span class="game-date">${match.date}</span>
+                                                ${match.gameMode ? `<span class="game-mode">${match.gameMode}</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('') : 
+                                '<p class="no-activity">No matches played yet</p>'
+                            }
+                        </div>
+                        ${user.match_history && user.match_history.length > 5 ? 
+                            `<a href="#" class="view-all-link" id="load-more-matches">Load More Matches</a>` : ''}
+                    </div>
+                </div>
+            </div>
+            `;
+
+            // Setup event listeners
+            this.setupEventListeners(isOwnProfile, user);
+        } catch (error) {
+            console.error("Error rendering profile:", error);
+            this.element.innerHTML = '<div class="profile-error"><h2>Error Loading Profile</h2><p>There was an error loading this profile. Please try again later.</p></div>';
+        }
+    }
+    
     private setupEventListeners(isOwnProfile: boolean, user: any): void {
         if (!this.element) return;
         
@@ -194,15 +200,37 @@ export class ProfileView {
         } else {
             // Add friend button for other users' profiles
             const addFriendBtn = this.element.querySelector('#add-friend-btn');
-            addFriendBtn?.addEventListener('click', () => {
-                // In a real app, this would send a friend request
-                // For now, just show a notification
-                NotificationManager.show({
-                    title: 'Friend Request Sent',
-                    message: `A friend request has been sent to ${user.displayName}.`,
-                    type: 'success',
-                    duration: 3000
-                });
+            addFriendBtn?.addEventListener('click', async () => {
+                try {
+                    // Import dynamically to avoid circular dependencies
+                    const { sendFriendRequest } = await import('../services/UserService.js');
+                    
+                    const success = await sendFriendRequest(this.currentUserId, this.profileUserId);
+                    
+                    if (success) {
+                        NotificationManager.show({
+                            title: 'Friend Request Sent',
+                            message: `A friend request has been sent to ${user.display_name}.`,
+                            type: 'success',
+                            duration: 3000
+                        });
+                        
+                        // Update button to show pending
+                        const addFriendButton = this.element?.querySelector('#add-friend-btn');
+                        if (addFriendButton) {
+                            addFriendButton.innerHTML = '<i class="fas fa-clock"></i> Request Pending';
+                            addFriendButton.setAttribute('disabled', 'true');
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error sending friend request:", error);
+                    NotificationManager.show({
+                        title: 'Error',
+                        message: 'Failed to send friend request',
+                        type: 'error',
+                        duration: 3000
+                    });
+                }
             });
         }
         
@@ -226,7 +254,7 @@ export class ProfileView {
         const currentMatchCount = matchList.querySelectorAll('.activity-item').length;
         
         // Get next batch of matches (5 more)
-        const nextMatches = user.matchHistory.slice(currentMatchCount, currentMatchCount + 5);
+        const nextMatches = user.match_history.slice(currentMatchCount, currentMatchCount + 5);
         
         if (nextMatches.length === 0) {
             // No more matches to display
@@ -258,7 +286,7 @@ export class ProfileView {
         matchList.insertAdjacentHTML('beforeend', matchesHTML);
         
         // Disable button if no more matches
-        if (currentMatchCount + nextMatches.length >= user.matchHistory.length) {
+        if (currentMatchCount + nextMatches.length >= user.match_history.length) {
             loadMoreBtn.textContent = 'No More Matches';
             loadMoreBtn.setAttribute('disabled', 'true');
         }
@@ -286,7 +314,7 @@ export class ProfileView {
                         <form id="profile-edit-form">
                             <!-- Cover Photo -->
                             <div class="cover-upload-container">
-                                <div class="cover-preview" style="background-image: url('${user.coverPhotoUrl || 'https://placehold.co/1200x300/7c00e3/ffffff?text=Cover+Photo'}');">
+                                <div class="cover-preview" style="background-image: url('${user.cover_photo_url || 'https://placehold.co/1200x300/7c00e3/ffffff?text=Cover+Photo'}');">
                                     <div class="cover-overlay">
                                         <label for="cover-upload" class="upload-btn">
                                             <i class="fas fa-camera"></i> Change Cover
@@ -298,7 +326,7 @@ export class ProfileView {
                             
                             <!-- Avatar -->
                             <div class="avatar-upload-container">
-                                <img src="${user.avatarUrl || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.displayName}" class="edit-avatar-preview">
+                                <img src="${user.avatar_url || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.display_name}" class="edit-avatar-preview">
                                 <div class="avatar-overlay">
                                     <label for="avatar-upload" class="upload-btn">
                                         <i class="fas fa-camera"></i>
@@ -310,7 +338,7 @@ export class ProfileView {
                             <!-- User Info -->
                             <div class="form-group">
                                 <label for="displayName">Display Name</label>
-                                <input type="text" id="displayName" name="displayName" value="${user.displayName}" required>
+                                <input type="text" id="displayName" name="displayName" value="${user.display_name}" required>
                             </div>
                             
                             <div class="form-group">
@@ -370,67 +398,93 @@ export class ProfileView {
         });
         
         // Handle form submission
-        form?.addEventListener('submit', (e) => {
+        form?.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Get form data
-            const displayName = (document.getElementById('displayName') as HTMLInputElement).value;
-            const bio = (document.getElementById('bio') as HTMLTextAreaElement).value;
-            
-            // In a real app, you would upload the files to a server and then update the user profile with the URLs
-            
-            // For demo purposes, we'll create object URLs from the files
-            let avatarUrl = user.avatarUrl;
-            let coverPhotoUrl = user.coverPhotoUrl;
-            
-            if (avatarUpload.files && avatarUpload.files[0]) {
-                avatarUrl = URL.createObjectURL(avatarUpload.files[0]);
+            // Show loading state
+            const saveButton = form.querySelector('#save-profile');
+            if (saveButton) {
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveButton.setAttribute('disabled', 'true');
             }
             
-            if (coverUpload.files && coverUpload.files[0]) {
-                coverPhotoUrl = URL.createObjectURL(coverUpload.files[0]);
-            }
-            
-            // Update the user profile
-            const updatedProfile = {
-                displayName,
-                bio,
-                avatarUrl,
-                coverPhotoUrl
-            };
-            
-            // Call your update service
-            updateUserProfile(user.id, updatedProfile);
-            
-            // Show notification
-            NotificationManager.show({
-                title: 'Profile Updated',
-                message: 'Your profile has been updated successfully.',
-                type: 'success',
-                duration: 3000
-            });
-            
-            // Close modal
-            modal!.style.display = 'none';
-            
-            if (modal) {
-                modal.style.display = 'none';
-            } else {
-                console.error('Modal element is null');
+            try {
+                // Get form data
+                const displayName = (document.getElementById('displayName') as HTMLInputElement).value;
+                const bio = (document.getElementById('bio') as HTMLTextAreaElement).value;
+                
+                // In a real app, you would upload the files to a server and then update the user profile with the URLs
+                // For demo purposes, we'll simulate file uploads with async operations
+                
+                let avatarUrl = user.avatar_url;
+                let coverPhotoUrl = user.cover_photo_url;
+                
+                if (avatarUpload.files && avatarUpload.files[0]) {
+                    // Simulate avatar upload
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    avatarUrl = URL.createObjectURL(avatarUpload.files[0]);
+                }
+                
+                if (coverUpload.files && coverUpload.files[0]) {
+                    // Simulate cover photo upload
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    coverPhotoUrl = URL.createObjectURL(coverUpload.files[0]);
+                }
+                
+                // Update the user profile
+                const updatedProfile = {
+                    display_name: displayName,
+                    bio,
+                    avatar_url: avatarUrl,
+                    cover_photo_url: coverPhotoUrl
+                };
+                
+                // Call your update service
+                const success = await updateUserProfile(user.id, updatedProfile);
+                
+                if (success) {
+                    // Show notification
+                    NotificationManager.show({
+                        title: 'Profile Updated',
+                        message: 'Your profile has been updated successfully.',
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    // Reload the profile to show updates
+                    window.location.reload();
+                } else {
+                    throw new Error('Failed to update profile');
+                }
+                
+                // Close modal
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                NotificationManager.show({
+                    title: 'Error',
+                    message: 'Failed to update profile. Please try again.',
+                    type: 'error',
+                    duration: 3000
+                });
+                
+                // Reset save button
+                if (saveButton) {
+                    saveButton.innerHTML = 'Save Changes';
+                    saveButton.removeAttribute('disabled');
+                }
             }
         });
         
-        // Close modal when clicking the close button
+        // Close modal when clicking the close button or cancel or outside
         closeButton?.addEventListener('click', () => {
             modal!.style.display = 'none';
         });
-        
-        // Close modal when clicking the cancel button
         cancelButton?.addEventListener('click', () => {
             modal!.style.display = 'none';
         });
-        
-        // Close modal when clicking outside
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal!.style.display = 'none';
