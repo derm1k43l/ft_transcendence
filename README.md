@@ -13,7 +13,7 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 
 ### Gameplay:
 - **Major**: Remote multiplayer functionality
-- **Minor**: Game customization options (power-ups, maps)
+- **Minor**: Game customization options
 - **Major**: Live chat system
 
 ### AI-Algo:
@@ -22,7 +22,6 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 
 ### Cybersecurity:
 - **Major**: Two-Factor Authentication (2FA) and JWT implementation
-- **Minor**: GDPR compliance with data management options
 
 ### Accessibility:
 - **Minor**: Cross-device compatibility
@@ -64,16 +63,6 @@ Our chat implementation allows users to:
 - Invite friends to play games directly from the chat interface
 - Receive tournament notifications and updates
 - Access player profiles through convenient links in the chat
-
-### GDPR Compliance
-Our application respects user privacy rights in accordance with GDPR:
-
-- **Data Transparency**: Users can view all personal data stored about them
-- **Right to be Forgotten**: Complete account deletion functionality permanently removes user data
-- **Data Portability**: Users can export their data in a standard format
-- **Privacy Controls**: Granular settings for visibility of online status, game history, and personal information
-- **Consent Management**: Clear privacy notices and consent options for data processing
-- **Data Minimization**: Only essential information is collected and stored
 
 ## Features
 
@@ -125,11 +114,3 @@ Our application respects user privacy rights in accordance with GDPR:
 - \+ | Added something 
 - ~ | Modified something
 - \- | Removed something
-
-## Security Features
-
-- JWT for secure authentication
-- CSRF protection
-- Two-factor authentication (2FA)
-- Input validation and sanitization
-- Secure WebSockets for real-time communication

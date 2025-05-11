@@ -103,6 +103,59 @@ export async function login(credentials: {
 
 // need to test following functions
 
+
+
+// ===== Chat-related Functions =====
+
+export async function sendMessage(fromUserId: number, toUserId: number, content: string): Promise<ChatMessage | null> {
+    try {
+        if (!content.trim()) return null;
+        
+        const response = await api.post('/messages', {
+            sender_id: fromUserId,
+            receiver_id: toUserId,
+            content: content.trim()
+        });
+        
+        return response.data;
+    } catch (error: any) {
+        console.error(`Failed to send message from ${fromUserId} to ${toUserId}`, error?.response?.data || error);
+        return null;
+    }
+}
+
+export async function getUnreadMessageCount(userId: number): Promise<number> {
+    try {
+        const response = await api.get(`/users/${userId}/messages/unread/count`);
+        return response.data.count;
+    } catch (error: any) {
+        console.error(`Failed to get unread message count for user ID: ${userId}`, error?.response?.data || error);
+        return 0;
+    }
+}
+
+export async function markMessagesAsRead(fromUserId: number, toUserId: number): Promise<void> {
+    try {
+        await api.put(`/messages/read`, {
+            sender_id: fromUserId,
+            receiver_id: toUserId
+        });
+    } catch (error: any) {
+        console.error(`Failed to mark messages as read from ${fromUserId} to ${toUserId}`, error?.response?.data || error);
+    }
+}
+
+// Function to get conversations for a user
+export async function getUserConversations(userId: number): Promise<any[]> {
+    try {
+        const response = await api.get(`/users/${userId}/conversations`);
+        return response.data;
+    } catch (error: any) {
+        console.error(`Failed to get conversations for user ID: ${userId}`, error?.response?.data || error);
+        return [];
+    }
+}
+
 export async function resetUserStats(userId: number): Promise<boolean> {
 	try {
 		await api.put(`/user-stats/${userId}/reset`);

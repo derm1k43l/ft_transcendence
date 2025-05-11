@@ -1,13 +1,12 @@
 import { Router } from '../core/router.js';
 import { 
-    getUserById,
-    markMessagesAsRead,
-    sendMessage,
-    getUserConversations
-} from '../data/UserService.js';
+    getUserById, 
+    sendMessage, 
+    getUserConversations, 
+    markMessagesAsRead
+} from '../services/UserService.js';
 import { ChatMessage } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
-import { mockMessages } from '../data/mock_data.js';
 
 export class ChatView {
     private element: HTMLElement | null = null;
@@ -19,7 +18,7 @@ export class ChatView {
         this.router = router;
     }
 
-    render(rootElement: HTMLElement): void {
+    async render(rootElement: HTMLElement): Promise<void> {
         this.element = document.createElement('div');
         this.element.className = 'chat-view';
 
@@ -82,11 +81,11 @@ export class ChatView {
         rootElement.appendChild(this.element);
         
         // Load contacts
-        this.loadContacts();
+        await this.loadContacts();
         
         // Load active chat if any
         if (this.activeChatUserId) {
-            this.loadActiveChat(this.activeChatUserId);
+            await this.loadActiveChat(this.activeChatUserId);
         }
         
         // Setup search
@@ -96,75 +95,80 @@ export class ChatView {
         });
     }
 
-    private loadContacts(): void {
+    private async loadContacts(): Promise<void> {
         const contactsContainer = this.element?.querySelector('#chat-contacts');
         if (!contactsContainer) return;
         
-        // Get conversations for current user using the helper function
-        const conversations = getUserConversations(this.currentUserId);
-        
-        if (conversations.length === 0) {
-            contactsContainer.innerHTML = '<p class="no-contacts">No conversations yet</p>';
-            return;
-        }
-        
-        let contactsHTML = '';
-        
-        conversations.forEach(convo => {
-            const user = convo.user;
-            const lastMessage = convo.lastMessage;
-            const unreadCount = convo.unreadCount;
+        try {
+            // Get conversations for current user using the API function
+            const conversations = await getUserConversations(this.currentUserId);
             
-            // Get online status
-            const isOnline = user.status === 'online';
-            const statusClass = user.status === 'in-game' ? 'in-game' : (isOnline ? 'online' : 'offline');
+            if (conversations.length === 0) {
+                contactsContainer.innerHTML = '<p class="no-contacts">No conversations yet</p>';
+                return;
+            }
             
-            contactsHTML += `
-                <div class="chat-contact ${this.activeChatUserId === user.id ? 'active' : ''}" data-id="${user.id}">
-                    <div class="chat-contact-avatar">
-                        <img src="${user.avatarUrl || 'https://placehold.co/40x40/1d1f21/ffffff?text=User'}" alt="${user.displayName}">
-                        <span class="chat-status ${statusClass}"></span>
-                    </div>
-                    <div class="chat-contact-info">
-                        <h4>${user.displayName}</h4>
-                        <p class="chat-last-message">
-                            ${lastMessage ? this.truncateMessage(lastMessage.content, 30) : 'No messages yet'}
-                        </p>
-                    </div>
-                    <div class="chat-contact-meta">
-                        <span class="chat-time">${lastMessage ? this.formatMessageTime(lastMessage.timestamp) : ''}</span>
-                        ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
-                    </div>
-                </div>
-            `;
-        });
-        
-        contactsContainer.innerHTML = contactsHTML;
-        
-        // Add click handlers
-        const contacts = this.element?.querySelectorAll('.chat-contact');
-        contacts?.forEach(contact => {
-            contact.addEventListener('click', () => {
-                const userId = Number(contact.getAttribute('data-id'));
-                this.activeChatUserId = userId;
+            let contactsHTML = '';
+            
+            for (const convo of conversations) {
+                const user = convo.user;
+                const lastMessage = convo.lastMessage;
+                const unreadCount = convo.unreadCount;
                 
-                // Update active contact
-                contacts.forEach(c => c.classList.remove('active'));
-                contact.classList.add('active');
+                // Get online status
+                const isOnline = user.status === 'online';
+                const statusClass = user.status === 'in-game' ? 'in-game' : (isOnline ? 'online' : 'offline');
                 
-                // Load chat
-                this.loadActiveChat(userId);
-                
-                // Update URL without full navigation
-                const newUrl = `#/chat/${userId}`;
-                if (window.location.hash !== newUrl) {
-                    history.pushState(null, '', newUrl);
-                }
+                contactsHTML += `
+                    <div class="chat-contact ${this.activeChatUserId === user.id ? 'active' : ''}" data-id="${user.id}">
+                        <div class="chat-contact-avatar">
+                            <img src="${user.avatar_url || 'https://placehold.co/40x40/1d1f21/ffffff?text=User'}" alt="${user.display_name}">
+                            <span class="chat-status ${statusClass}"></span>
+                        </div>
+                        <div class="chat-contact-info">
+                            <h4>${user.display_name}</h4>
+                            <p class="chat-last-message">
+                                ${lastMessage ? this.truncateMessage(lastMessage.content, 30) : 'No messages yet'}
+                            </p>
+                        </div>
+                        <div class="chat-contact-meta">
+                            <span class="chat-time">${lastMessage ? this.formatMessageTime(new Date(lastMessage.timestamp)) : ''}</span>
+                            ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            contactsContainer.innerHTML = contactsHTML;
+            
+            // Add click handlers
+            const contacts = this.element?.querySelectorAll('.chat-contact');
+            contacts?.forEach(contact => {
+                contact.addEventListener('click', () => {
+                    const userId = Number(contact.getAttribute('data-id'));
+                    this.activeChatUserId = userId;
+                    
+                    // Update active contact
+                    contacts.forEach(c => c.classList.remove('active'));
+                    contact.classList.add('active');
+                    
+                    // Load chat
+                    this.loadActiveChat(userId);
+                    
+                    // Update URL without full navigation
+                    const newUrl = `#/chat/${userId}`;
+                    if (window.location.hash !== newUrl) {
+                        history.pushState(null, '', newUrl);
+                    }
+                });
             });
-        });
+        } catch (error) {
+            console.error("Error loading contacts:", error);
+            contactsContainer.innerHTML = '<div class="error">Failed to load conversations. Please try again.</div>';
+        }
     }
 
-    private loadActiveChat(userId: number): void {
+    private async loadActiveChat(userId: number): Promise<void> {
         // Show active chat panel, hide welcome panel
         const welcomePanel = this.element?.querySelector('#welcome-panel');
         const activeChatPanel = this.element?.querySelector('#active-chat-panel');
@@ -178,71 +182,84 @@ export class ChatView {
         const messagesContainer = this.element?.querySelector('#chat-messages');
         
         if (!headerContainer || !messagesContainer) return;
-        
-        const user = getUserById(userId);
-        if (!user) {
-            messagesContainer.innerHTML = '<div class="chat-no-messages">User not found</div>';
-            return;
-        }
-        
-        // Get messages between current user and selected user
-        const messages = mockMessages.filter(msg => 
-            (msg.senderId === this.currentUserId && msg.receiverId === userId) || 
-            (msg.senderId === userId && msg.receiverId === this.currentUserId)
-        ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-        
-        // Get online status from user
-        const statusClass = user.status === 'in-game' ? 'in-game' : (user.status === 'online' ? 'online' : 'offline');
-        const statusText = user.status === 'in-game' ? 'In Game' : (user.status === 'online' ? 'Online' : 'Offline');
-        
-        // Render header
-        headerContainer.innerHTML = `
-            <div class="chat-panel-user">
-                <img src="${user.avatarUrl || 'https://placehold.co/40x40/1d1f21/ffffff?text=User'}" alt="${user.displayName}">
-                <div class="chat-panel-info">
-                    <h3>${user.displayName}</h3>
-                    <span class="chat-panel-status ${statusClass}">${statusText}</span>
+
+        try {
+            // Show loading state
+            messagesContainer.innerHTML = '<div class="loading-spinner">Loading messages...</div>';
+            
+            const user = await getUserById(userId);
+            if (!user) {
+                messagesContainer.innerHTML = '<div class="chat-no-messages">User not found</div>';
+                return;
+            }
+            
+            // API call to get messages 
+            // This would be a new function in your userService.js:
+            // async function getMessagesBetweenUsers(user1Id: number, user2Id: number): Promise<ChatMessage[]>
+            const response = await fetch(`/api/messages?user1=${this.currentUserId}&user2=${userId}`);
+            const messages = await response.json();
+            
+            // Sort messages by timestamp
+            messages.sort((a: ChatMessage, b: ChatMessage) => 
+                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            );
+            
+            // Get online status from user
+            const statusClass = user.status === 'in-game' ? 'in-game' : (user.status === 'online' ? 'online' : 'offline');
+            const statusText = user.status === 'in-game' ? 'In Game' : (user.status === 'online' ? 'Online' : 'Offline');
+            
+            // Render header
+            headerContainer.innerHTML = `
+                <div class="chat-panel-user">
+                    <img src="${user.avatar_url || 'https://placehold.co/40x40/1d1f21/ffffff?text=User'}" alt="${user.display_name}">
+                    <div class="chat-panel-info">
+                        <h3>${user.display_name}</h3>
+                        <span class="chat-panel-status ${statusClass}">${statusText}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="chat-panel-actions">
-                <button title="Video Call"><i class="fas fa-video"></i></button>
-                <button title="Invite to Game"><i class="fas fa-gamepad"></i></button>
-                <button title="More Options"><i class="fas fa-ellipsis-v"></i></button>
-            </div>
-        `;
-        
-        // Render messages
-        messagesContainer.innerHTML = messages.length > 0 
-            ? messages.map(msg => this.renderMessage(msg)).join('') 
-            : '<div class="chat-no-messages"><p>No messages yet. Start a conversation!</p></div>';
-        
-        // Scroll to bottom of messages
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Mark messages as read
-        markMessagesAsRead(userId, this.currentUserId);
-        
-        // Setup send handler
-        const messageInput = this.element?.querySelector('#message-input') as HTMLInputElement;
-        const sendButton = this.element?.querySelector('#send-button');
-        
-        // Remove old event listeners
-        const newSendButton = sendButton?.cloneNode(true);
-        if (sendButton?.parentNode && newSendButton) {
-            sendButton.parentNode.replaceChild(newSendButton, sendButton);
+                <div class="chat-panel-actions">
+                    <button title="Video Call"><i class="fas fa-video"></i></button>
+                    <button title="Invite to Game"><i class="fas fa-gamepad"></i></button>
+                    <button title="More Options"><i class="fas fa-ellipsis-v"></i></button>
+                </div>
+            `;
+            
+            // Render messages
+            messagesContainer.innerHTML = messages.length > 0 
+                ? messages.map((msg: ChatMessage) => this.renderMessage(msg)).join('') 
+                : '<div class="chat-no-messages"><p>No messages yet. Start a conversation!</p></div>';
+            
+            // Scroll to bottom of messages
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Mark messages as read
+            await markMessagesAsRead(userId, this.currentUserId);
+            
+            // Setup send handler
+            const messageInput = this.element?.querySelector('#message-input') as HTMLInputElement;
+            const sendButton = this.element?.querySelector('#send-button');
+            
+            // Remove old event listeners
+            const newSendButton = sendButton?.cloneNode(true);
+            if (sendButton?.parentNode && newSendButton) {
+                sendButton.parentNode.replaceChild(newSendButton, sendButton);
+            }
+            
+            // Add new send button listener
+            this.element?.querySelector('#send-button')?.addEventListener('click', () => {
+                this.sendNewMessage(userId);
+            });
+            
+            // Clear old input listener and add new one
+            messageInput?.removeEventListener('keypress', this.handleKeyPress);
+            messageInput?.addEventListener('keypress', this.handleKeyPress);
+            
+            // Focus on input
+            messageInput?.focus();
+        } catch (error) {
+            console.error("Error loading chat:", error);
+            messagesContainer.innerHTML = '<div class="error">Failed to load messages. Please try again.</div>';
         }
-        
-        // Add new send button listener
-        this.element?.querySelector('#send-button')?.addEventListener('click', () => {
-            this.sendNewMessage(userId);
-        });
-        
-        // Clear old input listener and add new one
-        messageInput?.removeEventListener('keypress', this.handleKeyPress);
-        messageInput?.addEventListener('keypress', this.handleKeyPress);
-        
-        // Focus on input
-        messageInput?.focus();
     }
 
     private handleKeyPress = (e: KeyboardEvent) => {
@@ -251,39 +268,48 @@ export class ChatView {
         }
     }
 
-    private sendNewMessage(userId: number): void {
+    private async sendNewMessage(userId: number): Promise<void> {
         const messageInput = this.element?.querySelector('#message-input') as HTMLInputElement;
         const content = messageInput?.value.trim();
         
         if (!content) return;
         
-        // Create new message
-        const newMessage = sendMessage(this.currentUserId, userId, content);
-        
-        if (newMessage) {
-            // Add to UI
-            const messagesContainer = this.element?.querySelector('#chat-messages');
-            if (messagesContainer) {
-                const messageEl = document.createElement('div');
-                messageEl.innerHTML = this.renderMessage(newMessage);
-                messagesContainer.appendChild(messageEl.firstElementChild as HTMLElement);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        try {
+            // Create new message
+            const newMessage = await sendMessage(this.currentUserId, userId, content);
+            
+            if (newMessage) {
+                // Add to UI
+                const messagesContainer = this.element?.querySelector('#chat-messages');
+                if (messagesContainer) {
+                    const messageEl = document.createElement('div');
+                    messageEl.innerHTML = this.renderMessage(newMessage);
+                    messagesContainer.appendChild(messageEl.firstElementChild as HTMLElement);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Update contact list to show new last message
+                await this.loadContacts();
+                
+                // Focus input again
+                messageInput.focus();
             }
-            
-            // Clear input
-            messageInput.value = '';
-            
-            // Update contact list to show new last message
-            this.loadContacts();
-            
-            // Focus input again
-            messageInput.focus();
+        } catch (error) {
+            console.error("Error sending message:", error);
+            NotificationManager.show({
+                message: "Failed to send message. Please try again.",
+                type: "error",
+                duration: 3000
+            });
         }
     }
 
     private renderMessage(message: ChatMessage): string {
         const isFromCurrentUser = message.senderId === this.currentUserId;
-        const time = this.formatMessageTime(message.timestamp);
+        const time = this.formatMessageTime(new Date(message.timestamp));
         
         return `
             <div class="chat-message ${isFromCurrentUser ? 'sent' : 'received'}">
@@ -333,6 +359,6 @@ export class ChatView {
         const messageInput = this.element?.querySelector('#message-input');
         messageInput?.removeEventListener('keypress', this.handleKeyPress as EventListener);
         
-        this.element = null;
-    }
+        this.element = null; 
+    } 
 }
