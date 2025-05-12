@@ -1,5 +1,6 @@
 const {
 	getUsers,
+	getCurrentUser,
 	getUser,
 	getUserByName,
 	getUserByEmail,
@@ -43,6 +44,23 @@ const getUsersOpts = {
 		}
 	},
 	handler: getUsers
+};
+
+const getCurrentUserOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object'
+		},
+		response: {
+			200: User,
+			404: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			500: BasicErrorSchema
+		}
+	},
+	handler: getCurrentUser
 };
 
 const getUserOpts = {
@@ -268,6 +286,9 @@ const logoutUserOpts = {
 function userRoutes(fastify, options, done) {
 	// Get all Users (verify if auth is needed)
 	fastify.get('/', getUsersOpts);
+
+	// Get current User - Private
+	fastify.get('/current', getCurrentUserOpts);
 
 	// Get single User - Public
 	fastify.get('/:id', getUserOpts);

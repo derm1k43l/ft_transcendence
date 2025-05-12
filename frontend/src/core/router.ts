@@ -39,6 +39,9 @@ export class Router {
         window.addEventListener('hashchange', () => this.handleRouteChange());
     }
 
+    reload() {
+        this.handleRouteChange();
+    }
 
     /**
      * Adds a route mapping a path (without '#') to a view component constructor.

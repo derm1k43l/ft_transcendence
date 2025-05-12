@@ -1,6 +1,6 @@
 import { Router } from '../core/router.js';
 import { getTopPlayers } from '../services/UserService.js';
-import { user } from '../main.js';
+import { currentUser } from '../main.js';
 
 export class DashboardView {
     private element: HTMLElement | null = null;
@@ -15,20 +15,20 @@ export class DashboardView {
         this.element = document.createElement('div');
         this.element.className = 'dashboard-view';
         
-        if (!user) {
+        if (!currentUser) {
             this.element.innerHTML = '<p>User not found</p>';
             rootElement.appendChild(this.element);
             return;
         }
         
         // Calculate stats
-        const totalGames = (user.stats?.wins || 0) + (user.stats?.losses || 0);
-        const winRate = totalGames > 0 ? ((user.stats?.wins || 0) / totalGames * 100) : 0;
+        const totalGames = (currentUser.stats?.wins || 0) + (currentUser.stats?.losses || 0);
+        const winRate = totalGames > 0 ? ((currentUser.stats?.wins || 0) / totalGames * 100) : 0;
         const formattedWinRate = winRate.toFixed(1);
         
         this.element.innerHTML = `
             <div class="dashboard-header">
-                <h2>Welcome back, ${user.display_name}!</h2>
+                <h2>Welcome back, ${currentUser.display_name}!</h2>
                 <p class="last-login">Last login: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
             </div>
             
@@ -41,7 +41,7 @@ export class DashboardView {
                         </div>
                         <div class="stat-info">
                             <h4>Rank</h4>
-                            <div class="stat-value">${user.stats?.rank || '-'}</div>
+                            <div class="stat-value">${currentUser.stats?.rank || '-'}</div>
                         </div>
                     </div>
                     <div class="quick-stat">
@@ -50,7 +50,7 @@ export class DashboardView {
                         </div>
                         <div class="stat-info">
                             <h4>Wins</h4>
-                            <div class="stat-value">${user.stats?.wins || 0}</div>
+                            <div class="stat-value">${currentUser.stats?.wins || 0}</div>
                         </div>
                     </div>
                     <div class="quick-stat">
@@ -59,7 +59,7 @@ export class DashboardView {
                         </div>
                         <div class="stat-info">
                             <h4>Losses</h4>
-                            <div class="stat-value">${user.stats?.losses || 0}</div>
+                            <div class="stat-value">${currentUser.stats?.losses || 0}</div>
                         </div>
                     </div>
                     <div class="quick-stat">
@@ -81,8 +81,8 @@ export class DashboardView {
                             <h4>Game Results</h4>
                             <canvas id="results-chart" width="100" height="100"></canvas>
                             <div class="chart-legend">
-                                <span class="legend-item"><span class="color-box win"></span> Wins (${user.stats?.wins || 0})</span>
-                                <span class="legend-item"><span class="color-box loss"></span> Losses (${user.stats?.losses || 0})</span>
+                                <span class="legend-item"><span class="color-box win"></span> Wins (${currentUser.stats?.wins || 0})</span>
+                                <span class="legend-item"><span class="color-box loss"></span> Losses (${currentUser.stats?.losses || 0})</span>
                             </div>
                         </div>
                         <div class="progress-chart-container">
@@ -105,7 +105,7 @@ export class DashboardView {
                     </div>
                     <div class="stat-cards">
                                 <div class="stat-card">
-                                    <div class="stat-card-value">${user.stats?.level || 1}</div>
+                                    <div class="stat-card-value">${currentUser.stats?.level || 1}</div>
                                     <div class="stat-card-label">Level</div>
                                 </div>
                                 <div class="stat-card">
@@ -119,8 +119,8 @@ export class DashboardView {
                 <div class="recent-activity card">
                     <h3>Recent Activity</h3>
                     <div class="activity-list">
-                        ${user.match_history && user.match_history.length > 0 ? 
-                            user.match_history.slice(0, 5).map(match => `
+                        ${currentUser.match_history && currentUser.match_history.length > 0 ? 
+                            currentUser.match_history.slice(0, 5).map(match => `
                                 <div class="activity-item ${match.result}">
                                     <div class="activity-icon">
                                         <i class="fas fa-${match.result === 'win' ? 'trophy' : 'times-circle'}"></i>
@@ -166,7 +166,7 @@ export class DashboardView {
         
         // Load Chart.js and initialize charts
         this.loadChartJS().then(() => {
-            this.initializeCharts(user);
+            this.initializeCharts(currentUser);
             this.loadLeaderboards();
             this.setupEventListeners();
         });
@@ -408,7 +408,7 @@ private renderLeaderboard(containerId: string, players: any[], type: 'wins' | 'w
             const totalGames = (player.stats?.wins || 0) + (player.stats?.losses || 0);
             const winRate = totalGames > 0 ? ((player.stats?.wins || 0) / totalGames * 100).toFixed(1) : '0.0';
             
-            const isCurrentUser = player === user;
+            const isCurrentUser = player === currentUser;
             
             html += `
                 <tr class="${isCurrentUser ? 'current-user' : ''}">

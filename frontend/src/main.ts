@@ -9,13 +9,14 @@ import { TournamentView } from './views/Tournament.js';
 import { RegisterView } from './views/Register.js';
 import { DashboardView } from './views/Dashboard.js';
 import { NotificationManager } from './components/Notification.js';
-import { findUserByUsername, getUserById } from './services/UserService.js'
+import { findUserByUsername, getCurrentUser, getUserById, logout } from './services/UserService.js'
 import { UserProfile } from './types/index.js';
 import { login } from './services/UserService.js';
 
 // --- State ---
 let isLoggedIn = false;
-export let user: UserProfile | null = null; // Store logged-in user details
+// export let user: UserProfile | null = null; // Store logged-in user details
+export let currentUser: UserProfile | null = null; // Store logged-in user details
 
 // --- DOM Elements ---
 let loginViewElement: HTMLElement | null;
@@ -40,7 +41,27 @@ let closeAboutButton: HTMLElement | null;
 let router: Router;
 
 // --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Initializing application...');
+
+    // Initialize user before proceeding
+    await initializeUser();
+
+    console.log("\nmain");
+    console.log(currentUser);
+    console.log("main\n");
+
+    // Proceed with the rest of the initialization
+    initializeApp();
+});
+
+async function initializeUser(): Promise<void> {
+    currentUser = await getCurrentUser();
+    if (currentUser)
+        isLoggedIn = true;
+}
+
+function initializeApp(): void {
     // Get main view containers
     loginViewElement = document.getElementById('login-view');
     appViewElement = document.getElementById('app-view');
@@ -146,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.reload(); // Simple approach to reset the login form
         }
     });
-});
+}
 
 // --- Functions ---
 function setupResponsiveElements(): void {
@@ -343,13 +364,13 @@ function setupEventListeners(): void {
 
         try {
 
-            user = (await login({ username, password })).user;
+            currentUser = (await login({ username, password })).user;
             console.log(`Login successful`);
             isLoggedIn = true;
 
             NotificationManager.show({
                 title: 'Welcome',
-                message: `Welcome back, ${user.display_name}!`,
+                message: `Welcome back, ${currentUser.display_name}!`,
                 type: 'info',
                 duration: 3000
             });
@@ -358,7 +379,7 @@ function setupEventListeners(): void {
             router.navigate('/');
         } catch (error: any) {
             console.log('Login failed: Invalid username or password');
-            user = null;
+            currentUser = null;
             NotificationManager.show({
                 title: 'Login Failed',
                 message: error,
@@ -440,7 +461,8 @@ function setupEventListeners(): void {
         event.preventDefault();
         console.log('Logout');
         isLoggedIn = false;
-        user = null;
+        currentUser = null;
+        logout();
         updateUI();
 
         NotificationManager.show({
@@ -454,17 +476,17 @@ function setupEventListeners(): void {
 }
 
 function updateUI(): void {
-    if (isLoggedIn && user) {
+    if (isLoggedIn && currentUser) {
         loginViewElement?.classList.remove('active');
         appViewElement?.classList.add('active');
 
         // Update sidebar profile info
         if (sidebarUsernameElement) {
-            sidebarUsernameElement.textContent = user.display_name;
+            sidebarUsernameElement.textContent = currentUser.display_name;
         }
-        if (sidebarAvatarElement && user.avatar_url) {
-            sidebarAvatarElement.src = user.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'; // Default avatar
-            sidebarAvatarElement.alt = `${user.display_name}'s avatar`;
+        if (sidebarAvatarElement && currentUser.avatar_url) {
+            sidebarAvatarElement.src = currentUser.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'; // Default avatar
+            sidebarAvatarElement.alt = `${currentUser.display_name}'s avatar`;
         }
 
         // Apply responsive layout

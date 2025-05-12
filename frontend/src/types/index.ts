@@ -74,12 +74,29 @@ export interface Achievement {
     dateCompleted?: string;
 }
 
+export interface Friend {
+    user_id: number;
+    friend_id: number;
+    friend_username: string;
+    friend_display_name: string;
+    friend_avatar_url: string;
+    friend_status: string;
+    friend_last_active: string;
+}
+
 export interface FriendRequest {
     id: number;
-    from: number;
-    to: number;
+    from_user_id: number;
+    to_user_id: number;
     status: 'pending' | 'accepted' | 'rejected';
     date: string;
+
+    from_username: string;
+    from_display_name: string;
+    from_avatar_url: string;
+    to_username: string;
+    to_display_name: string;
+    to_avatar_url: string;
 }
 
 export interface ChatMessage {

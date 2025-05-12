@@ -4,6 +4,7 @@ import {
     UserProfile,
     ChatMessage, 
     AppNotification,
+    Friend,
     FriendRequest,
     GameInvite,
     GameSettings,
@@ -96,6 +97,15 @@ export async function login(credentials: {
 }
 
 
+export async function getCurrentUser(): Promise<UserProfile | null> {
+	try {
+		const user = (await api.get(`/users/current`)).data as UserProfile;
+		return user;
+	} catch (error) {
+		console.error(`Failed to fetch current user: not logged in`);
+		return null;
+	}
+}
 
 
 // above functions are tested and working
@@ -104,10 +114,6 @@ export async function login(credentials: {
 // need to test following functions
 
 
-// here we need to add here the jwt
-export function getCurrentUserId() {
-	return localStorage.getItem('currentUserId');
-  }
 
 // ===== Chat-related Functions =====
 
@@ -123,7 +129,7 @@ export async function sendMessage(fromUserId: number, toUserId: number, content:
         
         return response.data;
     } catch (error: any) {
-        console.error(`Failed to send message from ${fromUserId} to ${toUserId}`, error?.response?.data || error);
+        console.error(`Failed to send message from ${fromUserId} to ${toUserId}`, error?.response?.data?.message || error);
         return null;
     }
 }
@@ -133,7 +139,7 @@ export async function getUnreadMessageCount(userId: number): Promise<number> {
         const response = await api.get(`/users/${userId}/messages/unread/count`);
         return response.data.count;
     } catch (error: any) {
-        console.error(`Failed to get unread message count for user ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to get unread message count for user ID: ${userId}`, error?.response?.data?.message || error);
         return 0;
     }
 }
@@ -145,7 +151,7 @@ export async function markMessagesAsRead(fromUserId: number, toUserId: number): 
             receiver_id: toUserId
         });
     } catch (error: any) {
-        console.error(`Failed to mark messages as read from ${fromUserId} to ${toUserId}`, error?.response?.data || error);
+        console.error(`Failed to mark messages as read from ${fromUserId} to ${toUserId}`, error?.response?.data?.message || error);
     }
 }
 
@@ -155,7 +161,7 @@ export async function getUserConversations(userId: number): Promise<any[]> {
         const response = await api.get(`/users/${userId}/conversations`);
         return response.data;
     } catch (error: any) {
-        console.error(`Failed to get conversations for user ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to get conversations for user ID: ${userId}`, error?.response?.data?.message || error);
         return [];
     }
 }
@@ -176,7 +182,7 @@ export async function deleteUserAccount(userId: number): Promise<boolean> {
         await api.delete(`/users/${userId}`);
         return true;
     } catch (error: any) {
-        console.error(`Error deleting user account for ID ${userId}:`, error?.response?.data || error);
+        console.error(`Error deleting user account for ID ${userId}:`, error?.response?.data?.message || error);
         return false;
     }
 }
@@ -189,7 +195,7 @@ export async function getTopPlayers(sortBy: 'wins' | 'winrate' = 'wins', limit: 
         const response = await api.get(`/leaderboard?sort=${sortBy}&limit=${limit}`);
         return response.data;
     } catch (error: any) {
-        console.error(`Failed to get top players by ${sortBy}`, error?.response?.data || error);
+        console.error(`Failed to get top players by ${sortBy}`, error?.response?.data?.message || error);
         return [];
     }
 }
@@ -197,12 +203,12 @@ export async function getTopPlayers(sortBy: 'wins' | 'winrate' = 'wins', limit: 
 
 // ===== Friend Management =====
 
-export async function getFriendsList(userId: number): Promise<number[]> {
+export async function getFriendsList(userId: number): Promise<Friend[]> {
     try {
-        const response = await api.get(`/users/${userId}/friends`);
-        return response.data;
+        const response = await api.get(`/friends/users/${userId}`);
+        return response.data as Friend[];
     } catch (error: any) {
-        console.error(`Failed to get friends list for user ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to get friends list for user ID: ${userId}`, error?.response?.data?.message || error);
         return [];
     }
 }
@@ -215,21 +221,43 @@ export async function sendFriendRequest(fromUserId: number, toUserId: number): P
         });
         return true;
     } catch (error: any) {
-        console.error(`Failed to send friend request from ${fromUserId} to ${toUserId}`, error?.response?.data || error);
+        console.error(`Failed to send friend request from ${fromUserId} to ${toUserId}`, error?.response?.data?.message || error);
         return false;
     }
 }
 
-export async function getFriendRequests(userId: number, status?: 'pending' | 'accepted' | 'rejected'): Promise<FriendRequest[]> {
+// export async function getFriendRequests(userId: number, status?: 'pending' | 'accepted' | 'rejected'): Promise<FriendRequest[]> {
+//     try {
+//         const allRequests = (await api.get('/friend-requests')).data as FriendRequest[];
+// 		const userRequests = allRequests.filter(r => r.from_user_id === userId || r.to_user_id === userId);
+// 		if (status)
+// 		{
+// 			const filteredUserRequests = userRequests.filter(r => r.status === status);
+// 			return filteredUserRequests;
+// 		}
+//         return userRequests;
+//     } catch (error: any) {
+//         console.error(`Failed to get friend requests for user ID: ${userId}`, error?.response?.data?.message || error);
+//         return [];
+//     }
+// }
+
+export async function getIncomingFriendRequests(userId: number): Promise<FriendRequest[]> {
     try {
-        let endpoint = `/users/${userId}/friend-requests`;
-        if (status) {
-            endpoint += `?status=${status}`;
-        }
-        const response = await api.get(endpoint);
-        return response.data;
+        const requests = (await api.get(`/friend-requests/received/users/${userId}`)).data as FriendRequest[];
+        return requests;
     } catch (error: any) {
-        console.error(`Failed to get friend requests for user ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to get friend requests for user ID: ${userId}`, error?.response?.data?.message || error);
+        return [];
+    }
+}
+
+export async function getOutgoingFriendRequests(userId: number): Promise<FriendRequest[]> {
+    try {
+        const requests = (await api.get(`/friend-requests/sent/users/${userId}`)).data as FriendRequest[];
+        return requests;
+    } catch (error: any) {
+        console.error(`Failed to get friend requests for user ID: ${userId}`, error?.response?.data?.message || error);
         return [];
     }
 }
@@ -241,7 +269,7 @@ export async function acceptFriendRequest(userId: number, requestId: number): Pr
         });
         return true;
     } catch (error: any) {
-        console.error(`Failed to accept friend request ID: ${requestId}`, error?.response?.data || error);
+        console.error(`Failed to accept friend request ID: ${requestId}`, error?.response?.data?.message || error);
         return false;
     }
 }
@@ -253,7 +281,7 @@ export async function rejectFriendRequest(userId: number, requestId: number): Pr
         });
         return true;
     } catch (error: any) {
-        console.error(`Failed to reject friend request ID: ${requestId}`, error?.response?.data || error);
+        console.error(`Failed to reject friend request ID: ${requestId}`, error?.response?.data?.message || error);
         return false;
     }
 }
@@ -265,7 +293,7 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
         await api.put(`/users/${userId}`, allowedUpdates);
         return true;
     } catch (error: any) {
-        console.error(`Failed to update user profile for ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to update user profile for ID: ${userId}`, error?.response?.data?.message || error);
         return false;
     }
 }
@@ -275,7 +303,7 @@ export async function updateUserGameSettings(userId: number, settings: GameSetti
         await api.put(`/users/${userId}/game-settings`, settings);
         return true;
     } catch (error: any) {
-        console.error(`Failed to update game settings for user ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to update game settings for user ID: ${userId}`, error?.response?.data?.message || error);
         return false;
     }
 }
@@ -293,7 +321,7 @@ export async function updateUserPassword(userId: number, currentPassword: string
         });
         return true;
     } catch (error: any) {
-        console.error(`Failed to update password for user ID: ${userId}`, error?.response?.data || error);
+        console.error(`Failed to update password for user ID: ${userId}`, error?.response?.data?.message || error);
         return false;
     }
 }

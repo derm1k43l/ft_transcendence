@@ -17,10 +17,41 @@ const getUsers = async (req, reply) => {
 	}
 };
 
+const getCurrentUser = async (req, reply) => {
+	try {
+		const decodedToken = await req.jwtVerify();
+		if (!decodedToken || !decodedToken.id) {
+			return reply.code(401).send({ message: 'Invalid or missing token' });
+		}
+
+		const { id } = decodedToken;
+		const db = req.server.betterSqlite3;
+
+		const user = db.prepare(`
+			SELECT 
+			id, username, display_name, email, bio,
+			avatar_url, cover_photo_url, join_date,
+			has_two_factor_auth, status, last_active, created_at
+			FROM users 
+			WHERE id = ?
+		`).get(id);
+
+		if (!user) {
+			reply.code(404).send({ message: 'User not found' });
+		} else {
+			reply.send(user);
+		}
+	} catch (error) {
+		req.log.error(error);
+		reply.code(500).send({ message: 'Error retrieving user' });
+	}
+};
+
 const getUser = async (req, reply) => {
 	try {
 		const { id } = req.params;
 		const db = req.server.betterSqlite3;
+		console.log("\n\n\nabxc\n\n\n");
 		
 		const user = db.prepare(`
 			SELECT 
@@ -417,6 +448,7 @@ const logoutUser = async (req, reply) => {
 
 module.exports = {
 	getUsers,
+	getCurrentUser,
 	getUser,
 	getUserByName,
 	getUserByEmail,

@@ -6,11 +6,11 @@ import {
     updateUserProfile, 
     updateUserPassword,
     resetUserStats,
-    deleteUserAccount,
-    getCurrentUserId
+    deleteUserAccount
 } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 import { GameSettings } from '../types/index.js';
+import { currentUser } from '../main.js';
 
 export class SettingsView {
     private element: HTMLElement | null = null;
@@ -664,7 +664,7 @@ export class SettingsView {
                 'This will permanently delete your account and all associated data. This action cannot be undone. Are you sure?',
                 async () => {
                     try {
-                        const userId = getCurrentUserId();
+                        const userId = currentUser?.id || -1;
 
                         if (!userId) {
                             throw new Error("User not logged in or user ID not available.");

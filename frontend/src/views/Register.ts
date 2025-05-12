@@ -5,7 +5,7 @@ import { UserProfile } from '../types/index.js';
 import { api } from '../services/api.js'
 
 //temp
-import { findUserByUsername, findUserByEmail,  getUserById } from '../services/UserService.js';
+import { findUserByUsername, findUserByEmail,  getUserById, getCurrentUser } from '../services/UserService.js';
 
 
 export class RegisterView {
@@ -19,6 +19,12 @@ export class RegisterView {
     async render(rootElement: HTMLElement): Promise<void> {
 
         // temporary API test start
+        console.log('auth token: ', localStorage.getItem('auth_token'));
+
+        console.log("\n\ncurrent user: ");
+        const tmp1 = await getCurrentUser();
+        console.log(tmp1);
+
         console.log("\n\nall users");
         const tmp = (await api.get('/users')).data as UserProfile[];
         for (const user of tmp)

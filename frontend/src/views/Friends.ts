@@ -5,17 +5,19 @@ import {
     getUserById, 
     sendFriendRequest, 
     getFriendsList,
-    getFriendRequests,
+    getIncomingFriendRequests,
+    getOutgoingFriendRequests,
     acceptFriendRequest,
     rejectFriendRequest
 } from '../services/UserService.js';
+import { currentUser } from '../main.js';
 
-import { UserProfile } from '../types/index.js';
+import { UserProfile, Friend, FriendRequest } from '../types/index.js';
 
 export class FriendsView {
     private element: HTMLElement | null = null;
     private router: Router;
-    private currentUserId: number = 1; // get real user session
+    private currentUserId: number = currentUser?.id || -1; // get real user session
 
     constructor(router: Router) {
         this.router = router;
@@ -63,7 +65,7 @@ export class FriendsView {
                         </div>
                         
                         <div id="requests" class="friends-panel">
-                            <h3>Friend Requests</h3>
+                            <h3>Incoming Friend Requests</h3>
                             <div class="requests-list" id="requests-list">
                                 <!-- Friend requests will be loaded here -->
                                 <div class="loading-spinner">Loading requests...</div>
@@ -160,50 +162,47 @@ export class FriendsView {
 
     private async loadFriends(): Promise<void> {
         try {
-            const currentUser = await getUserById(this.currentUserId);
             const friendsGrid = this.element?.querySelector('#friends-grid');
             const friendsCount = this.element?.querySelector('#friends-count');
             
             if (!friendsGrid || !currentUser) return;
         
-            const friendIds = await getFriendsList(this.currentUserId);
+            const friends = await getFriendsList(this.currentUserId);
         
             // Update friends count
             if (friendsCount) {
-                friendsCount.textContent = friendIds.length > 0 ? `(${friendIds.length})` : '';
+                friendsCount.textContent = friends.length > 0 ? `(${friends.length})` : '';
             }
 
-            if (friendIds.length === 0) {
+            if (!friends || friends.length === 0) {
                 friendsGrid.innerHTML = '<p class="empty-message">You don\'t have any friends yet. Use the search to find other players.</p>';
                 return;
             }
-        
+
             let friendsHTML = '';
-        
+
             // Loop through each friend ID
-            for (const friendId of friendIds) {
-                const friend = await getUserById(friendId);
-                if (!friend) continue;
-                
+            for (const friend of friends) {
                 // Get status from the friend object
-                const status = friend.status || 'offline';
+                const status = friend.friend_status || 'offline';
                 const statusText = status === 'in-game' ? 'In Game' : (status === 'online' ? 'Online' : 'Offline');
-                
+                if (!friend.friend_display_name)
+                    continue;
                 friendsHTML += `
                     <div class="friend-card">
-                        <img src="${friend.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=' + friend.display_name.charAt(0)}" 
-                            alt="${friend.display_name}" class="friend-avatar">
+                        <img src="${friend.friend_avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=' + friend.friend_display_name.charAt(0)}" 
+                            alt="${friend.friend_display_name}" class="friend-avatar">
                         <div class="friend-info">
-                            <h4>${friend.display_name}</h4>
+                            <h4>${friend.friend_display_name}</h4>
                             <div class="friend-status ${status}">
                                 ${statusText}
                             </div>
                         </div>
                         <div class="friend-actions">
-                            <button class="friend-button message" data-id="${friend.id}">
+                            <button class="friend-button message" data-id="${friend.friend_id}">
                                 <i class="fas fa-comment"></i> Message
                             </button>
-                            <button class="friend-button invite" data-id="${friend.id}">
+                            <button class="friend-button invite" data-id="${friend.friend_id}">
                                 <i class="fas fa-gamepad"></i> Invite
                             </button>
                         </div>
@@ -214,8 +213,8 @@ export class FriendsView {
             const messageButtons = this.element?.querySelectorAll('.friend-button.message');
             messageButtons?.forEach(button => {
                 button.addEventListener('click', () => {
-                    const friendId = button.getAttribute('data-id');
-                    this.router.navigate(`/chat/${friendId}`);
+                    const friend = button.getAttribute('data-id');
+                    this.router.navigate(`/chat/${friend}`);
                 });
             });
             
@@ -223,16 +222,14 @@ export class FriendsView {
             inviteButtons?.forEach(button => {
                 button.addEventListener('click', async () => {
                     const friendId = button.getAttribute('data-id');
-                    if (friendId) {
-                        const friend = await getUserById(Number(friendId));
-                        if (friend) {
-                            NotificationManager.show({
-                                title: 'Game Invitation',
-                                message: `Invitation sent to ${friend.display_name}`,
-                                type: 'success',
-                                duration: 3000
-                            });
-                        }
+                    const friend = await getUserById(Number(friendId));
+                    if (friend) {
+                        NotificationManager.show({
+                            title: 'Game Invitation',
+                            message: `Invitation sent to ${friend.display_name}`,
+                            type: 'success',
+                            duration: 3000
+                        });
                     }
                 });
             });
@@ -253,7 +250,8 @@ export class FriendsView {
             
             if (!requestsList || !currentUser) return;
             
-            const pendingRequests = await getFriendRequests(this.currentUserId, 'pending');
+            const pendingRequests = await getIncomingFriendRequests(this.currentUserId);
+
             
             // Update request count
             if (requestCount) {
@@ -269,7 +267,7 @@ export class FriendsView {
             
             // Process each request
             for (const request of pendingRequests) {
-                const fromUser = await getUserById(request.from);
+                const fromUser = await getUserById(request.from_user_id);
                 if (!fromUser) continue;
                 
                 requestsHTML += `
@@ -350,9 +348,6 @@ export class FriendsView {
                                     type: 'info',
                                     duration: 3000
                                 });
-                                
-                                // Reload requests list to update counts
-                                await this.loadFriendRequests();
                             }
                         }
                     } catch (error) {
@@ -392,13 +387,14 @@ export class FriendsView {
             }
             
             // Get current user's friends
-            const friendIds = await getFriendsList(this.currentUserId);
-            const isFriend = friendIds.includes(user.id);
+            const friends = await getFriendsList(this.currentUserId);
+            const isFriend = friends.some(friend => friend.friend_id === user.id);
             
             // Get pending requests
-            const pendingRequests = await getFriendRequests(this.currentUserId, 'pending');
-            const isPending = pendingRequests.some(r => r.from === user.id);
-            
+            let incomingRequests = await getIncomingFriendRequests(this.currentUserId);
+            let outgoingRequests = await getOutgoingFriendRequests(this.currentUserId);
+            const isPending = incomingRequests.some(r => r.from_user_id === user.id) || outgoingRequests.some(r => r.to_user_id === user.id);
+
             // Generate search result HTML
             const resultHTML = `
                 <div class="search-result-card">
@@ -459,6 +455,8 @@ export class FriendsView {
                             duration: 3000
                         });
                     }
+                    // reload friend requests to update request count display
+                    this.loadFriendRequests();
                 });
             });
         } catch (error) {

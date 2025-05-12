@@ -1,11 +1,13 @@
 import { Router } from '../core/router.js';
-import { getUserById, updateUserProfile } from '../services/UserService.js';
+import { getUserById, getCurrentUser, updateUserProfile } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
+import { currentUser as currentUser} from '../main.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;
     private router: Router;
-    private currentUserId: number = 1; // default logged-in user
+    private currentUserId: number = currentUser?.id || -1;
+    
     private profileUserId: number;
 
     constructor(router: Router, userId?: string) {
@@ -452,7 +454,14 @@ export class ProfileView {
                     });
                     
                     // Reload the profile to show updates
-                    window.location.reload();
+                    // window.location.reload();
+                    // window.location.hash = '#/profile/';
+                    // this.router.navigate('/profile');
+                    // window.dispatchEvent(new HashChangeEvent('hashchange', {
+                    //     oldURL: window.location.href,
+                    //     newURL: window.location.href
+                    // }));
+                    this.router.reload();
                 } else {
                     throw new Error('Failed to update profile');
                 }
@@ -470,14 +479,14 @@ export class ProfileView {
                     duration: 3000
                 });
                 
-                // Reset save button
-                if (saveButton) {
-                    saveButton.innerHTML = 'Save Changes';
-                    saveButton.removeAttribute('disabled');
-                }
+            }
+            // Reset save button
+            if (saveButton) {
+                saveButton.innerHTML = 'Save Changes';
+                saveButton.removeAttribute('disabled');
             }
         });
-        
+
         // Close modal when clicking the close button or cancel or outside
         closeButton?.addEventListener('click', () => {
             modal!.style.display = 'none';
