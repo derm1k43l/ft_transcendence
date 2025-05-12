@@ -1,6 +1,3 @@
-// TODO
-// pending friend requests should be automatically deleted after status update, reject/accept
-
 const getFriendRequests = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
@@ -204,31 +201,38 @@ const updateFriendRequestStatus = async (req, reply) => {
 
 		const { from_user_id, to_user_id } = request;
 
-		const updateResult = db.prepare('UPDATE friend_requests SET status = ? WHERE id = ?').run(status, id);
-
-		if (updateResult.changes === 0) {
-			reply.code(500).send({ message: 'Failed to update request status' }); // Should not happen if request was found
-			return;
-		}
+		let responseMessage = '';
+		let statusCode = 200;
 
 		if (status === 'accepted') {
 			try {
-				// Add friendship in both directions
-				db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)').run(from_user_id, to_user_id);
-				db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)').run(to_user_id, from_user_id);
-				reply.send({ message: 'Friend request accepted and friendship created' });
+				const addFriendshipAndDeleteRequest = db.transaction(() => {
+					db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)').run(from_user_id, to_user_id);
+					db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)').run(to_user_id, from_user_id);
+					// Delete the request after successful friendship creation
+					db.prepare('DELETE FROM friend_requests WHERE id = ?').run(id);
+				});
+				addFriendshipAndDeleteRequest();
+
+				responseMessage = 'Friend request accepted, friendship created, and request deleted.';
+
 			} catch (err) {
-				if (err.message.includes('UNIQUE constraint failed')) {
-					reply.code(409).send({ message: 'Friendship already exists, request marked as accepted' });
+				if (err.message.includes('UNIQUE constraint failed')) { // If friendship already exists, the request should still be deleted
+					db.prepare('DELETE FROM friend_requests WHERE id = ?').run(id);
+					responseMessage = 'Friendship already exists. Friend request deleted.';
+					statusCode = 409;
 				} else {
 					req.log.error(err);
-					reply.code(500).send({ message: 'Error creating friendship after accepting request', error: err.message });
+					reply.code(500).send({ message: 'Error processing friend request acceptance', error: err.message });
+					return;
 				}
 			}
-		} else { // status === 'rejected'
-			reply.send({ message: 'Friend request rejected' });
+		} else { // status === 'rejected', simply delete the request.
+			db.prepare('DELETE FROM friend_requests WHERE id = ?').run(id);
+			responseMessage = 'Friend request rejected and deleted.';
 		}
 
+		reply.code(statusCode).send({ message: responseMessage });
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error updating friend request status' });
