@@ -264,8 +264,8 @@ export async function getOutgoingFriendRequests(userId: number): Promise<FriendR
 
 export async function acceptFriendRequest(userId: number, requestId: number): Promise<boolean> {
     try {
-        await api.put(`/friend-requests/${requestId}/accept`, {
-            user_id: userId
+        await api.put(`/friend-requests/status/${requestId}`, {
+            status: "accepted"
         });
         return true;
     } catch (error: any) {
@@ -276,8 +276,8 @@ export async function acceptFriendRequest(userId: number, requestId: number): Pr
 
 export async function rejectFriendRequest(userId: number, requestId: number): Promise<boolean> {
     try {
-        await api.put(`/friend-requests/${requestId}/reject`, {
-            user_id: userId
+        await api.put(`/friend-requests/status/${requestId}`, {
+            status: "rejected"
         });
         return true;
     } catch (error: any) {

@@ -348,6 +348,10 @@ export class FriendsView {
                                     type: 'info',
                                     duration: 3000
                                 });
+                            
+                                // Reload both friend lists
+                                await this.loadFriends();
+                                await this.loadFriendRequests();
                             }
                         }
                     } catch (error) {
