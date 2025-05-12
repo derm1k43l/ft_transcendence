@@ -158,7 +158,7 @@ const addPlayerToTournamentOpts = {
 		params: {
 			type: 'object',
 			properties: {
-				id: { type: 'integer', description: 'Tournament ID' }
+				id: { type: 'integer' }
 			},
 			required: ['id']
 		},
@@ -183,8 +183,8 @@ const removePlayerFromTournamentOpts = {
 		params: {
 			type: 'object',
 			properties: {
-				id: { type: 'integer', description: 'Tournament ID' },
-				playerId: { type: 'integer', description: 'ID of the player to remove' }
+				id: { type: 'integer'},
+				playerId: { type: 'integer' }
 			},
 			required: ['id', 'playerId']
 		},
@@ -208,7 +208,7 @@ const getPlayersInTournamentOpts = {
 		params: {
 			type: 'object',
 			properties: {
-				id: { type: 'integer', description: 'Tournament ID' }
+				id: { type: 'integer' }
 			},
 			required: ['id']
 		},
