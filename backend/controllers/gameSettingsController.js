@@ -39,7 +39,7 @@ const addGameSettings = async (req, reply) => {
 		}
 
 		try {
-			const result = db.prepare('INSERT INTO game_settings (user_id, board_color, paddle_color, ball_color, score_color) VALUES (?, ?, ?, ?, ?, ?, ?)').run(user_id, board_color, paddle_color, ball_color, score_color);
+			const result = db.prepare('INSERT INTO game_settings (user_id, board_color, paddle_color, ball_color, score_color) VALUES (?, ?, ?, ?, ?)').run(user_id, board_color, paddle_color, ball_color, score_color);
 			const newSettings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(user_id);
 			reply.code(201).send(newSettings);
 		} catch (err) {

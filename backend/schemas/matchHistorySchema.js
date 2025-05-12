@@ -13,6 +13,8 @@ const MatchHistoryItem = {
 		date: { type: 'string', format: 'date-time' },
 		duration: { type: 'string', minLength: 1, nullable: true },
 		game_mode: { type: 'string', minLength: 1 }, // could be enum depending on the modes
+		status: { type: 'string', enum: ['pending', 'running', 'finished'] },
+		tournament_id: { type: 'integer', nullable: true },
 	},
 };
 

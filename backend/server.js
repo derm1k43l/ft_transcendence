@@ -6,6 +6,10 @@ TODO:
 	update user stats logic && gameSettings logic (maybe)
 	make .js into .ts?
 	delete friend requests automatically after it's updated
+	figure out how to make http into https
+	google sign in and 2FA look into
+	add tournament (should be working)
+	check findUserByUsername and email
 */
 
 const fastify = require('fastify')( {logger: true} );
@@ -80,7 +84,8 @@ fastify.register(require('./routes/achievementsRoutes'), { prefix: '/api/achieve
 fastify.register(require('./routes/friendsRoutes'), { prefix: '/api/friends' });
 fastify.register(require('./routes/friendRequestsRoutes'), { prefix: '/api/friend-requests' });
 fastify.register(require('./routes/chatMessagesRoutes'), { prefix: 'api/chat-messages' });
-fastify.register(require('./routes/notificationsRoutes'), { prefix: '/api/notifications' }); // wip (add prehandler to notification routes)
+fastify.register(require('./routes/notificationsRoutes'), { prefix: '/api/notifications' });
+fastify.register(require('./routes/tournamentRoutes'), { prefix: '/api/tournament' });
 
 const PORT = process.env.PORT || 3000;
 
@@ -134,7 +139,11 @@ fastify.after((err) => {
 			date TEXT NOT NULL,
 			duration TEXT,
 			game_mode TEXT,
+			status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'running', 'finished')),
+			tournament_id INTEGER,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+			FOREIGN KEY (opponent_id) REFERENCES users (id) ON DELETE CASCADE,
+			FOREIGN KEY (tournament_id) REFERENCES tournaments (id) ON DELETE SET NULL
 			);
 
 			CREATE TABLE IF NOT EXISTS achievements (
@@ -188,6 +197,25 @@ fastify.after((err) => {
 			related_user_id INTEGER,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
 			FOREIGN KEY (related_user_id) REFERENCES users (id) ON DELETE SET NULL
+			);
+
+			CREATE TABLE IF NOT EXISTS tournaments (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			tournament_name TEXT NOT NULL,
+			player_amount INTEGER NOT NULL,
+			status TEXT NOT NULL CHECK(status IN ('pending', 'running', 'finished')),
+			start_date TEXT NOT NULL,
+			end_date TEXT,
+			winner_user_id INTEGER,
+			FOREIGN KEY (winner_user_id) REFERENCES users (id) ON DELETE SET NULL
+			);
+
+			CREATE TABLE IF NOT EXISTS tournaments_players (
+			tournament_id INTEGER NOT NULL,
+			player_id INTEGER NOT NULL,
+			PRIMARY KEY (tournament_id, player_id),
+			FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+			FOREIGN KEY (player_id) REFERENCES users(id) ON DELETE CASCADE
 			);
 		`);
 		fastify.log.info('Database initialized (tables checked/created).');

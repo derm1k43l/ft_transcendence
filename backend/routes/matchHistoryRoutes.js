@@ -73,16 +73,18 @@ const addMatchHistoryItemOpts = {
 	schema: {
 		body: {
 			type: 'object',
-			required: ['user_id', 'opponent_id', 'opponent_name', 'result', 'score', 'date'],
+			required: ['user_id', 'opponent_id', 'opponent_name', 'result', 'score', 'date', 'status'],
 			properties: {
 				user_id: { type: 'integer'},
 				opponent_id: { type: 'integer'},
 				opponent_name: { type: 'string'},
-				result: { type: 'string'}, // Add validation for enum 'win', 'loss', 'draw' maybe
+				result: { type: 'string'},
 				score: { type: 'string'},
 				date: { type: 'string'},
 				duration: { type: 'string'},
 				game_mode: { type: 'string'},
+				status: { type: 'string' },
+				tournament_id: { type: 'integer' },
 			},
 		},
 		response: {
@@ -115,6 +117,8 @@ const updateMatchHistoryItemOpts = {
 				date: { type: 'string'},
 				duration: { type: 'string'},
 				game_mode: { type: 'string'},
+				status: { type: 'string' },
+				tournament_id: { type: 'integer' },
 			}
 		},
 		response: {

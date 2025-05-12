@@ -1,7 +1,7 @@
 const getMatchHistory = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
-		const history = db.prepare('SELECT * FROM match_history').all();
+		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id FROM match_history').all();
 		reply.send(history);
 	} catch (error) {
 		req.log.error(error);
@@ -13,7 +13,7 @@ const getMatchHistoryItem = async (req, reply) => {
 	try {
 		const { id } = req.params;
 		const db = req.server.betterSqlite3;
-		const item = db.prepare('SELECT * FROM match_history WHERE id = ?').get(id);
+		const item = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id FROM match_history WHERE id = ?').get(id);
 
 		if (!item) {
 			reply.code(404).send({ message: 'Match history item not found' });
@@ -30,7 +30,7 @@ const getMatchHistoryForUser = async (req, reply) => {
 	try {
 		const { userId } = req.params;
 		const db = req.server.betterSqlite3;
-		const history = db.prepare('SELECT * FROM match_history WHERE user_id = ?').all(userId); // Assuming user_id is the primary user in the row
+		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id FROM match_history WHERE user_id = ? OR opponent_id = ?').all(userId, userId);
 		reply.send(history);
 	} catch (error) {
 		req.log.error(error);
@@ -40,32 +40,22 @@ const getMatchHistoryForUser = async (req, reply) => {
 
 const addMatchHistoryItem = async (req, reply) => {
 	try {
-		const { user_id, opponent_id, opponent_name, result, score, date, duration, game_mode } = req.body;
+		const { user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id } = req.body;
 		const db = req.server.betterSqlite3;
 
-		if (!user_id || !opponent_id || !opponent_name || !result || !score || !date) {
-			reply.code(400).send({ message: 'user_id, opponent_id, opponent_name, result, score, and date are required' });
-			return;
-		}
-
-		// Optional: Check if user_id and opponent_id exist in the users table
 		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
 		const opponentExists = db.prepare('SELECT id FROM users WHERE id = ?').get(opponent_id);
-
-		if (!userExists) {
-			reply.code(400).send({ message: 'Invalid user_id' });
-			return;
+		if (!userExists) { reply.code(400).send({ message: 'Invalid user_id' }); return; }
+		if (!opponentExists) { reply.code(400).send({ message: 'Invalid opponent_id' }); return; }
+		if (tournament_id !== undefined && tournament_id !== null) { // Only check if tournament_id is provided
+			const tournamentExists = db.prepare('SELECT id FROM tournaments WHERE id = ?').get(tournament_id);
+			if (!tournamentExists) { reply.code(400).send({ message: 'Invalid tournament_id' }); return; }
 		}
-		if (!opponentExists) {
-			reply.code(400).send({ message: 'Invalid opponent_id' });
-			return;
-		}
-
 
 		try {
-			const resultRun = db.prepare('INSERT INTO match_history (user_id, opponent_id, opponent_name, result, score, date, duration, game_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(user_id, opponent_id, opponent_name, result, score, date, duration, game_mode);
+			const resultRun = db.prepare('INSERT INTO match_history (user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id);
 			const newItemId = resultRun.lastInsertedRowid;
-			const newItem = db.prepare('SELECT * FROM match_history WHERE id = ?').get(newItemId);
+			const newItem = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id FROM match_history WHERE id = ?').get(newItemId);
 			reply.code(201).send(newItem);
 		} catch (err) {
 			req.log.error(err); // Log the actual database error
@@ -80,16 +70,24 @@ const addMatchHistoryItem = async (req, reply) => {
 const updateMatchHistoryItem = async (req, reply) => {
 	try {
 		const { id } = req.params;
-		const { user_id, opponent_id, opponent_name, result, score, date, duration, game_mode } = req.body;
+		const { user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id } = req.body;
 		const db = req.server.betterSqlite3;
 
 		let query = 'UPDATE match_history SET';
 		const params = [];
-		const fields = { user_id, opponent_id, opponent_name, result, score, date, duration, game_mode };
+		const fields = { user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id };
 		let firstField = true;
 
 		for (const field in fields) {
 			if (fields[field] !== undefined) {
+				if (field === 'user_id' || field === 'opponent_id') {
+					const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(fields[field]);
+					if (!userExists) { reply.code(400).send({ message: `Invalid ${field}` }); return; }
+				}
+				if (field === 'tournament_id' && fields[field] !== null) {
+					const tournamentExists = db.prepare('SELECT id FROM tournaments WHERE id = ?').get(fields[field]);
+					if (!tournamentExists) { reply.code(400).send({ message: 'Invalid tournament_id' }); return; }
+				}
 				if (!firstField) {
 					query += ',';
 				}
@@ -117,7 +115,7 @@ const updateMatchHistoryItem = async (req, reply) => {
 				reply.code(200).send({ message: 'No changes made to match history item' });
 			}
 		} else {
-			const updatedItem = db.prepare('SELECT * FROM match_history WHERE id = ?').get(id);
+			const updatedItem = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status, tournament_id FROM match_history WHERE id = ?').get(id);
 			reply.send(updatedItem);
 		}
 
