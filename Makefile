@@ -19,6 +19,22 @@ start_docker:
 		echo ""; \
 	fi
 
+# set up docker in goinfre for people using dorker
+docker_goinfre:
+		@rm -rf /goinfre/${USER}/docker/com.docker.docker;
+		@rm -rf /goinfre/${USER}/docker/com.docker.helper;
+		@rm -rf /goinfre/${USER}/docker/.docker;
+		@unlink ~/Library/Containers/com.docker.docker &>/dev/null || true;
+		@unlink ~/Library/Containers/com.docker.helper &>/dev/null || true;
+		@unlink ~/.docker &>/dev/null || true;
+		@rm -rf ~/Library/Containers/com.docker.docker ~/Library/Containers/com.docker.helper ~/.docker;
+		@mkdir -p /goinfre/${USER}/docker/com.docker.docker/Data;
+		@mkdir -p /goinfre/${USER}/docker/com.docker.helper;
+		@mkdir -p /goinfre/${USER}/docker/.docker;
+		@ln -sf /goinfre/${USER}/docker/com.docker.docker ~/Library/Containers/com.docker.docker;
+		@ln -sf /goinfre/${USER}/docker/com.docker.helper ~/Library/Containers/com.docker.helper;
+		@ln -sf /goinfre/${USER}/docker/.docker ~/.docker;
+
 # Start all containers
 start_containers:
 	@echo "Starting all containers..."
@@ -71,4 +87,4 @@ logs_backend: start_docker
 logs_database: start_docker
 	@docker-compose -f $(NAME) logs database
 
-.PHONY: all start_docker start_containers frontend_dev backend_dev down fclean re ps db logs_frontend logs_backend logs_database
+.PHONY: all start_docker docker_goinfre start_containers frontend_dev backend_dev down fclean re ps db logs_frontend logs_backend logs_database
