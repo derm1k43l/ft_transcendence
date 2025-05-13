@@ -19,7 +19,7 @@
     transition: transform 0.2s ease, box-shadow 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 0 0 10px rgb(124, 92, 255);
+    /* box-shadow: 0 0 10px rgb(124, 92, 255); */
     width: 360px;
     text-align: center;
 }
@@ -27,7 +27,7 @@
 #modeContainer button:hover {
     background-color: rgb(124, 92, 255);
     color: #1a1a40;
-    box-shadow: 0 0 15px rgb(124, 92, 255), 0 0 25px rgb(124, 92, 255);
+    /* box-shadow: 0 0 15px rgb(124, 92, 255), 0 0 25px rgb(124, 92, 255); */
     transform: scale(1.05);
 }
 
