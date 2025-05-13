@@ -1,11 +1,11 @@
 import { Router } from '../core/router.js';
-import { registerUser } from '../services/UserService.js';
+import * as Auth from '../services/auth.js';
 import { NotificationManager } from '../components/Notification.js';
 import { UserProfile } from '../types/index.js';
 import { api } from '../services/api.js'
 
 //temp
-import { findUserByUsername, findUserByEmail,  getUserById, getCurrentUser } from '../services/UserService.js';
+import { getUserById } from '../services/UserService.js';
 
 
 export class RegisterView {
@@ -22,7 +22,7 @@ export class RegisterView {
         console.log('auth token: ', localStorage.getItem('auth_token'));
 
         console.log("\n\ncurrent user: ");
-        const tmp1 = await getCurrentUser();
+        const tmp1 = await Auth.getCurrentUser();
         console.log(tmp1);
 
         console.log("\n\nall users");
@@ -31,11 +31,11 @@ export class RegisterView {
             console.log(user);
 
         console.log("\n\nuser with name 'user1'");
-        const tmp2 = await findUserByUsername('user1');
+        const tmp2 = await Auth.findUserByUsername('user1');
         console.log(tmp2);
 
         console.log("\n\nuser with email 'test@gmail.com'");
-        const tmp3 = await findUserByEmail('test@gmail.com');
+        const tmp3 = await Auth.findUserByEmail('test@gmail.com');
         console.log(tmp3);
 
         console.log("\n\nuser with ID '2'");
@@ -143,7 +143,7 @@ export class RegisterView {
         }
 
         try {
-            const newUser = await registerUser({
+            const newUser = await Auth.register({
                 username,
                 email,
                 password,

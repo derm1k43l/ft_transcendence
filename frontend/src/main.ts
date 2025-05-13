@@ -9,13 +9,12 @@ import { TournamentView } from './views/Tournament.js';
 import { RegisterView } from './views/Register.js';
 import { DashboardView } from './views/Dashboard.js';
 import { NotificationManager } from './components/Notification.js';
-import { findUserByUsername, getCurrentUser, getUserById, logout } from './services/UserService.js'
+import { LoginView } from './views/Login.js';
 import { UserProfile } from './types/index.js';
-import { login } from './services/UserService.js';
+import * as Auth from './services/auth.js';
 
 // --- State ---
 let isLoggedIn = false;
-// export let user: UserProfile | null = null; // Store logged-in user details
 export let currentUser: UserProfile | null = null; // Store logged-in user details
 
 // --- DOM Elements ---
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function initializeUser(): Promise<void> {
-    currentUser = await getCurrentUser();
+    currentUser = await Auth.initializeAuth();
     if (currentUser)
         isLoggedIn = true;
 }
@@ -87,8 +86,6 @@ function initializeApp(): void {
         return;
     }
 
-    console.log('App Initializing...');
-
     // Setup Router - Targets the app's content area
     router = new Router(appContentRoot);
 
@@ -118,19 +115,13 @@ function initializeApp(): void {
     // --- Initial UI State ---
     updateUI(); // Show login or app view based on initial state
 
-    // Check for register route
-    if (window.location.hash === '#/register' && loginFormContainer) {
-        // Create and render register view
-        const registerView = new RegisterView(router);
-        
-        // Hide login form elements first
-        const loginFormElements = loginFormContainer.querySelectorAll(':not(.register-view)');
-        loginFormElements.forEach(el => {
-            (el as HTMLElement).style.display = 'none';
-        });
-        
-        // Render register view
-        registerView.render(loginFormContainer);
+    // Handle routes for login/register when not logged in
+    if (!isLoggedIn) {
+        if (window.location.hash === '#/register' && loginFormContainer) {
+            handleRegisterView();
+        } else if (loginFormContainer) {
+            handleLoginView();
+        }
     }
 
     // Handle initial deep linking or back/forward navigation if logged in
@@ -143,30 +134,64 @@ function initializeApp(): void {
         updateSidebarLinks(window.location.hash);
     }
 
-    // Listen for hash changes to update main content
+
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash;
         console.log(`Hash changed to: ${hash}`);
         
-        if (isLoggedIn) {
+    if (isLoggedIn) {
+        // Handle case where hash is exactly '#'
+        if (hash === '#') {
+            router.navigate('/');
+        } else {
             router.handleRouteChange();
-            updateSidebarLinks(window.location.hash);
-        } else if (hash === '#/register' && loginFormContainer) {
-            // Handle register route
-            
-            // Clear existing content
-            while (loginFormContainer.firstChild) {
-                loginFormContainer.removeChild(loginFormContainer.firstChild);
-            }
-            
-            // Create and render register view
-            const registerView = new RegisterView(router);
-            registerView.render(loginFormContainer);
-        } else if (hash === '' || hash === '#/') {
-            // Reset to login form
-            window.location.reload(); // Simple approach to reset the login form
         }
+        updateSidebarLinks(window.location.hash);
+    } else if (hash === '#/register' && loginFormContainer) {
+        handleRegisterView();
+    } else if ((hash === '' || hash === '#' || hash === '#/') && loginFormContainer) {
+        handleLoginView();
+    }
     });
+}
+
+// New function to handle login view rendering
+function handleLoginView(): void {
+    if (!loginFormContainer) return;
+    
+    // Clear existing content
+    loginFormContainer.innerHTML = '';
+    
+    // Create and render login view
+    const loginView = new LoginView(router, (user) => {
+        currentUser = user;
+        isLoggedIn = true;
+        updateUI();
+    });
+    
+    loginView.render(loginFormContainer);
+    
+    // Update URL without triggering another reload
+    if (window.location.hash !== '#/') {
+        history.pushState(null, document.title, '#/');
+    }
+}
+
+// New function to handle register view rendering
+function handleRegisterView(): void {
+    if (!loginFormContainer) return;
+    
+    // Clear existing content
+    loginFormContainer.innerHTML = '';
+    
+    // Create and render register view
+    const registerView = new RegisterView(router);
+    registerView.render(loginFormContainer);
+    
+    // Update URL without triggering another reload
+    if (window.location.hash !== '#/register') {
+        history.pushState(null, document.title, '#/register');
+    }
 }
 
 // --- Functions ---
@@ -342,127 +367,12 @@ function showAboutModal(): void {
 }
 
 function setupEventListeners(): void {
-    const loginForm = document.getElementById('login-form') as HTMLFormElement | null;
-    loginForm?.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        console.log('Login attempt...');
-
-        const usernameInput = document.getElementById('username') as HTMLInputElement | null;
-        const passwordInput = document.getElementById('password') as HTMLInputElement | null;
-
-        if (!usernameInput || !passwordInput) {
-            console.error("Login form inputs not found");
-            return;
-        }
-
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-
-
-        // Debug login attempt keep for database user testing
-        console.log(`Login attempt with username: "${username}" and password: "${password}"`);
-
-        try {
-
-            currentUser = (await login({ username, password })).user;
-            console.log(`Login successful`);
-            isLoggedIn = true;
-
-            NotificationManager.show({
-                title: 'Welcome',
-                message: `Welcome back, ${currentUser.display_name}!`,
-                type: 'info',
-                duration: 3000
-            });
-
-            updateUI();
-            router.navigate('/');
-        } catch (error: any) {
-            console.log('Login failed: Invalid username or password');
-            currentUser = null;
-            NotificationManager.show({
-                title: 'Login Failed',
-                message: error,
-                type: 'error',
-                duration: 5000
-            });
-            updateUI();
-            router.navigate('/'); // Navigate to Dashboard (root now..) after successful login
-        }
-        usernameInput.value = '';
-        passwordInput.value = '';
-    });
-
-    // Register link
-    const registerLink = document.querySelector('.register-link a');
-    if (registerLink) {
-        // Remove any existing event listeners
-        const newRegisterLink = registerLink.cloneNode(true);
-        if (registerLink.parentNode) {
-            registerLink.parentNode.replaceChild(newRegisterLink, registerLink);
-        }
-        
-        // Add our new event listener
-        newRegisterLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("Register link clicked, navigating to register view");
-            
-            // Get the login form elements to hide
-            const loginForm = document.getElementById('login-form');
-            const socialLogin = document.querySelector('.social-login');
-            const registerLinkContainer = document.querySelector('.register-link');
-            
-            // Hide them
-            if (loginForm) (loginForm as HTMLElement).style.display = 'none';
-            if (socialLogin) (socialLogin as HTMLElement).style.display = 'none';
-            if (registerLinkContainer) (registerLinkContainer as HTMLElement).style.display = 'none';
-            
-            // Clear existing content from the container
-            if (loginFormContainer) {
-                // Clear all content
-                loginFormContainer.innerHTML = '';
-                
-                // Create and render register view
-                const registerView = new RegisterView(router);
-                registerView.render(loginFormContainer);
-            }
-            
-            // Update URL without triggering another reload
-            history.pushState(null, document.title, '#/register');
-        });
-    }
-
-    // Social login buttons
-    const fortytwoButton = document.querySelector('.social-button.fortytwo');
-    fortytwoButton?.addEventListener('click', () => {
-        console.log('fortytwoButton was pressed');
-        NotificationManager.show({
-            title: '42 Login',
-            message: '42 is not implemented.',
-            type: 'info',
-            duration: 3000
-        });
-    });
-    const googleButton = document.querySelector('.social-button.google');
-    googleButton?.addEventListener('click', () => {
-        // this will redirect to Google OAuth
-        console.log('Google login clicked');
-        NotificationManager.show({
-            title: 'Google Login',
-            message: 'Google login would be implemented here. ',
-            type: 'info',
-            duration: 3000
-        });
-    });
-
     // Logout Button
     logoutButton?.addEventListener('click', (event) => {
         event.preventDefault();
-        console.log('Logout');
         isLoggedIn = false;
         currentUser = null;
-        logout();
+        Auth.logout();
         updateUI();
 
         NotificationManager.show({
@@ -472,6 +382,8 @@ function setupEventListeners(): void {
             duration: 3000
         });
 
+        //or?
+        window.location.hash = '#';
     });
 }
 
@@ -491,6 +403,9 @@ function updateUI(): void {
 
         // Apply responsive layout
         updateResponsiveLayout();
+        if (!window.location.hash || window.location.hash === '#/') {
+            router.navigate('/');
+        }
 
     } else {
         loginViewElement?.classList.add('active');

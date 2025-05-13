@@ -69,6 +69,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hb
 	"bio": "YOŒO%%OO% WEOOWOAWOE WOOOIWWIIIWEEE"
 }
 
+### TEST AVATAR UPLOAD WITH CURL in terminal
+curl -X PUT http://localhost:3000/api/users/2/avatar -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NzEyNTc5M30.QP3Q8j4odsOMbTYHiumGrWJJXIy1BB3XsnQZoD10aUM" -F "avatar=@/Users/rhorvath/Documents/rustedwall.jpeg"
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

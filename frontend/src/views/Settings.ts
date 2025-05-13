@@ -4,13 +4,12 @@ import {
     getUserGameSettings, 
     updateUserGameSettings, 
     updateUserProfile, 
-    updateUserPassword,
     resetUserStats,
-    deleteUserAccount
 } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 import { GameSettings } from '../types/index.js';
 import { currentUser } from '../main.js';
+import * as Auth from '../services/auth.js';
 
 export class SettingsView {
     private element: HTMLElement | null = null;
@@ -433,7 +432,7 @@ export class SettingsView {
             
             try {
                 // API call to update password
-                const success = await updateUserPassword(this.currentUserId, currentPassword, newPassword);
+                const success = await Auth.updateUserPassword(this.currentUserId, currentPassword, newPassword);
                 
                 if (success) {
                     NotificationManager.show({
@@ -675,7 +674,7 @@ export class SettingsView {
                         throw new Error("User ID is not a valid number.");
                         }
 
-                        const result = await deleteUserAccount(numericUserId);
+                        const result = await Auth.deleteUserAccount(numericUserId);
                         if (!result) {
                             throw new Error("Failed to delete account.");
                         }

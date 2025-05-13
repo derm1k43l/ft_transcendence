@@ -23,27 +23,6 @@ import { NotificationManager } from '../components/Notification.js';
 
 // ===== User Management Functions =====
 
-// User lookup functions
-export async function findUserByUsername(username: string): Promise<UserProfile | null> {
-	try {
-		const user = (await api.get(`/users/byname/${username}`)).data as UserProfile;
-		return user;
-	} catch (error) {
-		console.error(`Failed to fetch user with Username ${username}:`);
-		return null;
-	}
-}
-
-export async function findUserByEmail(email: string): Promise<UserProfile | null> {
-	try {
-		const user = (await api.get(`/users/byemail/${email}`)).data as UserProfile;
-		return user;
-	} catch (error) {
-		console.error(`Failed to fetch user with Email ${email}:`);
-		return null;
-	}
-}
-
 export async function getUserById(id: number): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/${id}`)).data as UserProfile;
@@ -63,50 +42,6 @@ export async function getUserGameSettings(userId: number): Promise<GameSettings 
 		return null;
 	}
 }
-
-export async function registerUser(userData: {
-	username: string;
-	password: string;
-	display_name: string;
-	email: string;
-}): Promise<UserProfile> {
-	try {
-	  const response = await api.post('/users', userData);
-	  return response.data;
-	} catch (error: any) {
-	  console.error('Error registering user:', error.response.data.message);
-	  throw error.response.data.message;
-	}
-}
-
-export async function login(credentials: {
-	username: string;
-	password: string;
-  }): Promise<LoginResponse> {
-	try {
-		const response = await api.post('/users/login', credentials);
-		// Store token for future requests
-		if (response.data.token) {
-			localStorage.setItem('auth_token', response.data.token);
-		}
-		return response.data;
-	} catch (error: any) {
-		console.error('Login error:', error.response.data.message);
-		throw error.response.data.message;
-	}
-}
-
-
-export async function getCurrentUser(): Promise<UserProfile | null> {
-	try {
-		const user = (await api.get(`/users/current`)).data as UserProfile;
-		return user;
-	} catch (error) {
-		console.error(`Failed to fetch current user: not logged in`);
-		return null;
-	}
-}
-
 
 // above functions are tested and working
 
@@ -175,18 +110,6 @@ export async function resetUserStats(userId: number): Promise<boolean> {
 		return false;
 	}
 }
-
-//testt
-export async function deleteUserAccount(userId: number): Promise<boolean> {
-    try {
-        await api.delete(`/users/${userId}`);
-        return true;
-    } catch (error: any) {
-        console.error(`Error deleting user account for ID ${userId}:`, error?.response?.data?.message || error);
-        return false;
-    }
-}
-
 
 // ===== Leaderboard Functions =====
 
@@ -310,37 +233,6 @@ export async function updateUserGameSettings(userId: number, settings: GameSetti
 
 export async function resetUserGameSettings(userId: number): Promise<boolean> {
     return updateUserGameSettings(userId, { ...DEFAULT_GAME_SETTINGS });
-}
-
-// mywbe here also soem security 
-export async function updateUserPassword(userId: number, currentPassword: string, newPassword: string): Promise<boolean> {
-    try {
-        await api.put(`/users/${userId}/password`, {
-            current_password: currentPassword,
-            new_password: newPassword
-        });
-        return true;
-    } catch (error: any) {
-        console.error(`Failed to update password for user ID: ${userId}`, error?.response?.data?.message || error);
-        return false;
-    }
-}
-
-
-
-
-export async function logout(): Promise<void> {
-	try {
-	  // Call the logout endpoint if it exists
-	  if (localStorage.getItem('auth_token')) {
-		await api.post('/users/logout', {});
-	  }
-	} catch (error) {
-	  console.error('Error during logout:', error);
-	} finally {
-	  // Always clear the token regardless of API result
-	  localStorage.removeItem('auth_token');
-	}
 }
 
 export function getRankIcon(rank: string): string {

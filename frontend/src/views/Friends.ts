@@ -1,7 +1,7 @@
 import { Router } from '../core/router.js';
 import { NotificationManager } from '../components/Notification.js';
+import * as Auth from '../services/auth.js';
 import { 
-    findUserByUsername,
     getUserById, 
     sendFriendRequest, 
     getFriendsList,
@@ -11,8 +11,6 @@ import {
     rejectFriendRequest
 } from '../services/UserService.js';
 import { currentUser } from '../main.js';
-
-import { UserProfile, Friend, FriendRequest } from '../types/index.js';
 
 export class FriendsView {
     private element: HTMLElement | null = null;
@@ -175,7 +173,7 @@ export class FriendsView {
             }
 
             if (!friends || friends.length === 0) {
-                friendsGrid.innerHTML = '<p class="empty-message">You don\'t have any friends yet. Use the search to find other players.</p>';
+                friendsGrid.innerHTML = '<p class="chat-welcome">You don\'t have any friends yet. Use the search to find other players.</p>';
                 return;
             }
 
@@ -259,7 +257,7 @@ export class FriendsView {
             }
             
             if (pendingRequests.length === 0) {
-                requestsList.innerHTML = '<p class="empty-message">You don\'t have any friend requests.</p>';
+                requestsList.innerHTML = '<p class="chat-welcome">You don\'t have any friend requests.</p>';
                 return;
             }
             
@@ -279,12 +277,14 @@ export class FriendsView {
                             <p class="request-date">Requested ${request.date}</p>
                         </div>
                         <div class="request-actions">
-                            <button class="request-button accept" data-id="${request.id}" data-user-id="${fromUser.id}">
+                            <button class="request-button accept app-button" data-id="${request.id}" data-user-id="${fromUser.id}">
                                 Accept
                             </button>
-                            <button class="request-button reject" data-id="${request.id}" data-user-id="${fromUser.id}">
+                            <button class="request-button reject app-button danger" data-id="${request.id}" data-user-id="${fromUser.id}">
                                 Reject
                             </button>
+                        </div>
+                    </div>
                         </div>
                     </div>
                 `;
@@ -383,10 +383,10 @@ export class FriendsView {
         
         try {
             // Use API to search for user
-            const user = await findUserByUsername(searchTerm);
+            const user = await Auth.findUserByUsername(searchTerm);
             
             if (!user || user.id === this.currentUserId) {
-                searchResults.innerHTML = '<p class="empty-message">No users found matching your search.</p>';
+                searchResults.innerHTML = '<p class="chat-welcome">No users found matching your search.</p>';
                 return;
             }
             
