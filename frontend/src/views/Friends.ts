@@ -279,12 +279,14 @@ export class FriendsView {
                             <p class="request-date">Requested ${request.date}</p>
                         </div>
                         <div class="request-actions">
-                            <button class="app-button" data-id="${request.id}" data-user-id="${fromUser.id}">
+                            <button class="request-button accept app-button" data-id="${request.id}" data-user-id="${fromUser.id}">
                                 Accept
                             </button>
-                            <button class="app-button danger" data-id="${request.id}" data-user-id="${fromUser.id}">
+                            <button class="request-button reject app-button danger" data-id="${request.id}" data-user-id="${fromUser.id}">
                                 Reject
                             </button>
+                        </div>
+                    </div>
                         </div>
                     </div>
                 `;
