@@ -26,7 +26,7 @@ export class TournamentView {
 			        <div id="my-tournaments" class="tournament-panel active">
 			            <h3>My Tournaments</h3>
 			            <div class="my-tournament-list">
-			                <div class="center-content">You don't participate in any tournaments right now</div>
+			                <div class="center-content" style="padding-left: 20px;">You don't participate in any tournaments right now</div>
 			            </div>
 			        </div>
 
