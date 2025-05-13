@@ -11,10 +11,10 @@ export class PongGame {
     private rightScoreElement: HTMLElement;
 
     // Ball position and speed
-    private ballX = 400;
-    private ballY = 250;
-    private ballSpeedX = 4;
-    private ballSpeedY = 4;
+    private ballX = 475;
+    private ballY = 295;
+    private ballSpeedX = 1.3;
+    private ballSpeedY = 1.3;
 
     // Paddle positions and scores
     private leftPaddleY = 0;
@@ -23,7 +23,7 @@ export class PongGame {
     private rightScore = 0;
 
     // Paddle settings
-    private readonly paddleSpeed = 10;
+    private readonly paddleSpeed = 3.5;
     private readonly paddleHeight = 80;
 
     // Game mode and key tracking
@@ -104,7 +104,7 @@ export class PongGame {
     // Start the game loop and optionally enable single-player mode
     start(isSinglePlayer = false) {
         this.isSinglePlayer = isSinglePlayer;
-        this.intervalId = window.setInterval(() => this.updateGame(), 16);
+        this.intervalId = window.setInterval(() => this.updateGame(), 1);
         if (this.isSinglePlayer) {
             this.startAI();
         }
@@ -144,6 +144,11 @@ export class PongGame {
         ) {
             this.ballSpeedX *= -1;
             this.ballX = 40; // Prevent sticking to the paddle
+            // increase ball speed after each paddle collision
+            if (Math.random() < 0.5)
+                this.ballSpeedX *= 1.1;
+            if (Math.random() < 0.5)
+                this.ballSpeedY *= 1.1;
         }
         if (this.ballX >= 895 && 
             this.ballY + 10 >= this.rightPaddleY &&
@@ -151,6 +156,11 @@ export class PongGame {
         ) {
             this.ballSpeedX *= -1;
             this.ballX = 895;
+            // increase ball speed after each paddle collision
+            if (Math.random() < 0.5)
+                this.ballSpeedX *= 1.1;
+            if (Math.random() < 0.5)
+                this.ballSpeedY *= 1.1;
         }
 
         // Player scores
@@ -184,9 +194,9 @@ export class PongGame {
         
             // MOVE PADDLE BASED ON KEY STATE
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
+                this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed*0.71, 0);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
+                this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed*0.71, 480);
         } else if (this.remotePlayer) {
             //implementing remote keys
         } else {
@@ -201,9 +211,11 @@ export class PongGame {
 
     // Reset ball to center and reverse direction after scoring
     private resetBall() {
-        this.ballX = 400;
-        this.ballY = 250;
+        this.ballX = 475;
+        this.ballY = 295;
         this.ballSpeedX *= -1;
+        this.ballSpeedX = this.ballSpeedX < 0 ? -1.3 : 1.3;
+        this.ballSpeedY = 1.3;
     }
 
     // Update DOM elements to reflect current game state
