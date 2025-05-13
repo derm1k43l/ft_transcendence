@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getUserById, getCurrentUser, updateUserProfile } from '../services/UserService.js';
+import { getUserById, updateUserProfile } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser as currentUser} from '../main.js';
 
