@@ -2,14 +2,11 @@
 TODO: 
 	add authentication to many schemas maybe (add forbidden(when in controllers) and unauth errors(ALWAYS) to protected schemas)
 	maybe make the DB be ignored by git?
-	implement login/out functions done. frontend has to do the rest, with JWT
 	update user stats logic && gameSettings logic (maybe)
-	make .js into .ts?
-	delete friend requests automatically after it's updated
 	figure out how to make http into https
 	google sign in and 2FA look into
-	add tournament (should be working)
-	check findUserByUsername and email
+	test tournament more
+	make .js into .ts?
 */
 
 const fastify = require('fastify')( {logger: true} );
@@ -17,6 +14,8 @@ const fs = require('fs'); //optional
 const path = require('path'); //optional
 const Database = require('better-sqlite3');
 const jwt = require('@fastify/jwt');
+const fastifyMultipart = require('@fastify/multipart');
+const fastifyStatic = require('@fastify/static');
 
 const dbDir = path.resolve(__dirname, './db');
 
@@ -48,6 +47,24 @@ try {
 
 // decorate fastify instance with db connection
 fastify.decorate('betterSqlite3', db);
+
+fastify.register(fastifyMultipart, {
+	limits: {
+		fileSize: 10 * 1024 * 1024, // max 10 MB to upload
+		files: 1 // max 1 file to upload
+	}
+});
+
+const UPLOAD_DIR = path.join(__dirname, './uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+	fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+fastify.register(fastifyStatic, {
+	root: UPLOAD_DIR,
+	prefix: '/uploads/', // /uploads url
+	immutable: true,
+});
 
 // create secret key (only need to run it once and copy the output and it's useable as the secret)
 const crypto = require('crypto'); // built into node.js
