@@ -259,7 +259,7 @@ export class FriendsView {
             }
             
             if (pendingRequests.length === 0) {
-                requestsList.innerHTML = '<p class="empty-message">You don\'t have any friend requests.</p>';
+                requestsList.innerHTML = '<p class="empty-message" style="padding-left: 20px;">You don\'t have any friend requests.</p>';
                 return;
             }
             
