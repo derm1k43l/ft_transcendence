@@ -39,10 +39,10 @@ export interface UserStats {
 
 // Game-related interfaces
 export interface GameSettings {
-    boardColor: string;
-    paddleColor: string;
-    ballColor: string;
-    scoreColor: string;
+    board_color: string;
+    paddle_color: string;
+    ball_color: string;
+    score_color: string;
 }
 
 export interface MatchRecord {

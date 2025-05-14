@@ -60,7 +60,6 @@ const getUser = async (req, reply) => {
 	try {
 		const { id } = req.params;
 		const db = req.server.betterSqlite3;
-		console.log("\n\n\nabxc\n\n\n");
 		
 		const user = db.prepare(`
 			SELECT 

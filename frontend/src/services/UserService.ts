@@ -223,7 +223,7 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
 
 export async function updateUserGameSettings(userId: number, settings: GameSettings): Promise<boolean> {
     try {
-        await api.put(`/users/${userId}/game-settings`, settings);
+        await api.put(`/game-settings/users/${userId}`, settings);
         return true;
     } catch (error: any) {
         console.error(`Failed to update game settings for user ID: ${userId}`, error?.response?.data?.message || error);

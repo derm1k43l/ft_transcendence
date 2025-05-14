@@ -108,7 +108,7 @@ export function getAuthenticatedUser(): UserProfile | null {
     return currentUser;
 }
 
-function clearAuthData(): void {
+export function clearAuthData(): void {
     localStorage.removeItem('auth_token');
     currentUser = null;
     isAuthenticated = false;

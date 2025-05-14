@@ -2,10 +2,10 @@ import { GameSettings } from '../types/index.js';
 
 // Default game settings
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  boardColor: '#000000',
-  paddleColor: '#FFFFFF',
-  ballColor: '#FFFFFF',
-  scoreColor: '#FFFFFF'
+  board_color: '#000000',
+  paddle_color: '#FFFFFF',
+  ball_color: '#FFFFFF',
+  score_color: '#FFFFFF'
 };
 
 // Default achievements 
