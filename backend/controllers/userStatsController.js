@@ -15,43 +15,6 @@ const getUserStat = async (req, reply) => {
 	}
 };
 
-const addUserStat = async (req, reply) => {
-	try {
-		const { user_id, wins = 0, losses = 0, rank, level = 1 } = req.body;
-		const db = req.server.betterSqlite3;
-
-		if (!user_id) {
-			reply.code(400).send({ message: 'user_id is required' });
-			return;
-		}
-
-		// Check if user exists
-		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
-		if (!userExists) {
-			reply.code(404).send({ message: 'User not found' });
-			return;
-		}
-
-		try {
-			db.prepare('INSERT INTO user_stats (user_id, wins, losses, rank, level) VALUES (?, ?, ?, ?, ?)').run(user_id, wins, losses, rank, level);
-			const newUserStat = db.prepare('SELECT * FROM user_stats WHERE user_id = ?').get(user_id);
-			reply.code(201).send(newUserStat);
-		} catch (err) {
-			if (err.message.includes('UNIQUE constraint failed')) {
-				reply.code(409).send({ message: 'User stats already exist for this user' });
-			} else if (err.message.includes('FOREIGN KEY constraint failed')) {
-				reply.code(400).send({ message: 'Invalid user_id' });
-			}
-			else {
-				throw err;
-			}
-		}
-	} catch (error) {
-		req.log.error(error);
-		reply.code(500).send({ message: 'Error adding user stats' });
-	}
-};
-
 const updateUserStat = async (req, reply) => {
 	try {
 		const { userId } = req.params;
@@ -124,7 +87,6 @@ const deleteUserStat = async (req, reply) => {
 
 module.exports = {
 	getUserStat,
-	addUserStat,
 	updateUserStat,
 	deleteUserStat,
 };

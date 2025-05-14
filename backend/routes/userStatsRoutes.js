@@ -1,6 +1,5 @@
 const {
 	getUserStat,
-	addUserStat,
 	updateUserStat,
 	deleteUserStat,
 } = require('../controllers/userStatsController');
@@ -29,31 +28,6 @@ const getUserStatOpts = {
 		},
 	},
 	handler: getUserStat,
-};
-
-// Options for add User Stat
-const addUserStatOpts = {
-	schema: {
-		body: {
-			type: 'object',
-			required: ['user_id'],
-			properties: {
-				user_id: { type: 'integer'},
-				wins: { type: 'integer'},
-				losses: { type: 'integer'},
-				rank: { type: 'string'},
-				level: { type: 'integer'},
-			},
-		},
-		response: {
-			201: UserStat,
-			400: ValidationErrorSchema,
-			404: BasicErrorSchema,
-			409: BasicErrorSchema,
-			500: BasicErrorSchema
-		},
-	},
-	handler: addUserStat,
 };
 
 // Options for update User Stat
@@ -113,9 +87,6 @@ const deleteUserStatOpts = {
 function userStatsRoutes (fastify, options, done) {
 	// Get user stats by user ID
 	fastify.get('/:userId', getUserStatOpts);
-
-	// Add user stats by user ID (currently expects ID in the body still in the logic)
-	fastify.post('/:userId', addUserStatOpts);
 
 	// Update user stats by user ID
 	fastify.put('/:userId', updateUserStatOpts);

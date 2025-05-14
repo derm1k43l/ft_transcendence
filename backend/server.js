@@ -1,12 +1,13 @@
 /*
 TODO: 
-	add authentication to many schemas maybe (add forbidden(when in controllers) and unauth errors(ALWAYS) to protected schemas)
-	maybe make the DB be ignored by git?
-	update user stats logic && gameSettings logic (maybe)
-	figure out how to make http into https
+	add authentication to many schemas (add forbidden(when in controllers) and unauth errors(ALWAYS) to protected schemas)
+			general rule of thumb: Any route that deals with user-specific data or
+				performs an action on behalf of a specific authenticated user should require authentication.
+	figure out how to make http into https (reverse proxy container, Caddy or Nginx?)
 	google sign in and 2FA look into
-	test tournament more
-	make .js into .ts?
+	remove addGameSettings, and addUserStats create values in addUser, (done)
+	update password option for users
+	change tournament as requested
 */
 
 const fastify = require('fastify')( {logger: true} );

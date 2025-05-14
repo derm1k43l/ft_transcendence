@@ -15,48 +15,6 @@ const getUserGameSettings = async (req, reply) => {
 	}
 };
 
-const addGameSettings = async (req, reply) => {
-	try {
-		const {
-			user_id,
-			board_color = '#000000',
-			paddle_color = '#FFFFFF',
-			ball_color = '#FFFFFF',
-			score_color = '#FFFFFF'
-		} = req.body;
-		const db = req.server.betterSqlite3;
-
-		if (!user_id) {
-			reply.code(400).send({ message: 'user_id is required' });
-			return;
-		}
-
-		// Check if user exists
-		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
-		if (!userExists) {
-			reply.code(404).send({ message: 'User not found' });
-			return;
-		}
-
-		try {
-			const result = db.prepare('INSERT INTO game_settings (user_id, board_color, paddle_color, ball_color, score_color) VALUES (?, ?, ?, ?, ?)').run(user_id, board_color, paddle_color, ball_color, score_color);
-			const newSettings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(user_id);
-			reply.code(201).send(newSettings);
-		} catch (err) {
-			if (err.message.includes('UNIQUE constraint failed')) {
-				reply.code(409).send({ message: 'Game settings already exist for this user' });
-			} else if (err.message.includes('FOREIGN KEY constraint failed')) {
-				 reply.code(400).send({ message: 'Invalid user_id' });
-			} else {
-				throw err;
-			}
-		}
-	} catch (error) {
-		req.log.error(error);
-		reply.code(500).send({ message: 'Error adding game settings' });
-	}
-};
-
 const updateGameSettings = async (req, reply) => {
 	try {
 		const { userId } = req.params;
@@ -109,6 +67,5 @@ const updateGameSettings = async (req, reply) => {
 
 module.exports = {
 	getUserGameSettings,
-	addGameSettings,
 	updateGameSettings,
 };

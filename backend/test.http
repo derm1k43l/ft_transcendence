@@ -75,31 +75,6 @@ curl -X PUT http://localhost:3000/api/users/2/avatar -H "Authorization: Bearer e
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-
-### ADD USER STATS for ID 1 (currently expects it in the body still in the logic)
-POST http://localhost:3000/api/users/stats/1
-Content-Type: application/json
-
-{
-	"user_id": 1,
-	"wins": 10,
-	"losses": 5,
-	"rank": "Gold",
-	"level": 3
-}
-
-### ADD USER STATS for ID 2 (currently expects it in the body still in the logic)
-POST http://localhost:3000/api/users/stats/2
-Content-Type: application/json
-
-{
-	"user_id": 2,
-	"wins": 10,
-	"losses": 5,
-	"rank": "Gold",
-	"level": 3
-}
-
 ### GET USER 1 STATS
 GET http://localhost:3000/api/users/stats/1
 
@@ -122,30 +97,6 @@ DELETE http://localhost:3000/api/users/stats/2
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-
-### Add Game Settings for ID 1
-POST http://localhost:3000/api/game-settings
-Content-Type: application/json
-
-{
-	"user_id": 1,
-	"board_color": "#222222",
-	"paddle_color": "#ffffff",
-	"ball_color": "#ff0000",
-	"score_color": "#00ff00"
-}
-
-### Add Game Settings for ID 2
-POST http://localhost:3000/api/game-settings
-Content-Type: application/json
-
-{
-	"user_id": 2,
-	"board_color": "#333333",
-	"paddle_color": "#ffffff",
-	"ball_color": "#ff0000",
-	"score_color": "#00ff00"
-}
 
 ### Get User 1 Game Settings
 GET http://localhost:3000/api/game-settings/users/1

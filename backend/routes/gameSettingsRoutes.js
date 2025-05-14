@@ -1,6 +1,5 @@
 const {
 	getUserGameSettings,
-	addGameSettings,
 	updateGameSettings,
 } = require('../controllers/gameSettingsController');
 
@@ -28,31 +27,6 @@ const getUserGameSettingsOpts = {
 		},
 	},
 	handler: getUserGameSettings,
-};
-
-// Options for add Game Settings
-const addGameSettingsOpts = {
-	schema: {
-		body: {
-			type: 'object',
-			required: ['user_id'],
-			properties: {
-				user_id: { type: 'integer'},
-				board_color: { type: 'string'},
-				paddle_color: { type: 'string'},
-				ball_color: { type: 'string'},
-				score_color: { type: 'string'},
-			},
-		},
-		response: {
-			201: GameSetting,
-			400: ValidationErrorSchema,
-			404: BasicErrorSchema,
-			409: BasicErrorSchema,
-			500: BasicErrorSchema
-		},
-	},
-	handler: addGameSettings,
 };
 
 // Options for update Game Settings
@@ -89,9 +63,6 @@ const updateGameSettingsOpts = {
 function gameSettingsRoutes (fastify, options, done) {
 	// Get user game settings by user ID
 	fastify.get('/users/:userId', getUserGameSettingsOpts);
-
-	// Add game settings (requires user_id in body) (could implement logic to be in url)
-	fastify.post('/', addGameSettingsOpts);
 
 	// Update game settings by user ID
 	fastify.put('/users/:userId', updateGameSettingsOpts);
