@@ -50,14 +50,14 @@
 }
 
 /* 4, 8, 16 buttons */
-.tournament-size-buttons {
+.tournament-buttons {
     display: flex;
     justify-content: center;
     gap: 1rem;
     margin-top: 1rem;
 }
 
-.tournament-size-buttons button {
+.tournament-buttons button {
     padding: 0.5rem 1rem;
     font-size: 1.2rem;
     border: none;
@@ -68,7 +68,7 @@
     transition: background-color 0.3s ease;
 }
 
-.tournament-size-buttons button:hover {
+.tournament-buttons button:hover {
     background-color: #45a049;
 }
 
@@ -107,7 +107,7 @@
     justify-content: space-between;
 }
 
-.player_score {
+.player-score {
     color: #ccc;
     font-weight: bold;
 }

@@ -9,7 +9,9 @@ import {
     GameInvite,
     GameSettings,
     NotificationOptions,
-	LoginResponse
+	LoginResponse,
+	TournamentMatch,
+	Tournament
 } from '../types/index.js';
 
 import {
@@ -252,4 +254,25 @@ export function getRankTitle(rank: string): string {
     if (rankNum <= 50) return 'Master';
     if (rankNum <= 100) return 'Expert';
     return 'Amateur';
+}
+
+// ===== Tournament =====
+
+export async function addTournament(tournamentInfos: {
+	id: number,
+	tournament_name: string,
+	creator_id: number,
+	player_amount: number,
+	status: 'pending' | 'running' | 'finished',
+	winner_name?: string | null,
+	players: string[],
+	matches: TournamentMatch[],
+}): Promise<Tournament | null> {
+    try {
+        const tournament = (await api.post(`/tournament/`, tournamentInfos)).data as Tournament;
+        return tournament;
+    } catch (error: any) {
+        console.error(`Failed to create tournament: `, error?.response?.data?.message || error);
+        return null;
+    }
 }
