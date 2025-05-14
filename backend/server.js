@@ -5,8 +5,7 @@ TODO:
 				performs an action on behalf of a specific authenticated user should require authentication.
 	figure out how to make http into https (reverse proxy container, Caddy or Nginx?)
 	google sign in and 2FA look into
-	remove addGameSettings, and addUserStats create values in addUser, (done)
-	update password option for users
+	update password option for users (done)
 	change tournament as requested (done?)
 	Look into simplifying match history, no longer needs tournament
 */

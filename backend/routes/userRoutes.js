@@ -11,7 +11,8 @@ const {
 	updateUserProfile,
 	loginUser,
 	logoutUser,
-	uploadAvatar
+	uploadAvatar,
+	updatePassword
 } = require('../controllers/userController');
 
 const {
@@ -21,7 +22,7 @@ const {
 	ForbiddenErrorSchema,
 } = require('../schemas/errorSchema');
 
-const { User, loginBody, loginResponse } = require('../schemas/userSchema');
+const { User, loginBody, loginResponse, updatePasswordBody } = require('../schemas/userSchema');
 
 const authPreHandler = require('./authPreHandlerRoutes');
 
@@ -316,6 +317,29 @@ const uploadAvatarOpts = {
 	handler: uploadAvatar,
 };
 
+const updatePasswordOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
+		},
+		body: updatePasswordBody,
+		response: {
+			200: BasicErrorSchema, // fine for message
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
+			409: BasicErrorSchema,
+			500: BasicErrorSchema
+		},
+	},
+	handler: updatePassword,
+};
+
 function userRoutes(fastify, options, done) {
 	// Get all Users (verify if auth is needed)
 	fastify.get('/', getUsersOpts);
@@ -348,6 +372,9 @@ function userRoutes(fastify, options, done) {
 
 	// Upload Avatar - Protected + Authorized
 	fastify.put('/:userId/avatar', uploadAvatarOpts);
+
+	// Update password
+	fastify.put('/:id/password', updatePasswordOpts);
 
 	// Delete User - protected, should only delete authenticated user's account
 	fastify.delete('/:id', deleteUserOpts);

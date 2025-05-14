@@ -546,6 +546,54 @@ const uploadAvatar = async (req, reply) => {
 	}
 };
 
+const updatePassword = async (req, reply) => {
+	const targetUserId = parseInt(req.params.id, 10); 
+	const authenticatedUserId = req.user.id;
+
+	// AUTHORIZATION CHECK: Ensure user is updating their own password
+	if (targetUserId !== authenticatedUserId) {
+		return reply.code(403).send({ message: 'Forbidden: You can only update your own password.' });
+	}
+
+	const { old_password, new_password } = req.body;
+
+	try {
+		const db = req.server.betterSqlite3;
+
+		const user = db.prepare('SELECT id, password FROM users WHERE id = ?').get(authenticatedUserId);
+
+		if (!user) {
+			// This case should ideally not happen if authPreHandler passed, but safety check
+			req.log.error(`User ID ${authenticatedUserId} not found after JWT verification.`);
+			return reply.code(500).send({ message: 'Internal server error: User data not found.' });
+		}
+
+		const isOldPasswordValid = await argon2.verify(user.password, old_password);
+
+		if (!isOldPasswordValid) {
+			// SECURITY: Incorrect old password
+			return reply.code(409).send({ message: 'Incorrect old password.' });
+		}
+
+		// Hash the new password
+		const newPasswordHash = await argon2.hash(new_password);
+
+		// Update the password in the database
+		const result = db.prepare('UPDATE users SET password = ? WHERE id = ?').run(newPasswordHash, authenticatedUserId);
+
+		if (result.changes === 0) {
+			req.log.warn(`Password update attempted for user ${authenticatedUserId} but no changes were made.`);
+			return reply.code(500).send({ message: 'Error updating password.' });
+		}
+
+		reply.code(200).send({ message: 'Password updated successfully.' });
+
+	} catch (error) {
+		req.log.error('Error updating password:', error);
+		reply.code(500).send({ message: 'Error updating password.' });
+	}
+};
+
 module.exports = {
 	getUsers,
 	getCurrentUser,
@@ -559,5 +607,6 @@ module.exports = {
 	updateUserProfile,
 	loginUser,
 	logoutUser,
-	uploadAvatar
+	uploadAvatar,
+	updatePassword
 };

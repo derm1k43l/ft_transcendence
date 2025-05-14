@@ -48,8 +48,19 @@ const loginResponse = {
 	},
 };
 
+const updatePasswordBody = {
+	type: 'object',
+	required: ['old_password', 'new_password'],
+	properties: {
+		old_password: { type: 'string', minLength: 1 },
+		new_password: { type: 'string', minLength: 4 },
+	},
+	additionalProperties: false
+};
+
 module.exports = {
 	User,
 	loginBody,
-	loginResponse
+	loginResponse,
+	updatePasswordBody
 };
