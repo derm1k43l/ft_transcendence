@@ -1,5 +1,6 @@
 import { Router } from "../core/router";
 import { PongGame } from "../game/PongGame.js";
+import { NotificationManager } from '../components/Notification.js';
 
 // The GameView class is responsible for rendering the game view and handling user input to start the game
 export class GameView {
@@ -32,12 +33,12 @@ export class GameView {
         // Event listener for single-player and multiplayer mode button
         singleplayerButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
-            this.startGame(gameContainer, true);
+            this.startGame(modeContainer, gameContainer, true);
         });
 
         multiplayerKeyboardButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
-            this.startGame(gameContainer, false);
+            this.startGame(modeContainer, gameContainer, false);
         });
 
         multiplayerRemoteButton.addEventListener('click', () => {
@@ -47,8 +48,17 @@ export class GameView {
     }
 
     // Starts the Pong game, passing the container and the mode (single player or multiplayer)
-    private startGame(container: HTMLElement, isSinglePlayer: boolean) {
-        this.game = new PongGame(container);
+    private startGame(modeContainer: HTMLElement, gameContainer: HTMLElement, isSinglePlayer: boolean) {
+        this.game = new PongGame(gameContainer, (score) => {
+            console.log("Game ended with score:", score);
+            NotificationManager.show({
+                title: 'Game ended',
+                message: `The score was: ${score.leftScore} - ${score.rightScore}`,
+                type: 'success',
+                duration: 3000
+            });
+            modeContainer.style.display = 'flex';
+        });
         this.game.start(isSinglePlayer);
     }
 

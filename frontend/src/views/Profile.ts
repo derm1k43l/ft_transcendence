@@ -1,7 +1,7 @@
 import { Router } from '../core/router.js';
 import { getUserById, updateUserProfile } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
-import { currentUser as currentUser} from '../main.js';
+import { currentUser} from '../main.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;

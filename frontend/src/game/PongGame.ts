@@ -1,5 +1,12 @@
 import { getUserGameSettings } from '../services/UserService.js';
 
+const WIN_CONDITION = 5;
+const BASE_SPEED = 1.3;
+const CENTER_X = 475;
+const CENTER_Y = 295;
+const PADDLE_SPEED = 3.5;
+const PADDLE_HEIGHT = 80;
+
 export class PongGame {
     // DOM elements used in the game
     private container: HTMLElement;
@@ -11,20 +18,16 @@ export class PongGame {
     private rightScoreElement: HTMLElement;
 
     // Ball position and speed
-    private ballX = 475;
-    private ballY = 295;
-    private ballSpeedX = 1.3;
-    private ballSpeedY = 1.3;
+    private ballX = CENTER_X;
+    private ballY = CENTER_Y;
+    private ballSpeedX = BASE_SPEED;
+    private ballSpeedY = BASE_SPEED;
 
     // Paddle positions and scores
-    private leftPaddleY = 0;
-    private rightPaddleY = 0;
+    private leftPaddleY = CENTER_Y;
+    private rightPaddleY = CENTER_Y;
     private leftScore = 0;
     private rightScore = 0;
-
-    // Paddle settings
-    private readonly paddleSpeed = 3.5;
-    private readonly paddleHeight = 80;
 
     // Game mode and key tracking
     private isSinglePlayer = false;
@@ -35,11 +38,15 @@ export class PongGame {
     private intervalId: number | null = null;
     
     // --------------------------------------------------------------------------
-    private gameSettings: { ballColor: string; paddleColor: string; scoreColor: string; boardColor: string } | undefined;
+    private gameSettings: { ball_color: string; paddle_color: string; score_color: string; board_color: string } | undefined;
     // --------------------------------------------------------------------------
 
-    constructor(container: HTMLElement) {
+    private onGameEnd: ((score: { leftScore: number; rightScore: number }) => void) | null = null;
+
+    constructor(container: HTMLElement, onGameEnd?: (score: { leftScore: number; rightScore: number }) => void) {
         this.container = container;
+        if (onGameEnd)
+            this.onGameEnd = onGameEnd;
         this.container.innerHTML = this.getTemplate();
 
         // Get references to the game elements
@@ -55,12 +62,12 @@ export class PongGame {
         getUserGameSettings(1).then(settings => {
             if (settings) {
                 this.gameSettings = settings;
-                this.ball.style.backgroundColor = settings.ballColor;
-                this.paddleLeft.style.backgroundColor = settings.paddleColor;
-                this.paddleRight.style.backgroundColor = settings.paddleColor;
-                this.leftScoreElement.style.color = settings.scoreColor;
-                this.rightScoreElement.style.color = settings.scoreColor;
-                gameContainer.style.backgroundColor = settings.boardColor;
+                this.ball.style.backgroundColor = settings.ball_color;
+                this.paddleLeft.style.backgroundColor = settings.paddle_color;
+                this.paddleRight.style.backgroundColor = settings.paddle_color;
+                this.leftScoreElement.style.color = settings.score_color;
+                this.rightScoreElement.style.color = settings.score_color;
+                gameContainer.style.backgroundColor = settings.board_color;
             }
         }).catch(error => {
             console.error('Failed to load game settings:', error);
@@ -112,15 +119,15 @@ export class PongGame {
 
     // Stop the game and clean up
     destroy() {
-    if (this.intervalId) {
-        clearInterval(this.intervalId);
-    }
-    if (this.aiViewIntervalId) {
-        clearInterval(this.aiViewIntervalId);
-    }
-    window.removeEventListener('keydown', this.onKeyDown);
-    window.removeEventListener('keyup', this.onKeyUp);
-    this.container.innerHTML = '';
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+        if (this.aiViewIntervalId) {
+            clearInterval(this.aiViewIntervalId);
+        }
+        window.removeEventListener('keydown', this.onKeyDown);
+        window.removeEventListener('keyup', this.onKeyUp);
+        this.container.innerHTML = '';
     }
     
     // Track when a key is pressed
@@ -138,29 +145,25 @@ export class PongGame {
         if (this.ballY <= 10 || this.ballY >= 570) this.ballSpeedY *= -1;
 
         // Paddle collision
-        if (this.ballX <= 30 &&
+        if (this.ballX <= 36 &&
             this.ballY + 10 >= this.leftPaddleY &&
-            this.ballY <= this.leftPaddleY + this.paddleHeight
+            this.ballY <= this.leftPaddleY + PADDLE_HEIGHT
         ) {
             this.ballSpeedX *= -1;
-            this.ballX = 40; // Prevent sticking to the paddle
-            // increase ball speed after each paddle collision
-            if (Math.random() < 0.5)
-                this.ballSpeedX *= 1.1;
-            if (Math.random() < 0.5)
-                this.ballSpeedY *= 1.1;
+            this.ballX = 36; // Prevent sticking to the paddle
+            // increase ball speed after each paddle collision, slightly changing angle by random
+            this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
+            this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
         }
-        if (this.ballX >= 895 && 
+        if (this.ballX >= 950 - 52 && 
             this.ballY + 10 >= this.rightPaddleY &&
-            this.ballY <= this.rightPaddleY + this.paddleHeight
+            this.ballY <= this.rightPaddleY + PADDLE_HEIGHT
         ) {
             this.ballSpeedX *= -1;
-            this.ballX = 895;
-            // increase ball speed after each paddle collision
-            if (Math.random() < 0.5)
-                this.ballSpeedX *= 1.1;
-            if (Math.random() < 0.5)
-                this.ballSpeedY *= 1.1;
+            this.ballX = 950 - 52;
+            // increase ball speed after each paddle collision, slightly changing angle by random
+            this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
+            this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
         }
 
         // Player scores
@@ -173,13 +176,20 @@ export class PongGame {
             this.resetBall();
         }
 
+        if (this.rightScore >= WIN_CONDITION || this.leftScore >= WIN_CONDITION) {
+            if (this.onGameEnd) {
+                this.onGameEnd({ leftScore: this.leftScore, rightScore: this.rightScore });
+            }
+            this.destroy();
+        }
+
         // Paddle movement
         if (this.keyState['w']) 
-            this.leftPaddleY = Math.max(this.leftPaddleY - this.paddleSpeed, 0);
+            this.leftPaddleY = Math.max(this.leftPaddleY - PADDLE_SPEED, 0);
         if (this.keyState['s']) 
-            this.leftPaddleY = Math.min(this.leftPaddleY + this.paddleSpeed, 480);
+            this.leftPaddleY = Math.min(this.leftPaddleY + PADDLE_SPEED, 480);
         if (this.isSinglePlayer) {
-            const paddleCenter = this.rightPaddleY + this.paddleHeight / 2;
+            const paddleCenter = this.rightPaddleY + PADDLE_HEIGHT / 2;
         
             if (paddleCenter < this.aiTargetY - 5) {
                 this.keyState['ArrowDown'] = true;
@@ -194,16 +204,16 @@ export class PongGame {
         
             // MOVE PADDLE BASED ON KEY STATE
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed*0.71, 0);
+                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED*0.71, 0);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed*0.71, 480);
+                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED*0.71, 480);
         } else if (this.remotePlayer) {
             //implementing remote keys
         } else {
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - this.paddleSpeed, 0);
+                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED, 0);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + this.paddleSpeed, 480);
+                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED, 480);
         }        
         // Update visual positions
         this.updateUI();
@@ -211,11 +221,11 @@ export class PongGame {
 
     // Reset ball to center and reverse direction after scoring
     private resetBall() {
-        this.ballX = 475;
-        this.ballY = 295;
+        this.ballX = CENTER_X;
+        this.ballY = CENTER_Y;
         this.ballSpeedX *= -1;
-        this.ballSpeedX = this.ballSpeedX < 0 ? -1.3 : 1.3;
-        this.ballSpeedY = 1.3;
+        this.ballSpeedX = this.ballSpeedX < 0 ? -BASE_SPEED : BASE_SPEED;
+        this.ballSpeedY = BASE_SPEED * Math.random() * 2 - BASE_SPEED;
     }
 
     // Update DOM elements to reflect current game state
