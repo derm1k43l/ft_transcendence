@@ -5,34 +5,77 @@ const {
 	addTournament,
 	updateTournament,
 	deleteTournament,
-	addPlayerToTournament,
-	removePlayerFromTournament,
-	getPlayersInTournament,
 } = require('../controllers/tournamentController');
 
 const {
 	BasicErrorSchema,
 	ValidationErrorSchema,
+	UnauthorizedErrorSchema,
+	ForbiddenErrorSchema,
 } = require('../schemas/errorSchema');
 
-const { TournamentSchema, TournamentPlayerItem, AddRemovePlayerSchema } = require('../schemas/tournamentSchema');
+const {
+	TournamentSchema,
+	TournamentMatchItem,
+} = require('../schemas/tournamentSchema');
 
-// Options for get all Tournaments
+const authPreHandler = require('./authPreHandlerRoutes');
+
+// Schema for POST body
+const addTournamentBodySchema = {
+	type: 'object',
+	required: ['tournament_name', 'player_amount', 'players'],
+	properties: {
+		tournament_name: { type: 'string', minLength: 1 },
+		player_amount: { type: 'integer', minimum: 1 },
+		players: {
+			type: 'array',
+			items: { type: 'string', minLength: 1 },
+		},
+	},
+	additionalProperties: false
+};
+
+// Schema for PUT body
+const updateTournamentBodySchema = {
+	type: 'object',
+	properties: {
+		tournament_name: { type: 'string', minLength: 1 },
+		player_amount: { type: 'integer', minimum: 1 },
+		status: { type: 'string', enum: ['pending', 'running', 'finished'] },
+		winner_name: { type: 'string', minLength: 1, nullable: true },
+		players: {
+			type: 'array',
+			items: { type: 'string', minLength: 1 },
+		},
+		matches: {
+			type: 'array',
+			items: TournamentMatchItem,
+		}
+	},
+	minProperties: 1,
+	additionalProperties: false
+};
+
+// Options for get all Tournaments (Assuming AUTH - get only MY tournaments)
 const getTournamentsOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		response: {
 			200: {
 				type: 'array',
 				items: TournamentSchema,
 			},
+			401: UnauthorizedErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getTournaments,
 };
 
-// Options for get single Tournament Item
+// Options for get single Tournament by ID (Requires AUTH + CREATOR CHECK)
 const getTournamentItemOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -43,6 +86,8 @@ const getTournamentItemOpts = {
 		},
 		response: {
 			200: TournamentSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -50,8 +95,9 @@ const getTournamentItemOpts = {
 	handler: getTournamentItem,
 };
 
-// Options for get Tournaments won by a specific user
+// Options for get Tournaments won by a specific user (Requires AUTH + MATCHING ID CHECK)
 const getTournamentsWonByUserOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -65,30 +111,22 @@ const getTournamentsWonByUserOpts = {
 				type: 'array',
 				items: TournamentSchema,
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getTournamentsWonByUser,
 };
 
-// Options for add Tournament
+// Options for add New Tournament (Requires AUTH)
 const addTournamentOpts = {
+	preHandler: [authPreHandler],
 	schema: {
-		body: {
-			type: 'object',
-			required: ['tournament_name', 'player_amount', 'status', 'start_date'],
-			properties: {
-				tournament_name: { type: 'string', minLength: 1 },
-				player_amount: { type: 'integer', minimum: 1 },
-				status: { type: 'string', enum: ['pending', 'running', 'finished'] },
-				start_date: { type: 'string', format: 'date' },
-				end_date: { type: 'string', format: 'date', nullable: true },
-				winner_user_id: { type: 'integer', nullable: true },
-			},
-			additionalProperties: false
-		},
+		body: addTournamentBodySchema,
 		response: {
 			201: TournamentSchema,
+			401: UnauthorizedErrorSchema,
 			400: ValidationErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -96,8 +134,9 @@ const addTournamentOpts = {
 	handler: addTournament,
 };
 
-// Options for update Tournament Item
+// Options for update Tournament by ID (Requires AUTH + CREATOR CHECK)
 const updateTournamentOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -106,30 +145,22 @@ const updateTournamentOpts = {
 			},
 			required: ['id']
 		},
-		body: {
-			type: 'object',
-			properties: {
-				tournament_name: { type: 'string', minLength: 1 },
-				player_amount: { type: 'integer', minimum: 1 },
-				status: { type: 'string', enum: ['pending', 'running', 'finished'] },
-				start_date: { type: 'string', format: 'date' },
-				end_date: { type: 'string', format: 'date', nullable: true },
-				winner_user_id: { type: 'integer', nullable: true },
-			},
-			additionalProperties: false
-		},
+		body: updateTournamentBodySchema,
 		response: {
 			200: TournamentSchema,
-			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
+			400: ValidationErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: updateTournament,
 };
 
-// Options for delete Tournament Item
+// Options for delete Tournament by ID (Requires AUTH + CREATOR CHECK)
 const deleteTournamentOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -137,56 +168,6 @@ const deleteTournamentOpts = {
 				id: { type: 'integer' }
 			},
 			required: ['id']
-		},
-		response: {
-			200: {
-				type: 'object',
-				properties: {
-					message: {type: 'string' }
-				},
-			},
-			404: BasicErrorSchema,
-			500: BasicErrorSchema
-		},
-	},
-	handler: deleteTournament,
-};
-
-// Options for adding a player to a tournament
-const addPlayerToTournamentOpts = {
-	schema: {
-		params: {
-			type: 'object',
-			properties: {
-				id: { type: 'integer' }
-			},
-			required: ['id']
-		},
-		body: AddRemovePlayerSchema,
-		response: {
-			201: {
-				type: 'array',
-				items: TournamentPlayerItem,
-			},
-			400: ValidationErrorSchema,
-			404: BasicErrorSchema,
-			409: BasicErrorSchema,
-			500: BasicErrorSchema
-		},
-	},
-	handler: addPlayerToTournament,
-};
-
-// Options for removing a player from a tournament
-const removePlayerFromTournamentOpts = {
-	schema: {
-		params: {
-			type: 'object',
-			properties: {
-				id: { type: 'integer'},
-				playerId: { type: 'integer' }
-			},
-			required: ['id', 'playerId']
 		},
 		response: {
 			200: {
@@ -195,59 +176,33 @@ const removePlayerFromTournamentOpts = {
 					message: { type: 'string' }
 				}
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
-	handler: removePlayerFromTournament,
+	handler: deleteTournament,
 };
-
-// Options for getting players in a specific tournament
-const getPlayersInTournamentOpts = {
-	schema: {
-		params: {
-			type: 'object',
-			properties: {
-				id: { type: 'integer' }
-			},
-			required: ['id']
-		},
-		response: {
-			200: {
-				type: 'array',
-				items: TournamentPlayerItem,
-			},
-			404: BasicErrorSchema,
-			500: BasicErrorSchema
-		},
-	},
-	handler: getPlayersInTournament,
-};
-
 
 function tournamentRoutes (fastify, options, done) {
-	// Get all tournaments
+	// Get all tournaments (for authenticated user)
 	fastify.get('/', getTournamentsOpts);
 
-	// Get single tournament item by ID
+	// Get single tournament by ID (for authenticated user, must be creator)
 	fastify.get('/:id', getTournamentItemOpts);
 
-	// Get tournaments won by a specific user
+	// Get tournaments won by a specific user (must be authenticated user)
 	fastify.get('/users/:userId/won', getTournamentsWonByUserOpts);
 
-	// Add new tournament
+	// Add new tournament (authenticated user is creator)
 	fastify.post('/', addTournamentOpts);
 
-	// Update tournament item by ID
+	// Update tournament by ID (authenticated user must be creator)
 	fastify.put('/:id', updateTournamentOpts);
 
-	// Delete tournament item by ID
+	// Delete tournament by ID (authenticated user must be creator)
 	fastify.delete('/:id', deleteTournamentOpts);
-
-	// Tournament Player Management
-	fastify.post('/:id/players', addPlayerToTournamentOpts); // Add a player to a tournament
-	fastify.delete('/:id/players/:playerId', removePlayerFromTournamentOpts); // Remove a player from a tournament
-	fastify.get('/:id/players', getPlayersInTournamentOpts); // Get all players in a tournament
 
 	done();
 }

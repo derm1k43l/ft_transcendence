@@ -1,74 +1,55 @@
 const scorePattern = '^\\d+-\\d+$';
 
-const TournamentPlayerItem = {
-	type: 'object',
-	additionalProperties: false,
-	properties: {
-		id: { type: 'integer' },
-		username: { type: 'string', minLength: 1 },
-	},
-	required: ['id', 'username'],
-};
-
 const TournamentMatchItem = {
 	type: 'object',
 	properties: {
 		id: { type: 'integer' },
-		user_id: { type: 'integer' },
-		opponent_id: { type: 'integer' },
-		opponent_name: { type: 'string', minLength: 1 },
-		result: { type: 'string', enum: ['win', 'loss', 'draw'] },
-		score: { type: 'string', pattern: scorePattern },
-		date: { type: 'string', format: 'date-time' },
+		round: { type: 'integer', minimum: 1 },
+		player1_name: { type: 'string', nullable: true },
+		player2_name: { type: 'string', nullable: true },
+		score: { type: 'string', pattern: scorePattern, nullable: true },
+		winner_name: { type: 'string', minLength: 1, nullable: true },
 		status: { type: 'string', enum: ['pending', 'running', 'finished'] },
+
+		// Fields for bracket progression:
+		next_match_id: { type: 'integer', nullable: true }, //winner proceeds to id (null for the final match)
+		next_match_player_slot: { type: 'integer', nullable: true}, // Which slot the winner takes in the next match (null for the final match)
 	},
-	required: ['id', 'user_id', 'opponent_id', 'opponent_name', 'result', 'score', 'date', 'status'],
+	required: ['id', 'round', 'status'],
 	additionalProperties: false
 };
 
 const TournamentSchema = {
 	type: 'object',
-	additionalProperties: false,
 	properties: {
 		id: { type: 'integer' },
 		tournament_name: { type: 'string', minLength: 1 },
+		creator_id: { type: 'integer' },
 		player_amount: { type: 'integer', minimum: 1 },
 		status: { type: 'string', enum: ['pending', 'running', 'finished'] },
-		start_date: { type: 'string', format: 'date' },
-		end_date: { type: 'string', format: 'date', nullable: true },
-		winner_user_id: { type: 'integer', nullable: true },
+		winner_name: { type: 'string', minLength: 1, nullable: true },
 		players: {
 			type: 'array',
-			items: TournamentPlayerItem,
-			readOnly: true // Indicates this is for response only
+			items: { type: 'string', minLength: 1 },
 		},
 		matches: {
 			type: 'array',
 			items: TournamentMatchItem,
-			readOnly: true // Indicates this is for response only
 		}
 	},
 	required: [
 		'id',
 		'tournament_name',
+		'creator_id',
 		'player_amount',
 		'status',
-		'start_date',
+		'players',
+		'matches',
 	],
-};
-
-const AddRemovePlayerSchema = {
-	type: 'object',
-	additionalProperties: false,
-	properties: {
-		player_id: { type: 'integer' },
-	},
-	required: ['player_id'],
+	additionalProperties: false
 };
 
 module.exports = {
 	TournamentSchema,
-	TournamentPlayerItem,
-	TournamentMatchItem,
-	AddRemovePlayerSchema
+	TournamentMatchItem
 };
