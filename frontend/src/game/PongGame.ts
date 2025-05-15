@@ -1,4 +1,5 @@
 import { getUserGameSettings } from '../services/UserService.js';
+import { currentUser } from '../main.js';
 
 const WIN_CONDITION = 5;
 const BASE_SPEED = 1.3;
@@ -6,6 +7,8 @@ const CENTER_X = 475;
 const CENTER_Y = 295;
 const PADDLE_SPEED = 3.5;
 const PADDLE_HEIGHT = 80;
+const BOARD_WIDTH = 950;
+const BOARD_HEIGHT = 590;
 
 export class PongGame {
     // DOM elements used in the game
@@ -36,7 +39,11 @@ export class PongGame {
     private aiTargetY: number = 250;
     private aiViewIntervalId: number | null = null;
     private intervalId: number | null = null;
-    
+
+    private player1Name: string = 'Player1';
+    private player2Name: string = 'Player2';
+
+
     // --------------------------------------------------------------------------
     private gameSettings: { ball_color: string; paddle_color: string; score_color: string; board_color: string } | undefined;
     // --------------------------------------------------------------------------
@@ -59,7 +66,8 @@ export class PongGame {
         const gameContainer = this.container.querySelector('.game__container') as HTMLElement;
         
         // Apply settings from gameSettings
-        getUserGameSettings(1).then(settings => {
+        // getUserGameSettings(this.currentUserId).then(settings => {
+        getUserGameSettings(currentUser?.id || 1).then(settings => {
             if (settings) {
                 this.gameSettings = settings;
                 this.ball.style.backgroundColor = settings.ball_color;
@@ -109,8 +117,19 @@ export class PongGame {
     }    
 
     // Start the game loop and optionally enable single-player mode
-    start(isSinglePlayer = false) {
+    start(isSinglePlayer = false, player1Name?: string, player2Name?: string) {
         this.isSinglePlayer = isSinglePlayer;
+        this.player1Name = player1Name || isSinglePlayer ? currentUser?.display_name || 'Player 1' : 'Player 1';
+        this.player2Name = player2Name || isSinglePlayer ? 'Computer' : this.player2Name;
+
+        // update player names in html
+        const player1Element = this.container.querySelector('#player1');
+        const player2Element = this.container.querySelector('#player2');
+        if (player1Element)
+            player1Element.textContent = this.player1Name;
+        if (player2Element)
+            player2Element.textContent = this.player2Name;
+
         this.intervalId = window.setInterval(() => this.updateGame(), 1);
         if (this.isSinglePlayer) {
             this.startAI();
@@ -142,25 +161,25 @@ export class PongGame {
         this.ballY += this.ballSpeedY;
 
         // Bounce off the top and bottom walls
-        if (this.ballY <= 10 || this.ballY >= 570) this.ballSpeedY *= -1;
+        if (this.ballY <= 9 || this.ballY >= BOARD_HEIGHT - 9) this.ballSpeedY *= -1;
 
         // Paddle collision
-        if (this.ballX <= 36 &&
+        if (this.ballX <= 26 &&
             this.ballY + 10 >= this.leftPaddleY &&
             this.ballY <= this.leftPaddleY + PADDLE_HEIGHT
         ) {
             this.ballSpeedX *= -1;
-            this.ballX = 36; // Prevent sticking to the paddle
+            this.ballX = 26; // Prevent sticking to the paddle
             // increase ball speed after each paddle collision, slightly changing angle by random
             this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
         }
-        if (this.ballX >= 950 - 52 && 
+        if (this.ballX >= BOARD_WIDTH - 26 && 
             this.ballY + 10 >= this.rightPaddleY &&
             this.ballY <= this.rightPaddleY + PADDLE_HEIGHT
         ) {
             this.ballSpeedX *= -1;
-            this.ballX = 950 - 52;
+            this.ballX = BOARD_WIDTH - 26;
             // increase ball speed after each paddle collision, slightly changing angle by random
             this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
@@ -185,9 +204,9 @@ export class PongGame {
 
         // Paddle movement
         if (this.keyState['w']) 
-            this.leftPaddleY = Math.max(this.leftPaddleY - PADDLE_SPEED, 0);
+            this.leftPaddleY = Math.max(this.leftPaddleY - PADDLE_SPEED, 5);
         if (this.keyState['s']) 
-            this.leftPaddleY = Math.min(this.leftPaddleY + PADDLE_SPEED, 480);
+            this.leftPaddleY = Math.min(this.leftPaddleY + PADDLE_SPEED, 495 - 5);
         if (this.isSinglePlayer) {
             const paddleCenter = this.rightPaddleY + PADDLE_HEIGHT / 2;
         
@@ -204,16 +223,16 @@ export class PongGame {
         
             // MOVE PADDLE BASED ON KEY STATE
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED*0.71, 0);
+                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED*0.71, 5);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED*0.71, 480);
+                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED*0.71, 495 - 5);
         } else if (this.remotePlayer) {
             //implementing remote keys
         } else {
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED, 0);
+                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED, 5);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED, 480);
+                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED, 495 - 5);
         }        
         // Update visual positions
         this.updateUI();
@@ -242,7 +261,14 @@ export class PongGame {
     private getTemplate(): string {
         return `
         <div class="score">
-            <span id="leftScore">0</span> &lt; - &gt; <span id="rightScore">0</span>
+            <div class="score">
+                <div class="score__left">
+                    <span id="leftScore">0</span><span id="player1">${this.player1Name}</span>
+                </div>
+                <div class="score__right">
+                    <span id="player2">${this.player2Name}</span><span id="rightScore">0</span>
+                </div>
+            </div>
         </div>
         <div class="game__container">
             <div class="ball"></div>
