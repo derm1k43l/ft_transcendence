@@ -89,7 +89,7 @@ export class PongGame {
     }
     
     private startAI() {
-        this.aiViewIntervalId = window.setInterval(() => this.updateAI(), 10000);
+        this.aiViewIntervalId = window.setInterval(() => this.updateAI(), 1000);
     }
     
     private updateAI() {
