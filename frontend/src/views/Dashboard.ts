@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getTopPlayers, setMatchHistory, setUserStats } from '../services/UserService.js';
+import { getAllUsers, getTopPlayers, setMatchHistory, setUserStats } from '../services/UserService.js';
 // import { user } from '../main.js';
 import { UserProfile } from '../types/index.js';
 import { getCurrentUser } from '../services/auth.js';
@@ -365,12 +365,11 @@ private initializeCharts(user: UserProfile): void {
 }
     
 private async loadLeaderboards(): Promise<void> {
-    // Load top 10 by wins
-    const topPlayersByWins = await getTopPlayers('wins', 10);
+    const allPlayers = await getAllUsers();
+    const topPlayersByWins = allPlayers.sort((a, b) => (b.stats?.wins || 0) - (a.stats?.wins || 0));
     this.renderLeaderboard('wins-leaderboard', topPlayersByWins, 'wins');
 
-    // Load top 10 by win rate
-    const topPlayersByWinRate = await getTopPlayers('winrate', 10);
+    const topPlayersByWinRate = allPlayers.sort((a, b) => (b.stats?.winrate || 0) - (a.stats?.winrate || 0));
     this.renderLeaderboard('winrate-leaderboard', topPlayersByWinRate, 'winrate');
 }
     
@@ -396,7 +395,8 @@ private renderLeaderboard(containerId: string, players: UserProfile[], type: 'wi
                 <tbody>
         `;
 
-        players.forEach((player, index) => {
+        // only display top 10 players at most
+        players.slice(0, 10).forEach((player, index) => {
             const totalGames = (player.stats?.wins || 0) + (player.stats?.losses || 0);
             const winRate = player.stats?.winrate;
             

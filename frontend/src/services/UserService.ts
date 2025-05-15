@@ -31,9 +31,23 @@ export async function getUserById(id: number): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/${id}`)).data as UserProfile;
 		return user;
-	} catch (error) {
-		console.error(`Failed to fetch user with ID ${id}:`);
+	} catch (error: any) {
+		console.error(`Failed to fetch user with ID ${id}: `, error?.response?.data?.message || error);
 		return null;
+	}
+}
+
+export async function getAllUsers(): Promise<UserProfile[]> {
+	try {
+		const users: UserProfile[] = (await api.get(`/users/`)).data as UserProfile[];
+        for (const user of users) {
+            await setMatchHistory(user);
+            await setUserStats(user);
+        }
+		return users;
+	} catch (error: any) {
+		console.error(`Failed to fetch all users: `, error?.response?.data?.message || error);
+		return [];
 	}
 }
 
