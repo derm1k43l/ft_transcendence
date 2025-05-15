@@ -4,11 +4,12 @@ import { MatchRecord } from '../types/index.js';
 import { addMatchRecord } from '../services/UserService.js';
 
 const WIN_CONDITION = 5;
-const BASE_SPEED = 1.3;
+const BASE_SPEED = 200;
 const CENTER_X = 475;
 const CENTER_Y = 295;
-const PADDLE_SPEED = 3.5;
-const PADDLE_HEIGHT = 80;
+const PADDLE_SPEED = 500;
+const PADDLE_HEIGHT = 95;
+const HALF_PADDLE = PADDLE_HEIGHT / 2;
 const BOARD_WIDTH = 950;
 const BOARD_HEIGHT = 590;
 
@@ -51,6 +52,9 @@ export class PongGame {
     // --------------------------------------------------------------------------
 
     private onGameEnd: ((score: { leftScore: number; rightScore: number }) => void) | null = null;
+
+    // Add a property to track the last update time
+    private lastUpdateTime: number | null = null;
 
     constructor(container: HTMLElement, onGameEnd?: (score: { leftScore: number; rightScore: number }) => void) {
         this.container = container;
@@ -158,27 +162,33 @@ export class PongGame {
 
     // Main game loop: update positions, handle collisions, and refresh UI
     private updateGame() {
+        const currentTime = performance.now();
+        const deltaTime = this.lastUpdateTime ? (currentTime - this.lastUpdateTime) / 1000 : 0; // Convert to seconds
+        this.lastUpdateTime = currentTime;
+
         // Move the ball
-        this.ballX += this.ballSpeedX;
-        this.ballY += this.ballSpeedY;
+        this.ballX += this.ballSpeedX * deltaTime;
+        this.ballY += this.ballSpeedY * deltaTime;
 
         // Bounce off the top and bottom walls
-        if (this.ballY <= 9 || this.ballY >= BOARD_HEIGHT - 9) this.ballSpeedY *= -1;
+        if ((this.ballY <= 9 && this.ballSpeedY < 0) || (this.ballY >= BOARD_HEIGHT - 9 && this.ballSpeedY > 0)) this.ballSpeedY *= -1;
 
         // Paddle collision
         if (this.ballX <= 26 &&
-            this.ballY + 10 >= this.leftPaddleY &&
-            this.ballY <= this.leftPaddleY + PADDLE_HEIGHT
+            this.ballY >= this.leftPaddleY - HALF_PADDLE - 9 &&
+            this.ballY <= this.leftPaddleY + HALF_PADDLE + 9 &&
+            this.ballSpeedX < 0
         ) {
             this.ballSpeedX *= -1;
-            this.ballX = 26; // Prevent sticking to the paddle
+            this.ballX = 26;
             // increase ball speed after each paddle collision, slightly changing angle by random
             this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
         }
         if (this.ballX >= BOARD_WIDTH - 26 && 
-            this.ballY + 10 >= this.rightPaddleY &&
-            this.ballY <= this.rightPaddleY + PADDLE_HEIGHT
+            this.ballY >= this.rightPaddleY - HALF_PADDLE - 9 &&
+            this.ballY <= this.rightPaddleY + HALF_PADDLE + 9 &&
+            this.ballSpeedX > 0
         ) {
             this.ballSpeedX *= -1;
             this.ballX = BOARD_WIDTH - 26;
@@ -218,36 +228,36 @@ export class PongGame {
         }
 
         // Paddle movement
+        const paddleSpeed = PADDLE_SPEED * deltaTime;
         if (this.keyState['w']) 
-            this.leftPaddleY = Math.max(this.leftPaddleY - PADDLE_SPEED, 5);
+            this.leftPaddleY = Math.max(this.leftPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
         if (this.keyState['s']) 
-            this.leftPaddleY = Math.min(this.leftPaddleY + PADDLE_SPEED, 495 - 5);
+            this.leftPaddleY = Math.min(this.leftPaddleY + paddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
         if (this.isSinglePlayer) {
-            const paddleCenter = this.rightPaddleY + PADDLE_HEIGHT / 2;
-        
-            if (paddleCenter < this.aiTargetY - 5) {
+            if (this.rightPaddleY < this.aiTargetY - 5) {
                 this.keyState['ArrowDown'] = true;
                 this.keyState['ArrowUp'] = false;
-            } else if (paddleCenter > this.aiTargetY + 5) {
+            } else if (this.rightPaddleY > this.aiTargetY + 5) {
                 this.keyState['ArrowUp'] = true;
                 this.keyState['ArrowDown'] = false;
             } else {
                 this.keyState['ArrowUp'] = false;
                 this.keyState['ArrowDown'] = false;
             }
-        
-            // MOVE PADDLE BASED ON KEY STATE
+
+            // MOVE PADDLE BASED ON KEY STATE (AI paddle is a bit slower (*0.7) to give a chance
+            const aiPaddleSpeed = PADDLE_SPEED * 0.7 * deltaTime;
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED*0.71, 5);
+                this.rightPaddleY = Math.max(this.rightPaddleY - aiPaddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED*0.71, 495 - 5);
+                this.rightPaddleY = Math.min(this.rightPaddleY + aiPaddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
         } else if (this.remotePlayer) {
             //implementing remote keys
         } else {
             if (this.keyState['ArrowUp']) 
-                this.rightPaddleY = Math.max(this.rightPaddleY - PADDLE_SPEED, 5);
+                this.rightPaddleY = Math.max(this.rightPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
-                this.rightPaddleY = Math.min(this.rightPaddleY + PADDLE_SPEED, 495 - 5);
+                this.rightPaddleY = Math.min(this.rightPaddleY + paddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
         }        
         // Update visual positions
         this.updateUI();

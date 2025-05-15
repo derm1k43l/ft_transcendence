@@ -84,6 +84,7 @@
     position: absolute;
     border-radius: 2px;
     z-index: 3;
+    transform: translateY(-50%);
 }
 
 .paddle__left {
