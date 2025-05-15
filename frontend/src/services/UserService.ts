@@ -276,3 +276,13 @@ export async function addTournament(tournamentInfos: {
         return null;
     }
 }
+
+export async function updateTournament(tournamentId: number, tournament: Tournament): Promise<boolean> {
+    try {
+        await api.put(`/tournament/${tournamentId}`, tournament);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to update tournament: ${tournamentId}`, error?.response?.data?.message || error);
+        return false;
+    }
+}
