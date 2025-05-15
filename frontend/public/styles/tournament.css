@@ -1,3 +1,8 @@
+.tournament-view {
+    max-width: 1200px;
+    min-width: 700px;
+}
+
 .tournament-nav li {
     margin-bottom: 0.5rem;
 }

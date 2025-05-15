@@ -99,18 +99,25 @@ export class LoginView {
         
         try {
             // Use Auth service for login
-            const loginResponse = await Auth.login({ username, password });
+            const user = await Auth.login({ username, password });
+            if (!user) { window.location.reload(); return; }
             console.log(`Login successful`);
+
+            
+            const sidebarAvatar = document.querySelector('.avatar');
+            if (sidebarAvatar && user.avatar_url)
+                sidebarAvatar.setAttribute('src', user.avatar_url);
+            
             
             NotificationManager.show({
                 title: 'Welcome',
-                message: `Welcome back, ${loginResponse.user.display_name}!`,
+                message: `Welcome back, ${user.display_name}!`,
                 type: 'info',
                 duration: 3000
             });
             
             // Call the login success callback
-            this.onLoginSuccess(loginResponse.user);
+            this.onLoginSuccess(user);
             window.location.hash = '#';
         } catch (error: any) {
             console.log('Login failed:', error);

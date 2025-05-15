@@ -1,5 +1,10 @@
 
 /* ===== CHAT VIEW ===== */
+.chat-view {
+    max-width: 1200px;
+    min-width: 700px;
+}
+
 .chat-search {
     margin-bottom: 1rem;
 }

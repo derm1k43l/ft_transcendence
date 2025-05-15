@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats } from '../services/UserService.js';
+import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats, uploadAvatar, uploadCover } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
 import { DEFAULT_ACHIEVEMENTS } from '../constants/defaults.js';
@@ -29,14 +29,20 @@ export class ProfileView {
             rootElement.appendChild(this.element);
 
             const user = await getUserById(this.profileUserId);
+            
+            
             if (!this.element) return;
             if (!user) {
                 this.element.innerHTML = '<div class="profile-error"><h2>User Not Found</h2><p>The requested profile could not be found.</p></div>';
                 return;
             }
+
+
+
             user.match_history = await setMatchHistory(user);
             user.achievements = await setAchievements(user);
             user.stats = await setUserStats(user);
+            if (!this.element) return;
 
             // Check if viewing own profile
             const isOwnProfile = this.profileUserId === this.currentUserId;
@@ -384,34 +390,49 @@ export class ProfileView {
         const avatarPreview = modal.querySelector('.edit-avatar-preview') as HTMLImageElement;
         const closeButton = modal.querySelector('.modal-close') as HTMLButtonElement;
         const cancelButton = document.getElementById('cancel-edit') as HTMLButtonElement;
-        
-        // Handle file uploads for preview
+
+        // cover photo change
         coverUpload?.addEventListener('change', function(e) {
             const fileInput = e.target as HTMLInputElement;
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     if (coverPreview && e.target) {
                         coverPreview.style.backgroundImage = `url(${e.target.result})`;
                     }
+                    if (!fileInput.files || !fileInput.files[0]) return;
+                    const file = fileInput.files[0];
+                    const url = await uploadCover(user.id, file);
+                    const profileCover = document.querySelector('.profile-cover');
+                    if (profileCover && url)
+                        profileCover.setAttribute('style', `background-image: url(${url})`);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             }
         });
-        
+        // avatar change
         avatarUpload?.addEventListener('change', function(e) {
             const fileInput = e.target as HTMLInputElement;
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     if (avatarPreview && e.target) {
                         avatarPreview.src = e.target.result as string;
                     }
+                    if (!fileInput.files || !fileInput.files[0]) return;
+                    const file = fileInput.files[0];
+                    const url = await uploadAvatar(user.id, file);
+                    const sidebarAvatar = document.querySelector('.avatar');
+                    if (sidebarAvatar && url)
+                        sidebarAvatar.setAttribute('src', url);
+                    const profileAvatar = document.querySelector('.profile-avatar');
+                    if (profileAvatar && url)
+                        profileAvatar.setAttribute('src', url);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             }
         });
-        
+
         // Handle form submission
         form?.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -433,19 +454,17 @@ export class ProfileView {
                 
                 let avatarUrl = user.avatar_url;
                 let coverPhotoUrl = user.cover_photo_url;
-                
+
                 if (avatarUpload.files && avatarUpload.files[0]) {
-                    // Simulate avatar upload
                     await new Promise(resolve => setTimeout(resolve, 500));
                     avatarUrl = URL.createObjectURL(avatarUpload.files[0]);
                 }
-                
+
                 if (coverUpload.files && coverUpload.files[0]) {
-                    // Simulate cover photo upload
                     await new Promise(resolve => setTimeout(resolve, 500));
                     coverPhotoUrl = URL.createObjectURL(coverUpload.files[0]);
                 }
-                
+
                 // Update the user profile
                 const updatedProfile = {
                     display_name: displayName,
@@ -456,6 +475,7 @@ export class ProfileView {
                 
                 // Call your update service
                 const success = await updateUserProfile(user.id, updatedProfile);
+                user = await getUserById(user.id);
                 
                 if (success) {
                     // Show notification
@@ -475,6 +495,9 @@ export class ProfileView {
                     //     newURL: window.location.href
                     // }));
                     this.router.reload();
+                    // const sidebarAvatar = document.querySelector('.avatar');
+                    // if (sidebarAvatar)
+                    //     sidebarAvatar.setAttribute('src', user.avatar_url);
                 } else {
                     throw new Error('Failed to update profile');
                 }
@@ -498,16 +521,16 @@ export class ProfileView {
                 saveButton.innerHTML = 'Save Changes';
                 saveButton.removeAttribute('disabled');
             }
-        });
+        }, { once: true });
 
         // Close modal when clicking the close button or cancel or outside
-        closeButton?.addEventListener('click', () => {
+        closeButton?.addEventListener('click', async () => {
             modal!.style.display = 'none';
         });
-        cancelButton?.addEventListener('click', () => {
+        cancelButton?.addEventListener('click', async () => {
             modal!.style.display = 'none';
         });
-        window.addEventListener('click', (e) => {
+        window.addEventListener('click', async (e) => {
             if (e.target === modal) {
                 modal!.style.display = 'none';
             }
@@ -515,6 +538,7 @@ export class ProfileView {
     }
 
     destroy(): void {
+        // this.element?.remove();
         this.element = null;
     }
 }

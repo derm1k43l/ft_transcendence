@@ -1,4 +1,9 @@
 /* Settings View Styles */
+.settings-view {
+    max-width: 1200px;
+    min-width: 700px;
+}
+
 .settings-nav {
     list-style: none;
 }

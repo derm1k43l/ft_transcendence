@@ -24,20 +24,20 @@ export async function initializeAuth(): Promise<UserProfile | null> {
 export async function login(credentials: { 
     username: string; 
     password: string;
-}): Promise<LoginResponse> {
+}): Promise<UserProfile | null> {
     try {
-        const response = await api.post('/users/login', credentials);
+        const response: LoginResponse = (await api.post('/users/login', credentials)).data;
         
         // Store token for future requests
-        if (response.data.token) {
-            localStorage.setItem('auth_token', response.data.token);
+        if (response.token) {
+            localStorage.setItem('auth_token', response.token);
         }
         
         // Set authentication state
-        currentUser = response.data.user;
+        currentUser = await getCurrentUser();
         isAuthenticated = true;
         
-        return response.data;
+        return currentUser;
     } catch (error: any) {
         console.error('Login error:', error.response?.data?.message || error);
         throw error.response?.data?.message || 'Login failed. Please check your credentials.';

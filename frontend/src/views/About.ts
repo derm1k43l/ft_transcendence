@@ -38,7 +38,7 @@ export class AboutView {
                     <!-- Team Member 3 -->
                     <div class="team-member">
                         <div class="member-image">
-                            <img src="https://media.licdn.com/dms/image/v2/D4D03AQEz1EOno8Uyqw/profile-displayphoto-shrink_400_400/B4DZaHnaY9G8As-/0/1746031978830?e=1752105600&v=beta&t=9HJ0pdwpRudi_K9KERvRyC5DRON_GpTq9BKmiPct3Vw" alt="Cosmin Stoia">
+                            <img src="https://cdn.intra.42.fr/users/39a5f284770463b7fb780a9e1c8ed663/cstoia.jpg" alt="Cosmin Stoia">
                         </div>
                         <h3>Cosmin Stoia</h3>
                         <p class="member-role">Game development</p>

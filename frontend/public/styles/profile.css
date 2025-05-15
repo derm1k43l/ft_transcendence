@@ -1,6 +1,7 @@
 /* ===== PROFILE VIEW ===== */
 .profile-view {
     max-width: var(--max-content-width);
+    min-width: 900px;
     margin: 0 auto;
     padding: 1rem;
 }

@@ -378,6 +378,7 @@ function setupEventListeners(): void {
             duration: 3000
         });
 
+        window.location.reload();
         //or?
         window.location.hash = '#';
     });

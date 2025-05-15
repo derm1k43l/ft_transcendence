@@ -4,9 +4,13 @@ const path = require('path');
 const fs = require('fs');
 
 const AVATAR_UPLOAD_DIR = path.join(__dirname, '../uploads/avatars');
+const COVER_UPLOAD_DIR = path.join(__dirname, '../uploads/covers');
 
 if (!fs.existsSync(AVATAR_UPLOAD_DIR)) {
 	fs.mkdirSync(AVATAR_UPLOAD_DIR, { recursive: true });
+}
+if (!fs.existsSync(COVER_UPLOAD_DIR)) {
+	fs.mkdirSync(COVER_UPLOAD_DIR, { recursive: true });
 }
 
 const getUsers = async (req, reply) => {
@@ -511,7 +515,11 @@ const uploadAvatar = async (req, reply) => {
 		const fileExtension = path.extname(file.filename);
 		const uniqueFilename = `${targetUserId}-${Date.now()}${fileExtension}`;
 		const filePath = path.join(AVATAR_UPLOAD_DIR, uniqueFilename);
-		const fileUrl = `/uploads/avatars/${uniqueFilename}`; // Public URL path relative to static root
+		// const fileUrl = `/uploads/avatars/${uniqueFilename}`; // Public URL path relative to static root
+	
+		const fileUrl = `http://localhost:3000/uploads/avatars/${uniqueFilename}`; // Full URL.
+		// not clean but the only way that will work with our current setup
+		// CHANGE TO HTTPS ONCE WE HAVE HTTPS!
 
 		// Save the file to disk
 		const writeStream = fs.createWriteStream(filePath);
@@ -534,6 +542,8 @@ const uploadAvatar = async (req, reply) => {
 		} else {
 			// maybe delete old avatar
 			reply.code(200).send({ message: 'Avatar uploaded successfully', avatar_url: fileUrl });
+			console.log(avatar_url);
+			console.log(fileUrl);
 		}
 
 	} catch (error) {
@@ -542,6 +552,85 @@ const uploadAvatar = async (req, reply) => {
 			reply.code(413).send({ message: 'File size exceeds limit.' });
 		} else {
 			reply.code(500).send({ message: 'Error uploading avatar' });
+		}
+	}
+};
+
+const uploadCover = async (req, reply) => {
+	try {
+		const authenticatedUserId = req.user ? req.user.id : null; // Get user ID from token
+
+		// Get the target user ID from the route parameters
+		const targetUserId = parseInt(req.params.userId, 10);
+
+		// If user is not authenticated OR authenticated user ID does not match the target ID
+		if (!authenticatedUserId || authenticatedUserId !== targetUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only upload your own cover.' });
+			return;
+		}
+
+		// Ensure the request is multipart/form-data
+		if (!req.isMultipart()) {
+			reply.code(415).send({ message: 'Unsupported Media Type: Must be multipart/form-data' });
+			return;
+		}
+
+		// Process the file upload
+		const file = await req.file(); // Get the file from the request (returns a stream)
+
+		if (!file) {
+			reply.code(400).send({ message: 'No file uploaded' });
+			return;
+		}
+
+		// maybe implement stricter validation
+		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+		if (!allowedTypes.includes(file.mimetype)) {
+			reply.code(400).send({ message: `Invalid file type. Only ${allowedTypes.join(', ')} are allowed.` });
+			return;
+		}
+
+		// Generate a unique filename to avoid collisions
+		const fileExtension = path.extname(file.filename);
+		const uniqueFilename = `${targetUserId}-${Date.now()}${fileExtension}`;
+		const filePath = path.join(COVER_UPLOAD_DIR, uniqueFilename);
+		// const fileUrl = `/uploads/covers/${uniqueFilename}`; // Public URL path relative to static root
+	
+		const fileUrl = `http://localhost:3000/uploads/covers/${uniqueFilename}`; // Full URL.
+		// not clean but the only way that will work with our current setup
+		// CHANGE TO HTTPS ONCE WE HAVE HTTPS!
+
+		// Save the file to disk
+		const writeStream = fs.createWriteStream(filePath);
+		try {
+			await pipeline(file.file, writeStream); // Pipe the incoming file stream to the file on disk
+		} catch (pipelineError) {
+			req.log.error('Error writing file to disk:', pipelineError);
+			if (fs.existsSync(filePath)) {
+				fs.unlinkSync(filePath);
+			}
+			throw pipelineError;
+		}
+
+		const db = req.server.betterSqlite3;
+
+		const result = db.prepare('UPDATE users SET cover_photo_url = ? WHERE id = ?').run(fileUrl, targetUserId);
+
+		if (result.changes === 0) {
+			reply.code(404).send({ message: 'User not found or no changes made' });
+		} else {
+			// maybe delete old cover
+			reply.code(200).send({ message: 'Cover Photo uploaded successfully', cover_photo_url: fileUrl });
+			console.log(cover_photo_url);
+			console.log(fileUrl);
+		}
+
+	} catch (error) {
+		req.log.error(error);
+		if (error.message === 'Reach file size limit') {
+			reply.code(413).send({ message: 'File size exceeds limit.' });
+		} else {
+			reply.code(500).send({ message: 'Error uploading cover' });
 		}
 	}
 };
@@ -608,5 +697,6 @@ module.exports = {
 	loginUser,
 	logoutUser,
 	uploadAvatar,
+	uploadCover,
 	updatePassword
 };

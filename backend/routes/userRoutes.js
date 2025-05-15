@@ -12,6 +12,7 @@ const {
 	loginUser,
 	logoutUser,
 	uploadAvatar,
+	uploadCover,
 	updatePassword
 } = require('../controllers/userController');
 
@@ -317,6 +318,37 @@ const uploadAvatarOpts = {
 	handler: uploadAvatar,
 };
 
+const uploadCoverOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				userId: { type: 'integer', minimum: 1 }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' },
+					cover_photo_url: { type: 'string', format: 'uri-reference' } // Return the new URL
+				},
+				required: ['message', 'cover_photo_url']
+			},
+			400: BasicErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
+			404: BasicErrorSchema,
+			413: BasicErrorSchema,
+			415: BasicErrorSchema,
+			500: BasicErrorSchema
+		}
+	},
+	handler: uploadCover,
+};
+
 const updatePasswordOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -372,6 +404,9 @@ function userRoutes(fastify, options, done) {
 
 	// Upload Avatar - Protected + Authorized
 	fastify.put('/:userId/avatar', uploadAvatarOpts);
+
+	// Upload Cover Photo - Protected + Authorized
+	fastify.put('/:userId/cover', uploadCoverOpts);
 
 	// Update password
 	fastify.put('/:id/password', updatePasswordOpts);

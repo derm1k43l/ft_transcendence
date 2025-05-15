@@ -1,4 +1,8 @@
 /* ===== FRIENDS VIEW ===== */
+.friends-view {
+    max-width: 1200px;
+    min-width: 700px;
+}
 .friends-search {
     margin-bottom: 1.5rem;
     display: flex;
