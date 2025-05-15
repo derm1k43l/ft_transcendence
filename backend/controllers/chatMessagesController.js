@@ -1,6 +1,15 @@
+// Controller for get chat messages between two users (Requires AUTH + Participant Check)
 const getChatMessagesBetweenUsers = async (req, reply) => {
+	const { userId1, userId2 } = req.params;
+	const authenticatedUserId = req.user.id;
+
+	// AUTHORIZATION CHECK: Ensure authenticated user is one of the two users in the conversation
+	if (authenticatedUserId !== parseInt(userId1, 10) && authenticatedUserId !== parseInt(userId2, 10)) {
+		reply.code(403).send({ message: 'Forbidden: You can only view chat messages you are a part of.' });
+		return; // Stop processing
+	}
+
 	try {
-		const { userId1, userId2 } = req.params;
 		const db = req.server.betterSqlite3;
 
 		// Get messages sent from user1 to user2 OR user2 to user1, ordered by timestamp
@@ -32,9 +41,12 @@ const getChatMessagesBetweenUsers = async (req, reply) => {
 	}
 };
 
+// Controller for get single Chat Message (Requires AUTH + Ownership/Participant Check)
 const getChatMessage = async (req, reply) => {
+	const { id } = req.params;
+	const authenticatedUserId = req.user.id;
+
 	try {
-		const { id } = req.params;
 		const db = req.server.betterSqlite3;
 
 		 const message = db.prepare(`
@@ -59,44 +71,43 @@ const getChatMessage = async (req, reply) => {
 
 		if (!message) {
 			reply.code(404).send({ message: 'Chat message not found' });
-		} else {
-			reply.send(message);
+			return; // stop
 		}
+
+		// AUTHORIZATION CHECK: Ensure authenticated user is either the sender or the receiver
+		if (authenticatedUserId !== message.sender_id && authenticatedUserId !== message.receiver_id) {
+			reply.code(403).send({ message: 'Forbidden: You can only view chat messages you are a part of.' });
+			return;
+		}
+		reply.code(200).send(message);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving chat message' });
 	}
 };
 
+// Controller for add Chat Message (Requires AUTH - sender is authenticated user)
 const addChatMessage = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const { receiver_id, content } = req.body;
+	const db = req.server.betterSqlite3;
+
+	if (authenticatedUserId === receiver_id) {
+		reply.code(400).send({ message: 'Cannot send message to yourself this way' });
+		return;
+	}
+
 	try {
-		const { sender_id, receiver_id, content } = req.body;
-		const db = req.server.betterSqlite3;
-		// timestamp defaults to CURRENT_TIMESTAMP in schema
-
-		if (!sender_id || !receiver_id || !content) {
-			reply.code(400).send({ message: 'sender_id, receiver_id, and content are required' });
-			return;
-		}
-
-		if (sender_id === receiver_id) {
-			reply.code(400).send({ message: 'Cannot send message to yourself this way' });
-			return;
-		}
-
-		// Check if users exist
-		const senderExists = db.prepare('SELECT id FROM users WHERE id = ?').get(sender_id);
 		const receiverExists = db.prepare('SELECT id FROM users WHERE id = ?').get(receiver_id);
 
-		if (!senderExists || !receiverExists) {
-			reply.code(400).send({ message: 'Invalid sender_id or receiver_id' });
+		if (!receiverExists) {
+			reply.code(400).send({ message: 'Invalid receiver_id: User not found' });
 			return;
 		}
 
 		try {
-			const result = db.prepare('INSERT INTO chat_messages (sender_id, receiver_id, content) VALUES (?, ?, ?)').run(sender_id, receiver_id, content);
+			const result = db.prepare('INSERT INTO chat_messages (sender_id, receiver_id, content) VALUES (?, ?, ?)').run(authenticatedUserId, receiver_id, content);
 			const newMessageId = result.lastInsertedRowid;
-			// Retrieve the newly inserted message with the actual timestamp from the DB
 			const newMessage = db.prepare('SELECT * FROM chat_messages WHERE id = ?').get(newMessageId);
 			reply.code(201).send(newMessage);
 		} catch (err) {
@@ -109,23 +120,34 @@ const addChatMessage = async (req, reply) => {
 	}
 };
 
-// Mark message as read
+// Mark message as read (Requires AUTH + Receiver Check)
 const markChatMessageAsRead = async (req, reply) => {
+	const { id } = req.params;
+	const authenticatedUserId = req.user.id;
+
 	try {
-		const { id } = req.params;
 		const db = req.server.betterSqlite3;
 
-		const result = db.prepare('UPDATE chat_messages SET read = 1 WHERE id = ?').run(id);
+		const message = db.prepare('SELECT id, receiver_id FROM chat_messages WHERE id = ?').get(id);
+
+		if (!message) {
+			reply.code(404).send({ message: 'Chat message not found' });
+			return; // Stop processing
+		}
+
+		// AUTHORIZATION CHECK: Ensure authenticated user is the receiver of this message
+		if (message.receiver_id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only mark messages as read that you received.' });
+			return; // Stop processing
+		}
+
+		// update the message
+		const result = db.prepare('UPDATE chat_messages SET read = 1 WHERE id = ? AND receiver_id = ?').run(id, authenticatedUserId);
 
 		if (result.changes === 0) {
-			const messageExists = db.prepare('SELECT id FROM chat_messages WHERE id = ?').get(id);
-			if (!messageExists) {
-				reply.code(404).send({ message: 'Chat message not found' });
-			} else {
-				reply.code(200).send({ message: 'Chat message already marked as read or no changes made' });
-			}
+			reply.code(200).send({ message: 'Chat message already marked as read or no changes made' });
 		} else {
-			reply.send({ message: `Chat message ${id} marked as read` });
+			reply.code(200).send({ message: `Chat message ${id} marked as read` });
 		}
 	} catch (error) {
 		req.log.error(error);
@@ -133,17 +155,34 @@ const markChatMessageAsRead = async (req, reply) => {
 	}
 };
 
+// Controller for delete Chat Message (Requires AUTH + Sender Check)
 const deleteChatMessage = async (req, reply) => {
+	const { id } = req.params;
+	const authenticatedUserId = req.user.id;
+
 	try {
-		const { id } = req.params;
 		const db = req.server.betterSqlite3;
 
-		const result = db.prepare('DELETE FROM chat_messages WHERE id = ?').run(id);
+		const message = db.prepare('SELECT id, sender_id FROM chat_messages WHERE id = ?').get(id);
+
+		if (!message) {
+			reply.code(404).send({ message: 'Chat message not found' });
+			return; // Stop processing
+		}
+
+		// AUTHORIZATION CHECK: Ensure authenticated user is the sender of this message (maybe we could allow reciever to delete messages too, but who cares)
+		if (message.sender_id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only delete messages you sent.' });
+			return; // Stop processing
+		}
+
+		// Delete the message
+		const result = db.prepare('DELETE FROM chat_messages WHERE id = ? AND sender_id = ?').run(id, authenticatedUserId);
 
 		if (result.changes === 0) {
-			reply.code(404).send({ message: 'Chat message not found' });
+			reply.code(404).send({ message: 'Chat message not found (or does not belong to you).' });
 		} else {
-			reply.send({ message: `Chat message ${id} has been removed` });
+			reply.code(200).send({ message: `Chat message ${id} has been removed` });
 		}
 	} catch (error) {
 		req.log.error(error);
