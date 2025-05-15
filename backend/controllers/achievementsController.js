@@ -1,3 +1,4 @@
+// Controller for get all Achievements (Public route)
 const getAchievements = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
@@ -9,28 +10,45 @@ const getAchievements = async (req, reply) => {
 	}
 };
 
+// Controller for get single Achievement (Requires AUTH + Ownership Check)
 const getAchievement = async (req, reply) => {
+	const { id } = req.params;
+	const authenticatedUserId = req.user.id;
 	try {
-		const { id } = req.params;
 		const db = req.server.betterSqlite3;
 		const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(id);
 
 		if (!achievement) {
 			reply.code(404).send({ message: 'Achievement not found' });
-		} else {
-			reply.send(achievement);
+			return; // stop prcessing
 		}
+
+		// AUTHORIZATION CHECK: Ensure the achievement belongs to the authenticated user
+		if (achievement.user_id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only view your own achievements.' });
+			return; // Stop processing
+		}
+		reply.send(achievement);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving achievement' });
 	}
 };
 
+// Controller for get Achievements for a specific user (Requires AUTH + Matching User ID Check)
 const getUserAchievements = async (req, reply) => {
+	const targetUserId = parseInt(req.params.userId, 10); // Get user ID from URL
+	const authenticatedUserId = req.user.id;
+
+	// AUTHORIZATION CHECK: Ensure the user ID in the URL matches the authenticated user ID
+	if (targetUserId !== authenticatedUserId) {
+		reply.code(403).send({ message: 'Forbidden: You can only view your own achievements.' });
+		return;
+	}
+
 	try {
-		const { userId } = req.params;
 		const db = req.server.betterSqlite3;
-		const achievements = db.prepare('SELECT * FROM achievements WHERE user_id = ?').all(userId);
+		const achievements = db.prepare('SELECT * FROM achievements WHERE user_id = ?').all(authenticatedUserId);
 		reply.send(achievements);
 	} catch (error) {
 		req.log.error(error);
@@ -38,32 +56,35 @@ const getUserAchievements = async (req, reply) => {
 	}
 };
 
+// Controller for add Achievement (Requires AUTH - adding for themselves)
 const addAchievement = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+
 	try {
-		const { user_id, name, description, icon, completed = 0, date_completed } = req.body;
+		const { name, description, icon, completed = 0, date_completed } = req.body;
 		const db = req.server.betterSqlite3;
 
-		if (!user_id || !name || !description || !icon) {
-			reply.code(400).send({ message: 'user_id, name, description, and icon are required' });
+		if (!name || !description || !icon) {
+			reply.code(400).send({ message: 'name, description, and icon are required' });
 			return;
 		}
 
 		// Optional: Check if user_id exists
-		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
+		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(authenticatedUserId);
 		if (!userExists) {
-			reply.code(400).send({ message: 'Invalid user_id' });
+			reply.code(400).send({ message: 'Invalid authenticatedUserId' });
 			return;
 		}
 
 		// Check if achievement already exists for this user
-		const existingAchievement = db.prepare('SELECT * FROM achievements WHERE user_id = ? AND name = ? AND description = ?').get(user_id, name, description);
+		const existingAchievement = db.prepare('SELECT * FROM achievements WHERE user_id = ? AND name = ? AND description = ?').get(authenticatedUserId, name, description);
 		if (existingAchievement) {
-			reply.code(400).send({ message: 'Achievement already exists for this user' });
+			reply.code(409).send({ message: 'Achievement already exists for this user' });
 			return;
 		}
 
 		try {
-			const result = db.prepare('INSERT INTO achievements (user_id, name, description, icon, completed, date_completed) VALUES (?, ?, ?, ?, ?, ?)').run(user_id, name, description, icon, completed, date_completed);
+			const result = db.prepare('INSERT INTO achievements (user_id, name, description, icon, completed, date_completed) VALUES (?, ?, ?, ?, ?, ?)').run(authenticatedUserId, name, description, icon, completed, date_completed || null);
 			const newAchievementId = result.lastInsertedRowid;
 			const newAchievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(newAchievementId);
 			reply.code(201).send(newAchievement);
@@ -77,48 +98,72 @@ const addAchievement = async (req, reply) => {
 	}
 };
 
+// Controller for update Achievement (Requires AUTH + Ownership Check)
 const updateAchievement = async (req, reply) => {
+	const { id } = req.params; // achievement id
+	const authenticatedUserId = req.user.id;
+	const updates = req.body;
+	// const { user_id, name, description, icon, completed, date_completed } = req.body;
+
+	if (Object.keys(updates).length === 0) {
+		reply.code(400).send({ message: 'No fields provided for update' });
+		return;
+	}
+	// Prevent updating user_id via this endpoint
+	if (updates.hasOwnProperty('user_id')) {
+		reply.code(400).send({ message: 'Cannot update user_id via this endpoint.' });
+		return;
+	}
+
 	try {
-		const { id } = req.params;
-		const { user_id, name, description, icon, completed, date_completed } = req.body;
 		const db = req.server.betterSqlite3;
+
+		const achievement = db.prepare('SELECT id, user_id FROM achievements WHERE id = ?').get(id);
+
+		if (!achievement) {
+			reply.code(404).send({ message: 'Achievement not found' });
+			return; // Stop processing
+		}
+
+		// AUTHORIZATION CHECK: Ensure the achievement belongs to the authenticated user
+		if (achievement.user_id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only update your own achievements.' });
+			return; // Stop processing
+		}
 
 		let query = 'UPDATE achievements SET';
 		const params = [];
-		const fields = { user_id, name, description, icon, completed, date_completed };
+		const allowedFields = [ 'name', 'description', 'icon', 'completed', 'date_completed' ];
 		let firstField = true;
 
-		for (const field in fields) {
-			if (fields[field] !== undefined) {
+		allowedFields.forEach(field => {
+			// Check if the field exists in the updates body and is not undefined
+			if (updates.hasOwnProperty(field) && updates[field] !== undefined) {
 				if (!firstField) {
 					query += ',';
 				}
 				query += ` ${field} = ?`;
-				params.push(fields[field]);
+				params.push(updates[field]);
 				firstField = false;
 			}
-		}
+		});
 
 		if (params.length === 0) {
 			reply.code(400).send({ message: 'No fields provided for update' });
 			return;
 		}
 
-		query += ' WHERE id = ?';
+		query += ' WHERE id = ? AND user_id = ?';
 		params.push(id);
+		params.push(authenticatedUserId);
 
 		const resultRun = db.prepare(query).run(...params);
 
 		if (resultRun.changes === 0) {
-			const achievementExists = db.prepare('SELECT id FROM achievements WHERE id = ?').get(id);
-			if (!achievementExists) {
-			 reply.code(404).send({ message: 'Achievement not found' });
-			} else {
-				reply.code(200).send({ message: 'No changes made to achievement' });
-			}
+			reply.code(200).send({ message: 'No changes made to achievement (values were already the same).' });
 		} else {
 			const updatedAchievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(id);
-			reply.send(updatedAchievement);
+			reply.code(200).send(updatedAchievement);
 		}
 
 	} catch (error) {
@@ -127,17 +172,33 @@ const updateAchievement = async (req, reply) => {
 	}
 };
 
+// Controller for delete Achievement (Requires AUTH + Ownership Check)
 const deleteAchievement = async (req, reply) => {
+	const { id } = req.params;
+	const authenticatedUserId = req.user.id;
 	try {
-		const { id } = req.params;
 		const db = req.server.betterSqlite3;
 
-		const result = db.prepare('DELETE FROM achievements WHERE id = ?').run(id);
+		const achievement = db.prepare('SELECT user_id FROM achievements WHERE id = ?').get(id);
+
+		if (!achievement) {
+			reply.code(404).send({ message: 'Achievement not found' });
+			return; // Stop processing
+		}
+
+		// AUTHORIZATION CHECK: Ensure the achievement belongs to the authenticated user
+		if (achievement.user_id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only delete your own achievements.' });
+			return; // Stop processing
+		}
+
+		// Delete achievement
+		const result = db.prepare('DELETE FROM achievements WHERE id = ? AND user_id = ?').run(id, authenticatedUserId);
 
 		if (result.changes === 0) {
-			reply.code(404).send({ message: 'Achievement not found' });
+			reply.code(404).send({ message: 'Achievement not found (or does not belong to you).' });
 		} else {
-			reply.send({ message: `Achievement ${id} has been removed` });
+			reply.code(200).send({ message: `Achievement ${id} has been removed` });
 		}
 	} catch (error) {
 		req.log.error(error);

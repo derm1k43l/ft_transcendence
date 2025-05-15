@@ -179,25 +179,12 @@ DELETE http://localhost:3000/api/match-history/1
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-### Add Achievement for ID 1
+### Add Achievement BY TOKEN
 POST http://localhost:3000/api/achievements
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
-	"user_id": 1,
-	"name": "First Win",
-	"description": "Complete your first win in the game.",
-	"icon": "first-win-icon.png",
-	"completed": 0,
-	"date_completed": "2025-04-21T14:00:00Z"
-}
-
-### Add Achievement for ID 2
-POST http://localhost:3000/api/achievements
-Content-Type: application/json
-
-{
-	"user_id": 2,
 	"name": "First Win",
 	"description": "Complete your first win in the game.",
 	"icon": "first-win-icon.png",
@@ -210,16 +197,18 @@ GET http://localhost:3000/api/achievements
 
 ### Get Achievement by ID
 GET http://localhost:3000/api/achievements/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### Get Achievements for a Specific User
-GET http://localhost:3000/api/achievements/users/1
+GET http://localhost:3000/api/achievements/users/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### Update Achievement by ID
 PUT http://localhost:3000/api/achievements/1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
-	"user_id": 1,
 	"name": "First Win",
 	"description": "Complete your LAST win in the game.",
 	"icon": "first-win-icon.png",
@@ -229,8 +218,7 @@ Content-Type: application/json
 
 ### Delete Achievement by ID
 DELETE http://localhost:3000/api/achievements/1
-
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
