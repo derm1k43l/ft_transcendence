@@ -13,7 +13,7 @@ import * as Auth from '../services/auth.js';
 import { DEFAULT_ACHIEVEMENTS, DEFAULT_GAME_SETTINGS } from '../constants/defaults.js';
 
 export class SettingsView {
-    private element: HTMLElement = document.createElement('div');
+    private element: HTMLElement | null = null;
     private router: Router;
     private currentUserId: number = currentUser?.id || -1;
     private gameSettings: GameSettings = DEFAULT_GAME_SETTINGS;
@@ -24,6 +24,7 @@ export class SettingsView {
     }
 
     async render(rootElement: HTMLElement): Promise<void> {
+        this.element = document.createElement('div');
         this.element.className = 'settings-view';
         this.gameSettings = await getUserGameSettings(this.currentUserId);
         
@@ -301,7 +302,8 @@ export class SettingsView {
                 if (valueDisplay) {
                     valueDisplay.textContent = target.value;
                 }
-                
+                if (!this.element)
+                    return;
                 this.gameSettings.board_color = (this.element.querySelector('#board-color') as HTMLInputElement)?.value;
                 this.gameSettings.paddle_color = (this.element.querySelector('#paddle-color') as HTMLInputElement)?.value;
                 this.gameSettings.ball_color = (this.element.querySelector('#ball-color') as HTMLInputElement)?.value;
@@ -431,6 +433,6 @@ export class SettingsView {
     }
 
     destroy(): void {
-        // this.element.remove();
+        this.element = null;
     }
 }
