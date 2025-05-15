@@ -1,4 +1,4 @@
-import { GameSettings } from '../types/index.js';
+import { Achievement, GameSettings, UserStats } from '../types/index.js';
 
 // Default game settings
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
@@ -9,7 +9,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
 };
 
 // Default achievements 
-export const DEFAULT_ACHIEVEMENTS = [
+export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   {
     id: 1,
     name: "First Victory",
@@ -20,25 +20,28 @@ export const DEFAULT_ACHIEVEMENTS = [
   {
     id: 2,
     name: "On Fire",
-    description: "Win 5 games in a row",
+    description: "Win 3 games in a row",
     icon: "fas fa-fire",
     completed: false
   },
   {
     id: 3,
     name: "Social Butterfly",
-    description: "Add 5 friends",
+    description: "Add 3 friends",
     icon: "fas fa-users",
     completed: false
   },
-  {
-    id: 4,
-    name: "Tournament Finalist",
-    description: "Reach the finals in a tournament",
-    icon: "fas fa-award",
-    completed: false
-  }
 ];
+
+// Default user stats 
+export const DEFAULT_STATS: UserStats = {
+    played: 0,
+    wins: 0,
+    losses: 0,
+    winrate: 0,
+    rank: 'Bronze',
+    level: 1,
+  };
 
 // User profile defaults
 export const DEFAULT_COVER_PHOTO = "https://placehold.co/1200x300/7c00e3/ffffff?text=Game+Profile";

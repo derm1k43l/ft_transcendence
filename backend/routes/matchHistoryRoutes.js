@@ -73,7 +73,7 @@ const addMatchHistoryItemOpts = {
 	schema: {
 		body: {
 			type: 'object',
-			required: ['user_id', 'opponent_id', 'opponent_name', 'result', 'score', 'date', 'status'],
+			required: ['user_id', 'opponent_name', 'result', 'score', 'date', 'status'],
 			properties: {
 				user_id: { type: 'integer'},
 				opponent_id: { type: 'integer'},

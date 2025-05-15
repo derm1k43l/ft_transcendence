@@ -31,10 +31,12 @@ export interface LoginResponse {
 
 
 export interface UserStats {
+    played: number;
     wins: number;
     losses: number;
-    rank?: string;
-    level?: number;
+    winrate: number;
+    rank: 'Bronze' | 'Silver' | 'Gold' | 'Diamond';
+    level: number;
 }
 
 // Game-related interfaces
@@ -47,13 +49,16 @@ export interface GameSettings {
 
 export interface MatchRecord {
     id?: number;
-    opponentId: number;
-    opponent: string;
+    user_id: number;
+    opponent_id?: number;
+    opponent_name?: string;
     result: 'win' | 'loss' | 'draw';
     score: string;
     date: string;
     duration?: string;
-    gameMode?: string;
+    game_mode?: string;
+    status: 'pending' | 'running' | 'finished';
+    tournament_id?: number | null;
 }
 
 export interface GameInvite {

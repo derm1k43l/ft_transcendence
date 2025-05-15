@@ -96,7 +96,7 @@ Content-Type: application/json
 {
 	"wins": 15,
 	"losses": 7,
-	"rank": "Platinum",
+	"rank": "Diamond",
 	"level": 4
 }
 
@@ -123,16 +123,30 @@ Content-Type: application/json
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-### Add Match History Item
+### Add Match History Item (win)
 POST http://localhost:3000/api/match-history
 Content-Type: application/json
 
 {
 	"user_id": 1,
-	"opponent_id": 2,
-	"opponent_name": "PlayerTwo",
+	"opponent_name": "Computer",
 	"result": "win",
 	"score": "5-3",
+	"date": "2025-04-21T14:00:00Z",
+	"duration": "10m",
+	"game_mode": "ranked",
+	"status": "finished"
+}
+
+### Add Match History Item (loss)
+POST http://localhost:3000/api/match-history
+Content-Type: application/json
+
+{
+	"user_id": 1,
+	"opponent_name": "Computer",
+	"result": "loss",
+	"score": "3-5",
 	"date": "2025-04-21T14:00:00Z",
 	"duration": "10m",
 	"game_mode": "ranked",

@@ -9,14 +9,18 @@ import {
     GameInvite,
     GameSettings,
     NotificationOptions,
-	LoginResponse
+	LoginResponse,
+    MatchRecord,
+    Achievement,
+    UserStats,
 } from '../types/index.js';
 
 import {
     DEFAULT_GAME_SETTINGS,
     DEFAULT_ACHIEVEMENTS,
     DEFAULT_COVER_PHOTO,
-    DEFAULT_AVATAR
+    DEFAULT_AVATAR,
+    DEFAULT_STATS
 } from '../constants/defaults.js';
 
 import { NotificationManager } from '../components/Notification.js';
@@ -235,21 +239,85 @@ export async function resetUserGameSettings(userId: number): Promise<boolean> {
     return updateUserGameSettings(userId, { ...DEFAULT_GAME_SETTINGS });
 }
 
-export function getRankIcon(rank: string): string {
-    // Extract numeric rank if possible
-    const rankNum = parseInt(rank?.replace(/\D/g, '') || '0');
-    
-    if (rankNum <= 10) return '<i class="fas fa-crown" style="color: gold;"></i>';
-    if (rankNum <= 50) return '<i class="fas fa-medal" style="color: silver;"></i>';
-    if (rankNum <= 100) return '<i class="fas fa-award" style="color: #cd7f32;"></i>';
-    return '<i class="fas fa-chess-pawn"></i>';
+export async function addMatchRecord(record: MatchRecord): Promise<boolean> {
+    try {
+        await api.post(`/match-history/`, record);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to add this game to match history`, error?.response?.data?.message || error);
+        return false;
+    }
 }
 
-export function getRankTitle(rank: string): string {
-    const rankNum = parseInt(rank?.replace(/\D/g, '') || '0');
-    
-    if (rankNum <= 10) return 'Grandmaster';
-    if (rankNum <= 50) return 'Master';
-    if (rankNum <= 100) return 'Expert';
-    return 'Amateur';
+export async function setMatchHistory(user: UserProfile): Promise<MatchRecord[]> {
+    try {
+        const records = (await api.get(`/match-history/users/${user.id}`)).data as MatchRecord[];
+        user.match_history = records;
+    } catch (error: any) {
+        console.error(`Failed to get match history`, error?.response?.data?.message || error);
+        user.match_history = [];
+    }
+
+    return user.match_history;
+}
+
+export async function setAchievements(user: UserProfile): Promise<Achievement[]> {
+    user.achievements = DEFAULT_ACHIEVEMENTS;
+
+    // check if user has won a game
+    if (user.match_history) {
+        for (const match of user.match_history) {
+            if (match.result === 'win') {
+                    user.achievements[0].completed = true;
+                    break;
+                }
+        }
+    }
+
+    // check if user has won 3 games in a row
+    if (user.match_history) {
+        let consecutiveWins = 0;
+        for (const match of user.match_history) {
+            if (match.result === 'win') {
+                consecutiveWins++;
+                if (consecutiveWins >= 3) {
+                    user.achievements[1].completed = true;
+                    break;
+                }
+            } else {
+                consecutiveWins = 0;
+            }
+        }
+    }
+
+    // check if user has at least 3 friends
+    if ((await getFriendsList(user.id)).length >= 3)
+        user.achievements[2].completed = true;
+
+    return user.achievements;
+}
+
+export async function setUserStats(user: UserProfile): Promise<UserStats> {
+    user.stats = { ...DEFAULT_STATS };
+    if (!user.match_history || !user.match_history.length) {
+        return user.stats;
+    }
+
+    user.stats.played = user.match_history.length;
+    for (const match of user.match_history) {
+        if (match.result === 'win')
+            user.stats.wins++;
+        if (match.result === 'loss')
+            user.stats.losses++;
+    }
+    if (user.stats.wins + user.stats.losses > 0)
+        user.stats.winrate = Math.round(user.stats.wins / (user.stats.wins + user.stats.losses) * 100);
+
+    if (user.stats.winrate >= 25 && user.stats.played >=  1) user.stats.rank = 'Silver';
+    if (user.stats.winrate >= 50 && user.stats.played >=  5) user.stats.rank = 'Gold';
+    if (user.stats.winrate >= 75 && user.stats.played >= 10) user.stats.rank = 'Diamond';
+
+    user.stats.level = Math.round((user.stats.played / 4) * (1 + user.stats.winrate / 100));
+
+    return user.stats;
 }

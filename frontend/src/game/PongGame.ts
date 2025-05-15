@@ -1,5 +1,7 @@
 import { getUserGameSettings } from '../services/UserService.js';
 import { currentUser } from '../main.js';
+import { MatchRecord } from '../types/index.js';
+import { addMatchRecord } from '../services/UserService.js';
 
 const WIN_CONDITION = 5;
 const BASE_SPEED = 1.3;
@@ -87,7 +89,7 @@ export class PongGame {
     }
     
     private startAI() {
-        this.aiViewIntervalId = window.setInterval(() => this.updateAI(), 1000);
+        this.aiViewIntervalId = window.setInterval(() => this.updateAI(), 10000);
     }
     
     private updateAI() {
@@ -198,6 +200,19 @@ export class PongGame {
         if (this.rightScore >= WIN_CONDITION || this.leftScore >= WIN_CONDITION) {
             if (this.onGameEnd) {
                 this.onGameEnd({ leftScore: this.leftScore, rightScore: this.rightScore });
+            }
+            // add match history item (only singleplayer)
+            if (this.isSinglePlayer && currentUser)
+            {
+                const record: MatchRecord = {
+                    user_id: currentUser.id,
+                    result: this.leftScore > this.rightScore ? 'win' : 'loss',
+                    score: `${this.leftScore}-${this.rightScore}`,
+                    date: new Date().toISOString(),
+                    status: 'finished',
+                    opponent_name: this.player2Name,
+                };
+                addMatchRecord(record);
             }
             this.destroy();
         }

@@ -150,7 +150,7 @@ fastify.after((err) => {
 			CREATE TABLE IF NOT EXISTS match_history (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
-			opponent_id INTEGER NOT NULL,
+			opponent_id INTEGER,
 			opponent_name TEXT NOT NULL,
 			result TEXT NOT NULL CHECK(result IN ('win', 'loss', 'draw')),
 			score TEXT NOT NULL,

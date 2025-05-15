@@ -44,9 +44,9 @@ const addMatchHistoryItem = async (req, reply) => {
 		const db = req.server.betterSqlite3;
 
 		const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
-		const opponentExists = db.prepare('SELECT id FROM users WHERE id = ?').get(opponent_id);
+		// const opponentExists = db.prepare('SELECT id FROM users WHERE id = ?').get(opponent_id);
 		if (!userExists) { reply.code(400).send({ message: 'Invalid user_id' }); return; }
-		if (!opponentExists) { reply.code(400).send({ message: 'Invalid opponent_id' }); return; }
+		// if (!opponentExists) { reply.code(400).send({ message: 'Invalid opponent_id' }); return; }
 		if (tournament_id !== undefined && tournament_id !== null) { // Only check if tournament_id is provided
 			const tournamentExists = db.prepare('SELECT id FROM tournaments WHERE id = ?').get(tournament_id);
 			if (!tournamentExists) { reply.code(400).send({ message: 'Invalid tournament_id' }); return; }

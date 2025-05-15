@@ -29,6 +29,8 @@ export class SettingsView {
         this.gameSettings = await getUserGameSettings(this.currentUserId);
         
         // Show loading state
+        if (!this.element)
+            return;
         this.element.innerHTML = '<div class="loading-spinner">Loading settings...</div>';
         rootElement.appendChild(this.element);
         

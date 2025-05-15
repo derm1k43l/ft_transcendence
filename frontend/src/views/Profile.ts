@@ -1,7 +1,8 @@
 import { Router } from '../core/router.js';
-import { getUserById, updateUserProfile } from '../services/UserService.js';
+import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
+import { DEFAULT_ACHIEVEMENTS } from '../constants/defaults.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;
@@ -19,27 +20,27 @@ export class ProfileView {
     }
 
     async render(rootElement: HTMLElement): Promise<void> {
-        this.element = document.createElement('div');
-        this.element.className = 'profile-view';
-        
-        // Show loading state
-        this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
-        rootElement.appendChild(this.element);
-    
         try {
+            this.element = document.createElement('div');
+            this.element.className = 'profile-view';
+            
+            // Show loading state
+            this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
+            rootElement.appendChild(this.element);
+
             const user = await getUserById(this.profileUserId);
+            if (!this.element) return;
             if (!user) {
                 this.element.innerHTML = '<div class="profile-error"><h2>User Not Found</h2><p>The requested profile could not be found.</p></div>';
                 return;
             }
+            user.match_history = await setMatchHistory(user);
+            user.achievements = await setAchievements(user);
+            user.stats = await setUserStats(user);
 
             // Check if viewing own profile
             const isOwnProfile = this.profileUserId === this.currentUserId;
 
-            // Calculate stats
-            const totalGames = (user.stats?.wins || 0) + (user.stats?.losses || 0);
-            const winRate = totalGames > 0 ? ((user.stats?.wins || 0) / totalGames * 100) : 0;
-        
             this.element.innerHTML = `
             <div class="profile-view">
                 <div class="profile-header">
@@ -74,7 +75,18 @@ export class ProfileView {
                     <div class="quick-stats card" style="grid-column: span 6;">
                         <div class="quick-stats-grid">
                             <div class="quick-stat">
-                                <div class="stat-icon rank">
+                                <div class="stat-icon rank" style="color: ${
+                                        user.stats.rank === 'Bronze'  ? `#cd7f32` : `` +
+                                        user.stats.rank === 'Silver'  ? `#dadada` : `` +
+                                        user.stats.rank === 'Gold'    ? `#f3a50f` : `` +
+                                        user.stats.rank === 'Diamond' ? `#1eb8dc` : ``
+                                    }; background-color: ${
+                                        user.stats.rank === 'Bronze'  ? `#cd7f3233` : `` +
+                                        user.stats.rank === 'Silver'  ? `#dadada33` : `` +
+                                        user.stats.rank === 'Gold'    ? `#f3a50f33` : `` +
+                                        user.stats.rank === 'Diamond' ? `#1eb8dc33` : ``
+                                    }"
+                                    >
                                     <i class="fas fa-medal"></i>
                                 </div>
                                 <div class="stat-info">
@@ -97,7 +109,7 @@ export class ProfileView {
                                 </div>
                                 <div class="stat-info">
                                     <h4>Games</h4>
-                                    <div class="stat-value">${totalGames}</div>
+                                    <div class="stat-value">${user.stats.played}</div>
                                 </div>
                             </div>
                             <div class="quick-stat">
@@ -106,7 +118,7 @@ export class ProfileView {
                                 </div>
                                 <div class="stat-info">
                                     <h4>Win Rate</h4>
-                                    <div class="stat-value">${winRate.toFixed(1)}%</div>
+                                    <div class="stat-value">${user.stats.winrate}%</div>
                                 </div>
                             </div>
                         </div>
@@ -119,7 +131,7 @@ export class ProfileView {
                             <div class="card-actions">
                                 <span class="progress-text">
                                     ${user.achievements ? 
-                                        `${user.achievements.filter(a => a.completed).length} / ${user.achievements.length}` : '0 / 0'}
+                                        `${user.achievements.filter(a => a.completed).length} / ${DEFAULT_ACHIEVEMENTS.length}` : `0 / ${DEFAULT_ACHIEVEMENTS.length}`}
                                 </span>
                             </div>
                         </div>
@@ -160,12 +172,12 @@ export class ProfileView {
                                         </div>
                                         <div class="activity-details">
                                             <div class="activity-primary">
-                                                <span class="game-result">vs ${match.opponent}</span>
+                                                <span class="game-result">vs ${match.opponent_name}</span>
                                                 <span class="game-score">${match.score}</span>
                                             </div>
                                             <div class="activity-meta">
                                                 <span class="game-date">${match.date}</span>
-                                                ${match.gameMode ? `<span class="game-mode">${match.gameMode}</span>` : ''}
+                                                ${match.game_mode ? `<span class="game-mode">${match.game_mode}</span>` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -184,7 +196,8 @@ export class ProfileView {
             this.setupEventListeners(isOwnProfile, user);
         } catch (error) {
             console.error("Error rendering profile:", error);
-            this.element.innerHTML = '<div class="profile-error"><h2>Error Loading Profile</h2><p>There was an error loading this profile. Please try again later.</p></div>';
+            if (this.element)
+                this.element.innerHTML = '<div class="profile-error"><h2>Error Loading Profile</h2><p>There was an error loading this profile. Please try again later.</p></div>';
         }
     }
     
@@ -278,7 +291,7 @@ export class ProfileView {
                     </div>
                     <div class="activity-meta">
                         <span class="game-date">${match.date}</span>
-                        ${match.gameMode ? `<span class="game-mode">${match.gameMode}</span>` : ''}
+                        ${match.game_mode ? `<span class="game-mode">${match.game_mode}</span>` : ''}
                     </div>
                 </div>
             </div>
