@@ -33,16 +33,6 @@ export async function getUserById(id: number): Promise<UserProfile | null> {
 	}
 }
 
-export async function getUserGameSettings(userId: number): Promise<GameSettings | null> {
-	try {
-		const user = await getUserById(userId);
-		return user?.game_settings || DEFAULT_GAME_SETTINGS;
-	} catch (error) {
-		console.error("Error retrieving game settings:", error);
-		return null;
-	}
-}
-
 // above functions are tested and working
 
 
@@ -218,6 +208,16 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
     } catch (error: any) {
         console.error(`Failed to update user profile for ID: ${userId}`, error?.response?.data?.message || error);
         return false;
+    }
+}
+
+export async function getUserGameSettings(userId: number): Promise<GameSettings> {
+    try {
+        const settings = (await api.get(`/game-settings/users/${userId}`)).data as GameSettings;
+        return settings;
+    } catch (error: any) {
+        console.error(`Failed to get game settings for user ID: ${userId}`, error?.response?.data?.message || error);
+        return DEFAULT_GAME_SETTINGS;
     }
 }
 

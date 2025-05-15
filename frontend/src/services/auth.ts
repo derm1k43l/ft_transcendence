@@ -85,10 +85,10 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 
 
 // mywbe here also some security 
-export async function updateUserPassword(userId: number, currentPassword: string, newPassword: string): Promise<boolean> {
+export async function updateUserPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
     try {
         await api.put(`/users/${userId}/password`, {
-            current_password: currentPassword,
+            old_password: oldPassword,
             new_password: newPassword
         });
         return true;

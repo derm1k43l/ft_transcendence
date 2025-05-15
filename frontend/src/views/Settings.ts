@@ -10,17 +10,13 @@ import { NotificationManager } from '../components/Notification.js';
 import { GameSettings } from '../types/index.js';
 import { currentUser } from '../main.js';
 import * as Auth from '../services/auth.js';
+import { DEFAULT_ACHIEVEMENTS, DEFAULT_GAME_SETTINGS } from '../constants/defaults.js';
 
 export class SettingsView {
-    private element: HTMLElement | null = null;
+    private element: HTMLElement = document.createElement('div');
     private router: Router;
     private currentUserId: number = currentUser?.id || -1;
-    private gameSettings: GameSettings = {
-        board_color: "#000000",
-        paddle_color: "#FFFFFF",
-        ball_color: "#FFFFFF",
-        score_color: "#FFFFFF"
-    };
+    private gameSettings: GameSettings = DEFAULT_GAME_SETTINGS;
 
     constructor(router: Router) {
         this.router = router;
@@ -28,27 +24,21 @@ export class SettingsView {
     }
 
     async render(rootElement: HTMLElement): Promise<void> {
-        this.element = document.createElement('div');
         this.element.className = 'settings-view';
+        this.gameSettings = await getUserGameSettings(this.currentUserId);
         
         // Show loading state
         this.element.innerHTML = '<div class="loading-spinner">Loading settings...</div>';
         rootElement.appendChild(this.element);
         
         try {
-            // Load user and game settings in parallel
-            const [user, gameSettings] = await Promise.all([
-                getUserById(this.currentUserId),
-                getUserGameSettings(this.currentUserId)
-            ]);
-            
+            const user = await Auth.getCurrentUser();
+            // const user = currentUser;
             if (!user) {
                 this.element.innerHTML = '<div class="error">User not found</div>';
                 return;
             }
-            
-            // Store game settings for later use
-            this.gameSettings = gameSettings || this.gameSettings;
+            await this.updateGameSettings();
     
             this.element.innerHTML = `
                 <div class="settings-header">
@@ -92,6 +82,7 @@ export class SettingsView {
                                     <div class="form-group">
                                         <label for="new-password">New Password</label>
                                         <input type="password" id="new-password" required>
+                                        <small class="form-hint">Use at least 8 characters</small>
                                     </div>
                                     <div class="form-group">
                                         <label for="confirm-password">Confirm New Password</label>
@@ -169,10 +160,9 @@ export class SettingsView {
                     </div>
                 </div>
             `;
-            
             // Set up event listeners
             this.setupEventListeners();
-            this.renderGamePreview();
+            await this.updateGameSettings();
         } catch (error) {
             console.error("Error rendering settings:", error);
             this.element.innerHTML = '<div class="error">Failed to load settings. Please try again later.</div>';
@@ -187,7 +177,7 @@ export class SettingsView {
         const panels = this.element.querySelectorAll('.settings-panel');
         
         navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+            link.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const targetId = link.getAttribute('href')?.substring(1);
                 
@@ -203,6 +193,7 @@ export class SettingsView {
                         panel.classList.remove('active');
                     }
                 });
+                await this.updateGameSettings();
             });
         });
         
@@ -250,7 +241,7 @@ export class SettingsView {
         passwordForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const currentPassword = (this.element?.querySelector('#current-password') as HTMLInputElement)?.value;
+            const oldPassword = (this.element?.querySelector('#current-password') as HTMLInputElement)?.value;
             const newPassword = (this.element?.querySelector('#new-password') as HTMLInputElement)?.value;
             const confirmPassword = (this.element?.querySelector('#confirm-password') as HTMLInputElement)?.value;
             
@@ -263,10 +254,19 @@ export class SettingsView {
                 });
                 return;
             }
+            if (newPassword.length < 8) {
+                NotificationManager.show({
+                    title: 'Password Error',
+                    message: 'Password must be at least 8 characters.',
+                    type: 'error',
+                    duration: 3000
+                });
+                return;
+            }
             
             try {
                 // API call to update password
-                const success = await Auth.updateUserPassword(this.currentUserId, currentPassword, newPassword);
+                const success = await Auth.updateUserPassword(this.currentUserId, oldPassword, newPassword);
                 
                 if (success) {
                     NotificationManager.show({
@@ -295,24 +295,26 @@ export class SettingsView {
         // Color pickers with value display
         const colorPickers = this.element.querySelectorAll('input[type="color"]');
         colorPickers.forEach(picker => {
-            picker.addEventListener('input', (e) => {
+            picker.addEventListener('input', async (e) => {
                 const target = e.target as HTMLInputElement;
                 const valueDisplay = target.parentElement?.querySelector('.color-value');
                 if (valueDisplay) {
                     valueDisplay.textContent = target.value;
                 }
                 
-                this.updateGameSettings();
+                this.gameSettings.board_color = (this.element.querySelector('#board-color') as HTMLInputElement)?.value;
+                this.gameSettings.paddle_color = (this.element.querySelector('#paddle-color') as HTMLInputElement)?.value;
+                this.gameSettings.ball_color = (this.element.querySelector('#ball-color') as HTMLInputElement)?.value;
+                this.gameSettings.score_color = (this.element.querySelector('#score-color') as HTMLInputElement)?.value;
+
                 this.renderGamePreview();
             });
         });
-        
+
         // Save game settings
         const saveGameSettingsBtn = this.element.querySelector('#save-game-settings');
         saveGameSettingsBtn?.addEventListener('click', async () => {
             await this.saveGameSettings();
-            this.updateGameSettings();
-            this.renderGamePreview();
         });
         
         // Confirmation modal
@@ -334,20 +336,15 @@ export class SettingsView {
         });
     }
     
-    private updateGameSettings(): void {
+    private async updateGameSettings(): Promise<void> {
         if (!this.element) return;
         
         const board_color = (this.element.querySelector('#board-color') as HTMLInputElement)?.value;
         const paddle_color = (this.element.querySelector('#paddle-color') as HTMLInputElement)?.value;
         const ball_color = (this.element.querySelector('#ball-color') as HTMLInputElement)?.value;
         const score_color = (this.element.querySelector('#score-color') as HTMLInputElement)?.value;
-        
-        this.gameSettings = {
-            board_color: board_color || '#000000',
-            paddle_color: paddle_color || '#FFFFFF',
-            ball_color: ball_color || '#FFFFFF',
-            score_color: score_color || '#FFFFFF',
-        };
+
+        this.renderGamePreview();
     }
     
     private async saveGameSettings(): Promise<void> {
@@ -381,6 +378,8 @@ export class SettingsView {
         
         const previewContainer = this.element.querySelector('#game-preview');
         if (!previewContainer) return;
+
+        console.log("rendering game preview");
         
         // Create a canvas for preview
         previewContainer.innerHTML = '';
@@ -432,6 +431,6 @@ export class SettingsView {
     }
 
     destroy(): void {
-        this.element = null;
+        // this.element.remove();
     }
 }

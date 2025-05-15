@@ -46,10 +46,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize user before proceeding
     await initializeUser();
 
-    console.log("\nmain");
-    console.log(currentUser);
-    console.log("main\n");
-
     // Proceed with the rest of the initialization
     initializeApp();
 });
