@@ -196,7 +196,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hb
 GET http://localhost:3000/api/achievements
 
 ### Get Achievement by ID
-GET http://localhost:3000/api/achievements/1
+GET http://localhost:3000/api/achievements/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### Get Achievements for a Specific User
@@ -289,10 +289,10 @@ DELETE http://localhost:3000/api/friend-requests/1 HTTP/1.1
 ### CREATE CHAT MESSAGE FROM USER 1 TO USER 2
 POST http://localhost:3000/api/chat-messages HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
-	"sender_id": 1,
-	"receiver_id": 2,
+	"receiver_id": 1,
 	"content": "Hey Big Sal! 👋~~~~~~~~",
 	"timestamp": "2025-04-21T14:00:00.000Z",
 	"read": 0
@@ -300,15 +300,20 @@ Content-Type: application/json
 
 ### GET MESSAGES BETWEEN USER 1 AND USER 2
 GET http://localhost:3000/api/chat-messages/chat/users/1/2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### GET CHAT MESSAGE BY ID
 GET http://localhost:3000/api/chat-messages/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### MARK MESSAGE AS READ (maybe make it only marked read once)
 PUT http://localhost:3000/api/chat-messages/read/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyODQxNX0.M-j8Ivm-mQWyNQvtAneXWG-s5sTERosDezvDneqS238
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### DELETE CHAT MESSAGE BY ID
 DELETE http://localhost:3000/api/chat-messages/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 

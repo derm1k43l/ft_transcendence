@@ -8,12 +8,18 @@ const {
 
 const {
 	BasicErrorSchema,
+	ValidationErrorSchema,
+	ForbiddenErrorSchema,
+	UnauthorizedErrorSchema,
 } = require('../schemas/errorSchema');
 
 const { ChatMessage, ChatMessageDetails } = require('../schemas/chatMessagesSchema');
 
-// Options for get chat messages between two users
+const authPreHandler = require('./authPreHandlerRoutes');
+
+// Options for get chat messages between two users (Requires AUTH + Participant Check)
 const getChatMessagesBetweenUsersOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -28,14 +34,17 @@ const getChatMessagesBetweenUsersOpts = {
 				type: 'array',
 				items: ChatMessageDetails,
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getChatMessagesBetweenUsers,
 };
 
-// Options for get single Chat Message
+// Options for get single Chat Message (Requires AUTH + Ownership/Participant Check)
 const getChatMessageOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -46,6 +55,8 @@ const getChatMessageOpts = {
 		},
 		response: {
 			200: ChatMessageDetails,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -53,29 +64,32 @@ const getChatMessageOpts = {
 	handler: getChatMessage,
 };
 
-// Options for add Chat Message
+// Options for add Chat Message (Requires AUTH - sender is authenticated user)
 const addChatMessageOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		body: {
 			type: 'object',
-			required: ['sender_id', 'receiver_id', 'content'],
+			required: ['receiver_id', 'content'],
 			properties: {
-				sender_id: { type: 'integer'},
 				receiver_id: { type: 'integer'},
-				content: { type: 'string'},
+				content: { type: 'string', minLength: 1},
 			},
+			additionalProperties: false
 		},
 		response: {
 			201: ChatMessage, // Return the basic message object on creation
-			400: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: addChatMessage,
 };
 
-// Options for marking a message as read
+// Options for marking a message as read (Requires AUTH + Receiver Check)
 const markChatMessageAsReadOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -91,6 +105,8 @@ const markChatMessageAsReadOpts = {
 					message: {type: 'string'}
 				},
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -98,8 +114,9 @@ const markChatMessageAsReadOpts = {
 	handler: markChatMessageAsRead,
 };
 
-// Options for delete Chat Message
+// Options for delete Chat Message (Requires AUTH + Sender Check)
 const deleteChatMessageOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -115,6 +132,8 @@ const deleteChatMessageOpts = {
 					message: {type: 'string'}
 				},
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -123,19 +142,19 @@ const deleteChatMessageOpts = {
 };
 
 function chatMessagesRoutes (fastify, options, done) {
-	// Get chat messages between two users
+	// Get chat messages between two users (Authenticated + Participant)
 	fastify.get('/chat/users/:userId1/:userId2', getChatMessagesBetweenUsersOpts);
 
-	// Get single chat message by ID
+	// Get single chat message by ID (Authenticated + Ownership/Participant)
 	fastify.get('/:id', getChatMessageOpts);
 
-	// Add chat message
+	// Add chat message (Authenticated - sender is authenticated user)
 	fastify.post('/', addChatMessageOpts);
 
-	// Mark a chat message as read
+	// Mark a chat message as read (Authenticated + Receiver)
 	fastify.put('/read/:id', markChatMessageAsReadOpts);
 
-	// Delete chat message
+	// Delete chat message (Authenticated + Sender)
 	fastify.delete('/:id', deleteChatMessageOpts);
 
 	done();
