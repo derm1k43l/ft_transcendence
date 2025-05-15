@@ -172,7 +172,7 @@ export class ProfileView {
                                         </div>
                                         <div class="activity-details">
                                             <div class="activity-primary">
-                                                <span class="game-result">vs ${match.opponent_name}</span>
+                                                <span class="game-result">${match.result === 'win' ? 'Won' : 'Lost'} against ${match.opponent_name}</span>
                                                 <span class="game-score">${match.score}</span>
                                             </div>
                                             <div class="activity-meta">
@@ -286,7 +286,7 @@ export class ProfileView {
                 </div>
                 <div class="activity-details">
                     <div class="activity-primary">
-                        <span class="game-result">vs ${match.opponent}</span>
+                        <span class="game-result">${match.result === 'win' ? 'Won' : 'Lost'} against ${match.opponent_name}</span>
                         <span class="game-score">${match.score}</span>
                     </div>
                     <div class="activity-meta">
