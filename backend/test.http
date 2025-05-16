@@ -45,7 +45,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hb
 	"username": "user2"
 }
 
-### DELETE USER (needs the token from the response, needs to be implemented on the client side, frontend, also needs to handle login, and invalid login)
+### DELETE USER
 DELETE http://localhost:3000/api/users/1 HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyODQxNX0.M-j8Ivm-mQWyNQvtAneXWG-s5sTERosDezvDneqS238
 
@@ -85,13 +85,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hb
 
 ### GET USER 1 STATS
 GET http://localhost:3000/api/users/stats/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyODQxNX0.M-j8Ivm-mQWyNQvtAneXWG-s5sTERosDezvDneqS238
 
 ### GET USER 2 STATS
 GET http://localhost:3000/api/users/stats/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### UPDATE USER STATS
 PUT http://localhost:3000/api/users/stats/2
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
 	"wins": 15,
@@ -99,10 +102,6 @@ Content-Type: application/json
 	"rank": "Diamond",
 	"level": 4
 }
-
-### DELETE USER STATS
-DELETE http://localhost:3000/api/users/stats/2
-
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
