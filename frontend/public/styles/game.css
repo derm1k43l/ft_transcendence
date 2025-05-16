@@ -6,9 +6,9 @@
 #modeContainer {
     display: flex;
     flex-direction: column;
+    top: 30;
     align-items: center;
     gap: 16px;
-    margin-top: 200px;
     z-index: 2;
 }
 
@@ -23,7 +23,6 @@
     transition: transform 0.2s ease, box-shadow 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
-    /* box-shadow: 0 0 10px rgb(124, 92, 255); */
     width: 360px;
     text-align: center;
 }
@@ -31,7 +30,6 @@
 #modeContainer button:hover {
     background-color: rgb(124, 92, 255);
     color: #1a1a40;
-    /* box-shadow: 0 0 15px rgb(124, 92, 255), 0 0 25px rgb(124, 92, 255); */
     transform: scale(1.05);
 }
 
@@ -163,4 +161,54 @@
     text-align: center;
 }
 
-  
+#playerInputModal {
+    padding: 14px 30px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #1a1a40;
+    border: 3px solid rgb(124, 92, 255);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 360px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+#playerCount {
+    width: 100px; 
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 2px solid rgb(124, 92, 255);
+    background-color: #1a1a40;
+    color: #fff;
+}
+
+#playerCount:focus {
+    outline: none;
+    border-color: rgb(124, 92, 255);
+    background-color: #333;
+}
+
+#startGameButton {
+    padding: 16px 30px;
+    font-size: 20px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: rgb(124, 92, 255);
+    color: #fff;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#startGameButton:hover {
+    background-color: rgb(96, 68, 204);
+    color: #1a1a40;
+    transform: scale(1.05);
+}

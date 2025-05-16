@@ -1,9 +1,7 @@
 const getNotifications = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
 	try {
-		// Auth check
-		const authenticatedUserId = req.user.id;
 		const db = req.server.betterSqlite3;
-
 		const sql = `
 			SELECT
 				n.id,
@@ -19,13 +17,11 @@ const getNotifications = async (req, reply) => {
 				u.avatar_url AS related_avatar_url
 			FROM notifications n
 			LEFT JOIN users u ON n.related_user_id = u.id
-			WHERE n.user_id = ? -- Filter notifications by the authenticated user ID
-			ORDER BY n.timestamp DESC; -- Order by newest first
+			WHERE n.user_id = ?
+			ORDER BY n.timestamp DESC;
 		`;
-
 		const stmt = db.prepare(sql);
 		const notifications = stmt.all(authenticatedUserId);
-
 		reply.code(200).send(notifications);
 	} catch (error) {
 		req.log.error(error);
@@ -39,12 +35,26 @@ const createNotification = async (req, reply) => {
 
 		const { user_id, type, message, action_url, related_user_id } = req.body; // user_id is the recipient ID here
 
+		const recipientExists = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
+		if (!recipientExists) {
+			reply.code(400).send({ message: 'Invalid user_id: Recipient user not found.' });
+			return;
+		}
+
+		if (related_user_id !== undefined && related_user_id !== null) {
+			const relatedUserExists = db.prepare('SELECT id FROM users WHERE id = ?').get(related_user_id);
+			if (!relatedUserExists) {
+				reply.code(400).send({ message: 'Invalid related_user_id: Related user not found.' });
+				return;
+			}
+		}
+
 		const insertSql = `
 			INSERT INTO notifications (user_id, type, message, action_url, related_user_id)
 			VALUES (?, ?, ?, ?, ?);
 		`;
 		const insertStmt = db.prepare(insertSql);
-		const insertResult = insertStmt.run(user_id, type, message, action_url, related_user_id);
+		const insertResult = insertStmt.run(user_id, type, message, action_url || null, related_user_id || null);
 
 		const newNotificationId = insertResult.lastInsertRowid;
 
@@ -83,23 +93,35 @@ const createNotification = async (req, reply) => {
 };
 
 const markNotificationAsRead = async (req, reply) => {
+	const authenticatedUserId = req.user.id; // Authenticated user ID from JWT
+	const notificationId = req.params.id; // Get the notification ID from URL path
 	try {
-		// Auth check
-		const authenticatedUserId = req.user.id; // Authenticated user ID from JWT
-		const notificationId = req.params.id; // Get the notification ID from URL path
 		const db = req.server.betterSqlite3;
+
+		const notification = db.prepare('SELECT id, user_id FROM notifications WHERE id = ?').get(notificationId);
+
+		if (!notification) {
+			reply.code(404).send({ message: 'Notification not found.' });
+			return;
+		}
+
+		// AUTHORIZATION CHECK: Ensure authenticated user is the recipient (user_id) of this notification
+		if (notification.user_id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only mark your own notifications as read.' });
+			return;
+		}
 
 		const updateSql = `
 			UPDATE notifications
-			SET read = 1 -- Hardcode 1 as this endpoint's purpose is to mark as read
-			WHERE id = ? AND user_id = ?; -- IMPORTANT: Only update if it matches the ID *and* belongs to the authenticated user
+			SET read = 1
+			WHERE id = ? AND user_id = ?;
 		`;
 		const updateStmt = db.prepare(updateSql);
 		const updateResult = updateStmt.run(notificationId, authenticatedUserId); //uses auth'd user ID
 
 		if (updateResult.changes === 0) {
-			req.log.warn(`Attempted to mark notification ${notificationId} as read for user ${authenticatedUserId}, but no rows updated.`);
-			return reply.code(404).send({ message: 'Notification not found or does not belong to user.' });
+			req.log.warn(`Attempted to mark notification ${notificationId} as read for user ${authenticatedUserId}, but no changes updated (already read?).`);
+			reply.code(204).send(); // still send as desired state is achieved
 		}
 
 		reply.code(204).send(); // could be 200 too I guess

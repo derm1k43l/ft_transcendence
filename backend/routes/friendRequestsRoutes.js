@@ -113,7 +113,6 @@ const addFriendRequestOpts = {
 			type: 'object',
 			required: ['to_user_id'],
 			properties: {
-				// from_user_id: { type: 'integer'},
 				to_user_id: { type: 'integer'},
 			},
 			additionalProperties: false

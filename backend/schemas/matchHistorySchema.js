@@ -5,7 +5,6 @@ const MatchHistoryItem = {
 	additionalProperties: false,
 	properties: {
 		id: { type: 'integer' },
-		user_id: { type: 'integer' },
 		opponent_id: { type: 'integer' },
 		opponent_name: { type: 'string', minLength: 1 },
 		result: { type: 'string', enum: ['win', 'loss', 'draw'] },
@@ -14,7 +13,6 @@ const MatchHistoryItem = {
 		duration: { type: 'string', minLength: 1, nullable: true },
 		game_mode: { type: 'string', minLength: 1 }, // could be enum depending on the modes
 		status: { type: 'string', enum: ['pending', 'running', 'finished'] },
-		tournament_id: { type: 'integer', nullable: true },
 	},
 };
 
