@@ -108,17 +108,22 @@ DELETE http://localhost:3000/api/users/stats/2
 
 ### Get User 1 Game Settings
 GET http://localhost:3000/api/game-settings/users/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyODQxNX0.M-j8Ivm-mQWyNQvtAneXWG-s5sTERosDezvDneqS238
 
 ### Get User 2 Game Settings
 GET http://localhost:3000/api/game-settings/users/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 ### Update Game Settings
 PUT http://localhost:3000/api/game-settings/users/1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyODQxNX0.M-j8Ivm-mQWyNQvtAneXWG-s5sTERosDezvDneqS238
 
 {
 	"paddle_color": "#0000ff",
-	"sound_enabled": 0
+	"board_color": "#000c43",
+	"ball_color": "#0000ff",
+	"score_color": "#0000ff"
 }
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
