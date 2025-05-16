@@ -11,26 +11,33 @@ const {
 const {
 	BasicErrorSchema,
 	ValidationErrorSchema,
+	UnauthorizedErrorSchema,
+	ForbiddenErrorSchema,
 } = require('../schemas/errorSchema');
 
 const { FriendRequest, FriendRequestDetails } = require('../schemas/friendRequestsSchema');
 
-// Options for get all Friend Requests
+const authPreHandler = require('./authPreHandlerRoutes');
+
+// Options for get all Friend Requests (Requires AUTH)
 const getFriendRequestsOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		response: {
 			200: {
 				type: 'array',
 				items: FriendRequestDetails, // Return detailed request objects
 			},
+			401: UnauthorizedErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getFriendRequests,
 };
 
-// Options for get single Friend Request
+// Options for get single Friend Request (Requires AUTH + Participant Check)
 const getFriendRequestOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -41,6 +48,8 @@ const getFriendRequestOpts = {
 		},
 		response: {
 			200: FriendRequestDetails, // Return detailed request object
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -48,8 +57,9 @@ const getFriendRequestOpts = {
 	handler: getFriendRequest,
 };
 
-// Options for get Sent Friend Requests for a user
+// Options for get Sent Friend Requests for a user (Requires AUTH + Matching User ID Check)
 const getSentFriendRequestsOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -63,14 +73,17 @@ const getSentFriendRequestsOpts = {
 				type: 'array',
 				items: FriendRequestDetails,
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getSentFriendRequests,
 };
 
-// Options for get Received Friend Requests for a user (usually pending)
+// Options for get Received Friend Requests for a user (usually pending) (Requires AUTH + Matching User ID Check)
 const getReceivedFriendRequestsOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -84,26 +97,32 @@ const getReceivedFriendRequestsOpts = {
 				type: 'array',
 				items: FriendRequestDetails,
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getReceivedFriendRequests,
 };
 
-// Options for add Friend Request
+// Options for add Friend Request (Requires AUTH - sender is authenticated user)
 const addFriendRequestOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		body: {
 			type: 'object',
-			required: ['from_user_id', 'to_user_id'],
+			required: ['to_user_id'],
 			properties: {
-				from_user_id: { type: 'integer'},
+				// from_user_id: { type: 'integer'},
 				to_user_id: { type: 'integer'},
 			},
+			additionalProperties: false
 		},
 		response: {
 			201: FriendRequest, // Return the basic request object on creation
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			409: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -111,8 +130,9 @@ const addFriendRequestOpts = {
 	handler: addFriendRequest,
 };
 
-// Options for update Friend Request Status
+// Options for update Friend Request Status (accept/reject) (Requires AUTH + Receiver Check)
 const updateFriendRequestStatusOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -126,11 +146,14 @@ const updateFriendRequestStatusOpts = {
 			required: ['status'],
 			properties: {
 				status: { type: 'string', enum: ['accepted', 'rejected']},
-			}
+			},
+			additionalProperties: false
 		},
 		response: {
 			200: BasicErrorSchema,
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			409: BasicErrorSchema,
 			500: BasicErrorSchema
@@ -139,8 +162,9 @@ const updateFriendRequestStatusOpts = {
 	handler: updateFriendRequestStatus,
 };
 
-// Options for delete Friend Request
+// Options for delete Friend Request (Requires AUTH + Participant Check)
 const deleteFriendRequestOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -156,6 +180,8 @@ const deleteFriendRequestOpts = {
 					message: {type: 'string'}
 				},
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -164,25 +190,25 @@ const deleteFriendRequestOpts = {
 };
 
 function friendRequestsRoutes (fastify, options, done) {
-	// Get all friend requests
+	// Get all friend requests (Authenticated)
 	fastify.get('/', getFriendRequestsOpts);
 
-	// Get single friend request by ID
+	// Get single friend request by ID (Authenticated + Participant)
 	fastify.get('/:id', getFriendRequestOpts);
 
-	// Get friend requests sent by a user
+	// Get friend requests sent by a user (Authenticated + Matching User ID)
 	fastify.get('/sent/users/:userId', getSentFriendRequestsOpts);
 
-	// Get friend requests received by a user (pending)
+	// Get friend requests received by a user (pending) (Authenticated + Matching User ID)
 	fastify.get('/received/users/:userId', getReceivedFriendRequestsOpts);
 
-	// Add friend request
+	// Add friend request (Authenticated - sender is authenticated user)
 	fastify.post('/', addFriendRequestOpts);
 
-	// Update friend request status (accept/reject)
+	// Update friend request status (accept/reject) (Authenticated + Receiver)
 	fastify.put('/status/:id', updateFriendRequestStatusOpts);
 
-	// Delete friend request
+	// Delete friend request (Authenticated + Participant)
 	fastify.delete('/:id', deleteFriendRequestOpts);
 
 	done();

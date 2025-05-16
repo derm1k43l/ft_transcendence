@@ -243,9 +243,10 @@ DELETE http://localhost:3000/api/friends/users/1/2 HTTP/1.1
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-### Add friend request (Might need more tests)
+### Add friend request
 POST http://localhost:3000/api/friend-requests HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0NjUyODQxNX0.M-j8Ivm-mQWyNQvtAneXWG-s5sTERosDezvDneqS238
 
 {
 	"from_user_id": 1,
@@ -254,27 +255,33 @@ Content-Type: application/json
 
 ### Get All Friend Requests
 GET http://localhost:3000/api/friend-requests HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
 ### Get a Single Friend Request by ID
 GET http://localhost:3000/api/friend-requests/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
 ### Get Sent Friend Requests for a User
-GET http://localhost:3000/api/friend-requests/sent/users/1 HTTP/1.1
+GET http://localhost:3000/api/friend-requests/sent/users/2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
 ### Get Received Friend Requests for a User
 GET http://localhost:3000/api/friend-requests/received/users/2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
-### Update Friend Request Status (Accept) (has issues for some reason)
-PUT http://localhost:3000/api/friend-requests/status/1 HTTP/1.1
+### Update Friend Request Status (Accept)
+PUT http://localhost:3000/api/friend-requests/status/2 HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
 {
 	"status": "accepted"
 }
 
-### Update Friend Request Status (Reject) (id is for the request)
+### Update Friend Request Status (Reject)
 PUT http://localhost:3000/api/friend-requests/status/1 HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
 {
 	"status": "rejected"
@@ -282,6 +289,7 @@ Content-Type: application/json
 
 ### Delete a Friend Request (maybe delete it automatically after it's updated)
 DELETE http://localhost:3000/api/friend-requests/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjUzMDEwOH0.F7-BRpfwxJknr0JdOiSeDEm7mO4Xzc6o0WHYrgXMoUg
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
