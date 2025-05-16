@@ -351,6 +351,8 @@ export async function uploadAvatar(user_id: number, image: File): Promise<string
         return body.avatar_url;
     } catch (error: any) {
         console.error(`Failed to upload avatar for user id ${user_id}: `, error?.response?.data?.message || error);
+        const oldURL = (await getUserById(user_id))?.avatar_url;
+        if (oldURL) return oldURL;
         return DEFAULT_AVATAR;
     }
 }

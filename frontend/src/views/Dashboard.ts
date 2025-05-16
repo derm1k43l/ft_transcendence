@@ -458,6 +458,7 @@ private setupEventListeners(): void {
             }
         });
         this.charts = [];
+        this.element?.remove();
         this.element = null;
     }
 }

@@ -170,6 +170,7 @@ export class RegisterView {
     }
 
     destroy(): void {
+        this.element?.remove();
         this.element = null;
     }
 }

@@ -378,9 +378,9 @@ function setupEventListeners(): void {
             duration: 3000
         });
 
-        window.location.reload();
-        //or?
+        // window.location.reload();
         window.location.hash = '#';
+        router.reload();
     });
 }
 

@@ -359,6 +359,7 @@ export class ChatView {
         const messageInput = this.element?.querySelector('#message-input');
         messageInput?.removeEventListener('keypress', this.handleKeyPress as EventListener);
         
+        this.element?.remove();
         this.element = null; 
     } 
 }

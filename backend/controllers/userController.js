@@ -505,12 +505,10 @@ const uploadAvatar = async (req, reply) => {
 		}
 
 		// maybe implement stricter validation
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-		if (!allowedTypes.includes(file.mimetype)) {
-			reply.code(400).send({ message: `Invalid file type. Only ${allowedTypes.join(', ')} are allowed.` });
+		if (!file.mimetype.startsWith('image/')) {
+			reply.code(400).send({ message: 'Invalid file type. Only image files are allowed.' });
 			return;
 		}
-
 		// Generate a unique filename to avoid collisions
 		const fileExtension = path.extname(file.filename);
 		const uniqueFilename = `${targetUserId}-${Date.now()}${fileExtension}`;
@@ -584,9 +582,8 @@ const uploadCover = async (req, reply) => {
 		}
 
 		// maybe implement stricter validation
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-		if (!allowedTypes.includes(file.mimetype)) {
-			reply.code(400).send({ message: `Invalid file type. Only ${allowedTypes.join(', ')} are allowed.` });
+		if (!file.mimetype.startsWith('image/')) {
+			reply.code(400).send({ message: 'Invalid file type. Only image files are allowed.' });
 			return;
 		}
 

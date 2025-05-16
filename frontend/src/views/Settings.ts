@@ -435,6 +435,7 @@ export class SettingsView {
     }
 
     destroy(): void {
+        this.element?.remove();
         this.element = null;
     }
 }

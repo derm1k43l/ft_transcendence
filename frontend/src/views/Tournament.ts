@@ -158,6 +158,7 @@ export class TournamentView {
 	
 	
     destroy(): void {
+        this.element?.remove();
         this.element = null;
     }
 }
