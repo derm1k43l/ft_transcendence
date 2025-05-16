@@ -133,15 +133,15 @@ function initializeApp(): void {
 
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash;
-        console.log(`Hash changed to: ${hash}`);
+        // console.log(`Hash changed to: ${hash}`);
         
     if (isLoggedIn) {
-        // Handle case where hash is exactly '#'
-        if (hash === '#') {
-            router.navigate('/');
-        } else {
-            router.handleRouteChange();
-        }
+        // // Handle case where hash is exactly '#'
+        // if (hash === '#') {
+        //     router.navigate('/');
+        // } else {
+        //     // router.handleRouteChange();
+        // }
         updateSidebarLinks(window.location.hash);
     } else if (hash === '#/register' && loginFormContainer) {
         handleRegisterView();

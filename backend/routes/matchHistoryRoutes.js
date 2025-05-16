@@ -34,7 +34,7 @@ const getMatchHistoryOpts = {
 	handler: getMatchHistory,
 };
 
-// Options for get single Match History Item (Requires AUTH + Participant Check)
+// Options for get single Match History Item (Requires AUTH)
 const getMatchHistoryItemOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -56,7 +56,7 @@ const getMatchHistoryItemOpts = {
 	handler: getMatchHistoryItem,
 };
 
-// Options for get Match History for a specific user (Requires AUTH + Matching User ID Check)
+// Options for get Match History for a specific user (Requires AUTH)
 const getMatchHistoryForUserOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -174,10 +174,10 @@ function matchHistoryRoutes (fastify, options, done) {
 	// Get all match history (Requires AUTH + Filtering by User/Opponent)
 	fastify.get('/', getMatchHistoryOpts);
 
-	// Get single match history item by ID (Requires AUTH + Participant Check)
+	// Get single match history item by ID (Requires AUTH)
 	fastify.get('/:id', getMatchHistoryItemOpts);
 
-	// Get match history for a specific user (Requires AUTH + Matching User ID Check)
+	// Get match history for a specific user (Requires AUTH)
 	fastify.get('/users/:userId', getMatchHistoryForUserOpts);
 
 	// Add match history item (Requires AUTH - authenticated user is  'user_id')

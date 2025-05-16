@@ -1,9 +1,9 @@
 // Controller for get all Match History (Requires AUTH + Filtering by User/Opponent)
 const getMatchHistory = async (req, reply) => {
-	const authenticatedUserId = req.user.id;
+	// const authenticatedUserId = req.user.id;
 	try {
 		const db = req.server.betterSqlite3;
-		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE user_id = ? OR opponent_id = ?').all(authenticatedUserId, authenticatedUserId);
+		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE user_id = ? OR opponent_id = ?').all(req.user.id, req.user.id);
 		reply.code(200).send(history);
 	} catch (error) {
 		req.log.error(error);
@@ -11,9 +11,9 @@ const getMatchHistory = async (req, reply) => {
 	}
 };
 
-// Controller for get single Match History Item (Requires AUTH + Participant Check)
+// Controller for get single Match History Item (Requires AUTH)
 const getMatchHistoryItem = async (req, reply) => {
-	const authenticatedUserId = req.user.id;
+	// const authenticatedUserId = req.user.id;
 	const { id } = req.params;
 	try {
 		const db = req.server.betterSqlite3;
@@ -25,10 +25,10 @@ const getMatchHistoryItem = async (req, reply) => {
 		}
 
 		// AUTHORIZATION CHECK: Ensure authenticated user is either the user_id or the opponent_id
-		if (authenticatedUserId !== item.user_id && authenticatedUserId !== item.opponent_id) {
-			reply.code(403).send({ message: 'Forbidden: You can only view match history items you are a part of.' });
-			return;
-		}
+		// if (authenticatedUserId !== item.user_id && authenticatedUserId !== item.opponent_id) {
+		// 	reply.code(403).send({ message: 'Forbidden: You can only view match history items you are a part of.' });
+		// 	return;
+		// }
 
 		reply.code(200).send(item);
 	} catch (error) {
@@ -37,19 +37,19 @@ const getMatchHistoryItem = async (req, reply) => {
 	}
 };
 
-// Controller for get Match History for a specific user (Requires AUTH + Matching User ID Check)
+// Controller for get Match History for a specific user (Requires AUTH)
 const getMatchHistoryForUser = async (req, reply) => {
-	const authenticatedUserId = req.user.id;
-	const targetId = parseInt(req.params.userId, 10);
+	// const authenticatedUserId = req.user.id;
+	// const targetId = parseInt(req.params.userId, 10);
 
 	// AUTHORIZATION CHECK: Ensure the user ID in the URL matches the authenticated user ID
-	if (authenticatedUserId !== targetId) {
-		reply.code(403).send({ message: 'Forbidden: You can only view your own match history.' });
-		return;
-	}
+	// if (authenticatedUserId !== targetId) {
+	// 	reply.code(403).send({ message: 'Forbidden: You can only view your own match history.' });
+	// 	return;
+	// }
 	try {
 		const db = req.server.betterSqlite3;
-		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE user_id = ? OR opponent_id = ?').all(authenticatedUserId, authenticatedUserId);
+		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE user_id = ? OR opponent_id = ?').all(req.user.id, req.user.id);
 		reply.code(200).send(history);
 	} catch (error) {
 		req.log.error(error);

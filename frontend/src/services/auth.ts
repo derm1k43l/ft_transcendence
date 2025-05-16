@@ -75,14 +75,19 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
     try {
+        if (!localStorage.getItem('auth_token')) {
+            console.log('user has no auth_token');
+            clearAuthData();
+            return null;
+        }
         const user = (await api.get(`/users/current`)).data as UserProfile;
         return user;
     } catch (error) {
         console.error(`Failed to fetch current user: not logged in`);
+        clearAuthData();
         return null;
     }
 }
-
 
 // mywbe here also some security 
 export async function updateUserPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
@@ -114,11 +119,9 @@ export function clearAuthData(): void {
     isAuthenticated = false;
 }
 
-export async function socialLogin(provider: 'google' | 'fortytwo'): Promise<void> {
-    // Implementation for social login for google only
-    
-    throw new Error(`${provider} login not implemented`);
-}
+// export async function googleLogin(): Promise<UserProfile | null> {
+
+// }
 
 //testt
 export async function deleteUserAccount(userId: number): Promise<boolean> {
