@@ -108,7 +108,6 @@ export class TournamentView {
 				console.warn(`Duplicate name detected: ${name}`);
 				return [];
 			}
-
 			playerNames.push(name);
 		}
 
@@ -276,6 +275,31 @@ export class TournamentView {
 		}
 	}
 
+	private createManageButtons(): void {
+		const manageButtonsContainer = this.element?.querySelector('#tournament-manage-buttons');
+		if (!manageButtonsContainer) return ;
+
+		const collectButton = document.createElement('button');
+		collectButton.type = 'button';
+		collectButton.id = 'startMatchButton';
+		collectButton.className = 'tournament-button';
+		collectButton.textContent = 'Start Match'; //maybe show whos playing
+		collectButton.addEventListener('click', () => {
+			this.startGameButton();
+		});
+		manageButtonsContainer.appendChild(collectButton);
+
+		const deleteButton = document.createElement('button');
+		deleteButton.type = 'button';
+		deleteButton.id = 'deleteTournamentButton';
+		deleteButton.className = 'tournament-button';
+		deleteButton.textContent = 'Delete Tournament';
+		deleteButton.addEventListener('click', () => {
+			this.deleteTournamentButton();
+		});
+		manageButtonsContainer.appendChild(deleteButton);
+	}
+
 	private buildTournament(): void {
 		if (!this.tournament) return ;
 
@@ -307,26 +331,7 @@ export class TournamentView {
 		const mButtonsContainer = this.element?.querySelector('#tournament-manage-buttons');
 		if (!mButtonsContainer) return ;
 
-		const collectButton = document.createElement('button');
-		collectButton.type = 'button';
-		collectButton.id = 'startMatchButton';
-		collectButton.className = 'tournament-button';
-		collectButton.textContent = 'Start Match'; //maybe show whos playing
-		collectButton.addEventListener('click', () => {
-			this.startGameButton();
-		});
-		mButtonsContainer.appendChild(collectButton);
-		
-
-		const deleteButton = document.createElement('button');
-		deleteButton.type = 'button';
-		deleteButton.id = 'deleteTournamentButton';
-		deleteButton.className = 'tournament-button';
-		deleteButton.textContent = 'Delete Tournament';
-		deleteButton.addEventListener('click', () => {
-			this.deleteTournamentButton();
-		});
-		mButtonsContainer.appendChild(deleteButton);
+		this.createManageButtons();
 	}
 
     destroy(): void {
