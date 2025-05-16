@@ -36,7 +36,7 @@ export class PongGame {
     private rightScore = 0;
 
     // Game mode and key tracking
-    private isSinglePlayer = false;
+    private nrPlayers = 0;
     private remotePlayer = false;
     private keyState: Record<string, boolean> = {};
     private aiTargetY: number = 250;
@@ -123,10 +123,10 @@ export class PongGame {
     }    
 
     // Start the game loop and optionally enable single-player mode
-    start(isSinglePlayer = false, player1Name?: string, player2Name?: string) {
-        this.isSinglePlayer = isSinglePlayer;
-        this.player1Name = player1Name || isSinglePlayer ? currentUser?.display_name || 'Player 1' : 'Player 1';
-        this.player2Name = player2Name || isSinglePlayer ? 'Computer' : this.player2Name;
+    start(nrPlayers = 1, player1Name?: string, player2Name?: string) {
+        this.nrPlayers = nrPlayers;
+        this.player1Name = player1Name ?? (nrPlayers === 1 ? currentUser?.display_name ?? 'Player 1' : 'Player 1');
+        this.player2Name = player2Name ?? (nrPlayers === 1 ? 'Computer' : 'Player 2');
 
         // update player names in html
         const player1Element = this.container.querySelector('#player1');
@@ -137,7 +137,7 @@ export class PongGame {
             player2Element.textContent = this.player2Name;
 
         this.intervalId = window.setInterval(() => this.updateGame(), 1);
-        if (this.isSinglePlayer) {
+        if (this.nrPlayers == 1) {
             this.startAI();
         }
     }
@@ -212,7 +212,7 @@ export class PongGame {
                 this.onGameEnd({ leftScore: this.leftScore, rightScore: this.rightScore });
             }
             // add match history item (only singleplayer)
-            if (this.isSinglePlayer && currentUser)
+            if (this.nrPlayers && currentUser)
             {
                 const record: MatchRecord = {
                     user_id: currentUser.id,
@@ -233,7 +233,7 @@ export class PongGame {
             this.leftPaddleY = Math.max(this.leftPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
         if (this.keyState['s']) 
             this.leftPaddleY = Math.min(this.leftPaddleY + paddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
-        if (this.isSinglePlayer) {
+        if (this.nrPlayers == 1) {
             if (this.rightPaddleY < this.aiTargetY - 5) {
                 this.keyState['ArrowDown'] = true;
                 this.keyState['ArrowUp'] = false;
@@ -244,16 +244,14 @@ export class PongGame {
                 this.keyState['ArrowUp'] = false;
                 this.keyState['ArrowDown'] = false;
             }
-
+            
             // MOVE PADDLE BASED ON KEY STATE (AI paddle is a bit slower (*0.7) to give a chance
             const aiPaddleSpeed = PADDLE_SPEED * 0.7 * deltaTime;
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - aiPaddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
                 this.rightPaddleY = Math.min(this.rightPaddleY + aiPaddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
-        } else if (this.remotePlayer) {
-            //implementing remote keys
-        } else {
+        } else if (this.nrPlayers >= 2) {
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 

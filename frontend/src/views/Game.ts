@@ -12,43 +12,51 @@ export class GameView {
         this.router = router;
     }
     
-    // The render method creates the HTML structure for the game mode selection and renders it to the provided container
     render(container: HTMLElement) {
         container.innerHTML = `
             <div id="modeContainer">
                 <button id="singleplayerButton">Play Against AI</button>
-                <button id="multiplayerKeyboardButton">Local 2-Player</button>
-                <button id="multiplayerRemoteButton">Remote Play</button>
+                <button id="multiplayerButton">Multiplayer</button>
+            </div>
+            <div id="playerInputModal" style="display: none;">
+                <label for="playerCount">Enter number of players:</label>
+                <input type="number" id="playerCount" min="2" max="4" value="2" />
+                <button id="startGameButton">Start Game</button>
             </div>
             <div id="game-container"></div>
-        `;
-
-        // Querying DOM elements for buttons and game container
+            `;
+            
+        // Querying DOM elements
         const modeContainer = container.querySelector('#modeContainer') as HTMLElement;
         const singleplayerButton = container.querySelector('#singleplayerButton') as HTMLButtonElement;
-        const multiplayerKeyboardButton = container.querySelector('#multiplayerKeyboardButton') as HTMLButtonElement;
-        const multiplayerRemoteButton = container.querySelector('#multiplayerRemoteButton') as HTMLButtonElement;
+        const multiplayerButton = container.querySelector('#multiplayerButton') as HTMLButtonElement;
         const gameContainer = container.querySelector('#game-container') as HTMLElement;
-
-        // Event listener for single-player and multiplayer mode button
+        const playerInputModal = container.querySelector('#playerInputModal') as HTMLElement;
+        const confirmButton = container.querySelector('#startGameButton') as HTMLButtonElement;
+        const playerCountInput = container.querySelector('#playerCount') as HTMLInputElement;
+    
+        // Singleplayer
         singleplayerButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
-            this.startGame(modeContainer, gameContainer, true);
+            this.startGame(modeContainer, gameContainer, 1);
         });
-
-        multiplayerKeyboardButton.addEventListener('click', () => {
+    
+        // Multiplayer
+        multiplayerButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
-            this.startGame(modeContainer, gameContainer, false);
+            playerInputModal.style.display = 'block';
         });
-
-        multiplayerRemoteButton.addEventListener('click', () => {
-            modeContainer.style.display = 'none';
-            this.router.navigate('/friends');
+    
+        // Confirm player count and start game
+        confirmButton.addEventListener('click', () => {
+            const playerCount = parseInt(playerCountInput.value);    
+            playerInputModal.style.display = 'none';
+            this.startGame(modeContainer, gameContainer, playerCount);
         });
-    }
+    }    
 
     // Starts the Pong game, passing the container and the mode (single player or multiplayer)
-    private startGame(modeContainer: HTMLElement, gameContainer: HTMLElement, isSinglePlayer: boolean) {
+    private startGame(modeContainer: HTMLElement, gameContainer: HTMLElement, nrPlayers: number) {
         this.game = new PongGame(gameContainer, (score) => {
             console.log("Game ended with score:", score);
             NotificationManager.show({
@@ -59,7 +67,7 @@ export class GameView {
             });
             modeContainer.style.display = 'flex';
         });
-        this.game.start(isSinglePlayer);
+        this.game.start(nrPlayers);
     }
 
     // Destroys the game instance if its not null
