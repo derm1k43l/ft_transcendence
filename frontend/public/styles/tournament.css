@@ -1,3 +1,10 @@
+.tournament-container {
+    display: grid;
+    gap: 2rem;
+    min-height: calc(90vh - 200px);
+    max-height: calc(90vh - 200px);
+}
+
 .tournament-nav li {
     margin-bottom: 0.5rem;
 }
@@ -46,10 +53,10 @@
     justify-content: center;
     align-items: center;
     height: 100px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+	font-size: 1rem;
 }
 
-/* 4, 8, 16 buttons */
 .tournament-buttons {
     display: flex;
     justify-content: center;

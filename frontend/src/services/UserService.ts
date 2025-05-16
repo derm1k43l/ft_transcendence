@@ -258,6 +258,16 @@ export function getRankTitle(rank: string): string {
 
 // ===== Tournament =====
 
+export async function getAllTournaments(): Promise<Tournament[]> {
+    try {
+        const tournaments = (await api.get(`/tournament/`)).data as Tournament[];
+        return tournaments;
+    } catch (error: any) {
+        console.error(`Failed to get tournaments for user ID: `, error?.response?.data?.message || error);
+        return [];
+    }
+}
+
 export async function addTournament(tournamentInfos: {
 	id: number,
 	tournament_name: string,
@@ -283,6 +293,17 @@ export async function updateTournament(tournamentId: number, tournament: Tournam
         return true;
     } catch (error: any) {
         console.error(`Failed to update tournament: ${tournamentId}`, error?.response?.data?.message || error);
+        return false;
+    }
+}
+
+export async function deleteTournament(tournamentId: number): Promise<boolean> {
+    try {
+        const response = (await api.delete(`/tournament/${tournamentId}`)).data as { message: string };
+        console.log(`${response.message} with id: ${tournamentId}`);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to delete tournament: ${tournamentId}`, error?.response?.data?.message || error);
         return false;
     }
 }
