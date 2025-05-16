@@ -8,12 +8,17 @@ const {
 const {
 	BasicErrorSchema,
 	ValidationErrorSchema,
+	UnauthorizedErrorSchema,
+	ForbiddenErrorSchema,
 } = require('../schemas/errorSchema');
 
 const { Friend, FriendDetails } = require('../schemas/friendsSchema');
 
-// Options for get friends for a specific user
+const authPreHandler = require('./authPreHandlerRoutes');
+
+// Options for get friends for a specific user (Requires AUTH + Matching User ID Check)
 const getUserFriendsOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -27,14 +32,17 @@ const getUserFriendsOpts = {
 				type: 'array',
 				items: FriendDetails, // Return friend details
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getUserFriends,
 };
 
-// Options for checking if two users are friends
+// Options for checking if two users are friends (Requires AUTH + Participant Check)
 const checkFriendshipOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -51,22 +59,27 @@ const checkFriendshipOpts = {
 					isFriend: { type: 'boolean' }
 				}
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: checkFriendship,
 };
 
-// Options for add friendship
+// Options for add friendship (Requires AUTH - user_id is authenticated user)
 const addFriendshipOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		body: {
 			...Friend,
-			required: ['user_id', 'friend_id'],
+			required: ['friend_id'],
 		},
 		response: {
 			201: BasicErrorSchema, // it's fine for just a message
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			409: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -74,8 +87,9 @@ const addFriendshipOpts = {
 	handler: addFriendship,
 };
 
-// Options for remove friendship
+// Options for remove friendship (Requires AUTH + Participant Check)
 const removeFriendshipOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -93,6 +107,8 @@ const removeFriendshipOpts = {
 				},
 			},
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -101,16 +117,16 @@ const removeFriendshipOpts = {
 };
 
 function friendsRoutes (fastify, options, done) {
-	// Get friends for a specific user
+	// Get friends for a specific user (Authenticated + Matching User ID)
 	fastify.get('/users/:userId', getUserFriendsOpts);
 
-	// Check if two users are friends
+	// Check if two users are friends (Authenticated + Participant)
 	fastify.get('/users/:userId/:friendId', checkFriendshipOpts);
 
-	// Add friendship (requires user_id and friend_id in body)
+	// Add friendship (Authenticated - user_id is authenticated user)
 	fastify.post('/', addFriendshipOpts);
 
-	// Remove friendship between two users
+	// Remove friendship between two users (Authenticated + Participant)
 	fastify.delete('/users/:userId/:friendId', removeFriendshipOpts);
 
 	done();

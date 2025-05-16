@@ -2,7 +2,6 @@ const Friend = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		user_id: { type: 'integer' },
 		friend_id: { type: 'integer' },
 	},
 };
