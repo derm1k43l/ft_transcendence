@@ -14,6 +14,7 @@ const BOARD_WIDTH = 950;
 const BOARD_HEIGHT = 590;
 const POWERUP_FACTOR_X = 2.2;
 const POWERUP_FACTOR_Y = 1.3;
+const POWERUP_FACTOR_PADDLE = 1.35;
 
 export class PongGame {
     // DOM elements used in the game
@@ -32,6 +33,7 @@ export class PongGame {
     private ballY = CENTER_Y;
     private ballSpeedX = BASE_SPEED;
     private ballSpeedY = BASE_SPEED;
+    private paddleSpeed: number = PADDLE_SPEED;
 
     // Paddle positions and scores
     private leftPaddleY = CENTER_Y;
@@ -49,12 +51,11 @@ export class PongGame {
     private player1Name: string = 'Player1';
     private player2Name: string = 'Player2';
 
-    private powerup: boolean = true; //temp until backend integration
+    private powerup: boolean = true;
     private leftPowerAvailable: boolean = false;
     private rightPowerAvailable: boolean = false;
     private leftPowerActive: boolean = false;
     private rightPowerActive: boolean = false;
-
 
     // --------------------------------------------------------------------------
     private gameSettings: { ball_color: string; paddle_color: string; score_color: string; board_color: string } | undefined;
@@ -65,7 +66,7 @@ export class PongGame {
 
     constructor(container: HTMLElement, onGameEnd?: (score: { leftScore: number; rightScore: number }) => void) {
         this.container = container;
-        if (this.powerup === true) { //temp until backend integration
+        if (this.powerup === true) {
             this.leftPowerAvailable = true;
             this.rightPowerAvailable = true;
         }
@@ -94,6 +95,7 @@ export class PongGame {
                 this.paddleRight.style.backgroundColor = settings.paddle_color;
                 this.leftScoreElement.style.color = settings.score_color;
                 this.rightScoreElement.style.color = settings.score_color;
+                // this.powerup = settings.powerup; //waiting for backend integration
                 gameContainer.style.backgroundColor = settings.board_color;
             }
         }).catch(error => {
@@ -135,13 +137,11 @@ export class PongGame {
         console.log('AI sees ball at:', observedBallX, observedBallY, '-> predicting Y:', predictedY);
 
         // Powerup
-        if (this.powerup) {
+        if (this.powerup && this.rightPowerAvailable && !this.rightPowerActive) {
             const chance = (Math.abs(this.ballSpeedX) + Math.abs(this.ballSpeedY))/20000;
-            // console.log('chance: ', chance);
-            if (this.rightPowerAvailable === true && Math.random() < chance) { // some chance to use powerup each second random relative to ball speed
-                this.keyState['ArrowLeft'] = true;
-            } else {
-                this.keyState['ArrowLeft'] = false;
+            if (Math.random() < chance) { // some chance to use powerup each second random relative to ball speed
+                this.rightPowerActive = true;
+                this.rightPowerAvailable = false;
             }
         }
     }
@@ -212,6 +212,7 @@ export class PongGame {
             if (this.leftPowerActive === true) {
                 this.ballSpeedX *= POWERUP_FACTOR_X;
                 this.ballSpeedY *= POWERUP_FACTOR_Y;
+                this.paddleSpeed *= POWERUP_FACTOR_PADDLE;
                 this.leftPowerActive = false;
             }
         }
@@ -229,6 +230,7 @@ export class PongGame {
             if (this.rightPowerActive === true) {
                 this.ballSpeedX *= POWERUP_FACTOR_X;
                 this.ballSpeedY *= POWERUP_FACTOR_Y;
+                this.paddleSpeed *= POWERUP_FACTOR_PADDLE;
                 this.rightPowerActive = false;
             }
         }
@@ -264,7 +266,7 @@ export class PongGame {
         }
 
         // Paddle movement
-        const paddleSpeed = PADDLE_SPEED * deltaTime;
+        const paddleSpeed = this.paddleSpeed * deltaTime;
         if (this.keyState['w']) 
             this.leftPaddleY = Math.max(this.leftPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
         if (this.keyState['s']) 
@@ -284,17 +286,13 @@ export class PongGame {
                 this.keyState['ArrowUp'] = false;
                 this.keyState['ArrowDown'] = false;
             }
-            
+
             // MOVE PADDLE BASED ON KEY STATE (AI paddle is a bit slower (*0.7) to give a chance when playing without poweups)
-            const aiPaddleSpeed = PADDLE_SPEED * deltaTime * (this.powerup ? 1 : 0.7);
+            const aiPaddleSpeed = this.paddleSpeed * deltaTime * (this.powerup ? 1 : 0.7);
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - aiPaddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
                 this.rightPaddleY = Math.min(this.rightPaddleY + aiPaddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
-            if (this.keyState['ArrowLeft'] && this.rightPowerAvailable === true) {
-                this.rightPowerActive = true;
-                this.rightPowerAvailable = false;
-            }
         } else if (this.nrPlayers >= 2) { // 2 Player game
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
@@ -316,7 +314,8 @@ export class PongGame {
         this.ballSpeedX *= -1;
         this.ballSpeedX = this.ballSpeedX < 0 ? -BASE_SPEED : BASE_SPEED;
         this.ballSpeedY = BASE_SPEED * Math.random() * 2 - BASE_SPEED;
-        if (this.powerup === true) { //temp until backend integration
+        this.paddleSpeed = PADDLE_SPEED;
+        if (this.powerup === true) {
             this.leftPowerAvailable = true;
             this.rightPowerAvailable = true;
         }
@@ -332,7 +331,7 @@ export class PongGame {
         this.paddleRight.style.top = `${this.rightPaddleY}px`;
         this.leftScoreElement.textContent = `${this.leftScore}`;
         this.rightScoreElement.textContent = `${this.rightScore}`;
-        if (this.powerup) { //temp until backend integration
+        if (this.powerup) {
             if (this.leftPowerActive) this.leftPowerup.style.color = '#7c0e0e';
             else if (this.leftPowerAvailable) this.leftPowerup.style.color = '#d1bd51';
             else this.leftPowerup.style.color = '#212121';
