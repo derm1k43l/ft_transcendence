@@ -191,7 +191,7 @@ const addFriendRequest = async (req, reply) => {
 				'pending',
 				date
 			);
-			const newRequestId = result.lastInsertedRowid;
+			const newRequestId = result.lastInsertRowid;
 			const newRequest = db.prepare('SELECT id, from_user_id, to_user_id, status, date FROM friend_requests WHERE id = ?').get(newRequestId);
 			reply.code(201).send(newRequest);
 		} catch (err) {

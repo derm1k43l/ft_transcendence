@@ -24,12 +24,14 @@ import {
 } from '../constants/defaults.js';
 
 import { NotificationManager } from '../components/Notification.js';
+import { getCurrentUser } from './auth.js';
 
 // ===== User Management Functions =====
 
 export async function getUserById(id: number): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/${id}`)).data as UserProfile;
+        completeUser(user);
 		return user;
 	} catch (error: any) {
 		console.error(`Failed to fetch user with ID ${id}: `, error?.response?.data?.message || error);
@@ -40,10 +42,8 @@ export async function getUserById(id: number): Promise<UserProfile | null> {
 export async function getAllUsers(): Promise<UserProfile[]> {
 	try {
 		const users: UserProfile[] = (await api.get(`/users/`)).data as UserProfile[];
-        for (const user of users) {
-            await setMatchHistory(user);
-            await setUserStats(user);
-        }
+        for (const user of users)
+            completeUser(user);
 		return users;
 	} catch (error: any) {
 		console.error(`Failed to fetch all users: `, error?.response?.data?.message || error);
@@ -60,19 +60,18 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 
 // ===== Chat-related Functions =====
 
-export async function sendMessage(fromUserId: number, toUserId: number, content: string): Promise<ChatMessage | null> {
+export async function sendMessage(receiver_id: number, content: string) {
     try {
-        if (!content.trim()) return null;
-        
-        const response = await api.post('/messages', {
-            sender_id: fromUserId,
-            receiver_id: toUserId,
-            content: content.trim()
+        content = content.trim();
+        if (content.length < 1) return null;
+        const response = await api.post('/chat-messages/', {
+            receiver_id: receiver_id,
+            content: content,
         });
-        
-        return response.data;
+        const message = response.data as ChatMessage;
+        return message;
     } catch (error: any) {
-        console.error(`Failed to send message from ${fromUserId} to ${toUserId}`, error?.response?.data?.message || error);
+        console.error(`Failed to send message to ${receiver_id}: `, error?.response?.data?.message || error);
         return null;
     }
 }
@@ -87,26 +86,51 @@ export async function getUnreadMessageCount(userId: number): Promise<number> {
     }
 }
 
-export async function markMessagesAsRead(fromUserId: number, toUserId: number): Promise<void> {
+export async function markMessagesAsRead(messages: ChatMessage[]) {
+    if (messages.length === 0) return;
+    const receiver = await getCurrentUser();
+    if (!receiver) return;
     try {
-        await api.put(`/messages/read`, {
-            sender_id: fromUserId,
-            receiver_id: toUserId
-        });
+        for (const msg of messages) {
+            if (msg.receiver_id === receiver.id && !msg.read)
+                await api.put(`/chat-messages/read/${msg.id}`);
+    }
     } catch (error: any) {
-        console.error(`Failed to mark messages as read from ${fromUserId} to ${toUserId}`, error?.response?.data?.message || error);
+        console.error(`Failed to mark messages as read: `, error?.response?.data?.message || error);
     }
 }
 
-// Function to get conversations for a user
-export async function getUserConversations(userId: number): Promise<any[]> {
+// Function to get chat messages for a user
+export async function getChatMessages(userId: number, partnerId: number): Promise<ChatMessage[]> {
     try {
-        const response = await api.get(`/users/${userId}/conversations`);
-        return response.data;
+        const messages = (await api.get(`/chat-messages/chat/users/${userId}/${partnerId}`)).data as ChatMessage[];
+        // messages.sort((a: ChatMessage, b: ChatMessage) => 
+        //     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        // );
+        return messages;
     } catch (error: any) {
-        console.error(`Failed to get conversations for user ID: ${userId}`, error?.response?.data?.message || error);
+        console.error(`Failed to get chat messages between users: ${userId} and ${partnerId}: `, error?.response?.data?.message || error);
         return [];
     }
+}
+
+export async function getLastMessageAndUnreadCount(userId: number, partnerId: number): Promise<{ lastMessage: ChatMessage | null, unreadCount: number }> {
+    try {
+        let unreadCount = 0;
+        const messages = (await api.get(`/chat-messages/chat/users/${userId}/${partnerId}`)).data as ChatMessage[];
+        // messages.sort((a: ChatMessage, b: ChatMessage) => 
+        //     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        // );
+        for (const msg of messages) {
+            if (msg.receiver_id === userId && !msg.read)
+                unreadCount++;
+        }
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage) return { lastMessage: lastMessage, unreadCount: unreadCount};
+    } catch (error: any) {
+        console.error(`Failed to get chat messages between users: ${userId} and ${partnerId}: `, error?.response?.data?.message || error);
+    }
+    return { lastMessage: null, unreadCount: 0 };
 }
 
 export async function resetUserStats(userId: number): Promise<boolean> {
@@ -118,19 +142,6 @@ export async function resetUserStats(userId: number): Promise<boolean> {
 		return false;
 	}
 }
-
-// ===== Leaderboard Functions =====
-
-export async function getTopPlayers(sortBy: 'wins' | 'winrate' = 'wins', limit: number = 10): Promise<UserProfile[]> {
-    try {
-        const response = await api.get(`/leaderboard?sort=${sortBy}&limit=${limit}`);
-        return response.data;
-    } catch (error: any) {
-        console.error(`Failed to get top players by ${sortBy}`, error?.response?.data?.message || error);
-        return [];
-    }
-}
-
 
 // ===== Friend Management =====
 
@@ -156,22 +167,6 @@ export async function sendFriendRequest(fromUserId: number, toUserId: number): P
         return false;
     }
 }
-
-// export async function getFriendRequests(userId: number, status?: 'pending' | 'accepted' | 'rejected'): Promise<FriendRequest[]> {
-//     try {
-//         const allRequests = (await api.get('/friend-requests')).data as FriendRequest[];
-// 		const userRequests = allRequests.filter(r => r.from_user_id === userId || r.to_user_id === userId);
-// 		if (status)
-// 		{
-// 			const filteredUserRequests = userRequests.filter(r => r.status === status);
-// 			return filteredUserRequests;
-// 		}
-//         return userRequests;
-//     } catch (error: any) {
-//         console.error(`Failed to get friend requests for user ID: ${userId}`, error?.response?.data?.message || error);
-//         return [];
-//     }
-// }
 
 export async function getIncomingFriendRequests(userId: number): Promise<FriendRequest[]> {
     try {
@@ -265,6 +260,62 @@ export async function addMatchRecord(record: MatchRecord): Promise<boolean> {
     }
 }
 
+export async function uploadAvatar(user_id: number, image: File): Promise<string> {
+    try {
+        const formData = new FormData();
+        formData.append('avatar', image);
+        const response = await api.put(`/users/${user_id}/avatar`, formData, {
+            headers: {
+                'Content-Type': undefined,
+            },
+        });
+        const body: { message: string, avatar_url: string } = response.data;
+        return body.avatar_url;
+    } catch (error: any) {
+        console.error(`Failed to upload avatar for user id ${user_id}: `, error?.response?.data?.message || error);
+        const oldURL = (await getUserById(user_id))?.avatar_url;
+        if (oldURL) return oldURL;
+        return DEFAULT_AVATAR;
+    }
+}
+
+export async function uploadCover(user_id: number, image: File): Promise<string> {
+    try {
+        const formData = new FormData();
+        formData.append('cover', image);
+        const response = await api.put(`/users/${user_id}/cover`, formData, {
+            headers: {
+                'Content-Type': undefined,
+            },
+        });
+        const body: { message: string, cover_photo_url: string } = response.data;
+        return body.cover_photo_url;
+    } catch (error: any) {
+        console.error(`Failed to upload cover photo for user id ${user_id}: `, error?.response?.data?.message || error);
+        return DEFAULT_COVER_PHOTO;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function completeUser(user: UserProfile | null) {
+    if (!user) return;
+    await setMatchHistory(user);
+    await setAchievements(user);
+    await setUserStats(user);
+    setRealStatus(user);
+}
+
 export async function setMatchHistory(user: UserProfile): Promise<MatchRecord[]> {
     try {
         const records = (await api.get(`/match-history/users/${user.id}`)).data as MatchRecord[];
@@ -338,38 +389,17 @@ export async function setUserStats(user: UserProfile): Promise<UserStats> {
     return user.stats;
 }
 
-export async function uploadAvatar(user_id: number, image: File): Promise<string> {
-    try {
-        const formData = new FormData();
-        formData.append('avatar', image);
-        const response = await api.put(`/users/${user_id}/avatar`, formData, {
-            headers: {
-                'Content-Type': undefined,
-            },
-        });
-        const body: { message: string, avatar_url: string } = response.data;
-        return body.avatar_url;
-    } catch (error: any) {
-        console.error(`Failed to upload avatar for user id ${user_id}: `, error?.response?.data?.message || error);
-        const oldURL = (await getUserById(user_id))?.avatar_url;
-        if (oldURL) return oldURL;
-        return DEFAULT_AVATAR;
+export function setRealStatus(user: UserProfile | null) {
+    if (!user) return;
+    if (!user.status || !user.last_active) {
+        user.status = 'offline';
+        return;
     }
-}
 
-export async function uploadCover(user_id: number, image: File): Promise<string> {
-    try {
-        const formData = new FormData();
-        formData.append('cover', image);
-        const response = await api.put(`/users/${user_id}/cover`, formData, {
-            headers: {
-                'Content-Type': undefined,
-            },
-        });
-        const body: { message: string, cover_photo_url: string } = response.data;
-        return body.cover_photo_url;
-    } catch (error: any) {
-        console.error(`Failed to upload cover photo for user id ${user_id}: `, error?.response?.data?.message || error);
-        return DEFAULT_COVER_PHOTO;
-    }
+    // check for timeout
+    const timeout = new Date();
+    timeout.setMinutes(timeout.getMinutes() + 3);
+
+    if (new Date(user.last_active) < timeout)
+        user.status = 'offline';
 }

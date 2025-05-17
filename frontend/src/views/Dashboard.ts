@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getAllUsers, getTopPlayers, setMatchHistory, setUserStats } from '../services/UserService.js';
+import { getAllUsers, setMatchHistory, setUserStats } from '../services/UserService.js';
 // import { user } from '../main.js';
 import { UserProfile } from '../types/index.js';
 import { getCurrentUser } from '../services/auth.js';

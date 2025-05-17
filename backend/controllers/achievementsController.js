@@ -85,7 +85,7 @@ const addAchievement = async (req, reply) => {
 
 		try {
 			const result = db.prepare('INSERT INTO achievements (user_id, name, description, icon, completed, date_completed) VALUES (?, ?, ?, ?, ?, ?)').run(authenticatedUserId, name, description, icon, completed, date_completed || null);
-			const newAchievementId = result.lastInsertedRowid;
+			const newAchievementId = result.lastInsertRowid;
 			const newAchievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(newAchievementId);
 			reply.code(201).send(newAchievement);
 		} catch (err) {

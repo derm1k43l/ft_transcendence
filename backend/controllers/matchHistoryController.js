@@ -83,7 +83,7 @@ const addMatchHistoryItem = async (req, reply) => {
 				game_mode,
 				status
 			);
-			const newItemId = resultRun.lastInsertedRowid;
+			const newItemId = resultRun.lastInsertRowid;
 			const newItem = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE id = ?').get(newItemId);
 			reply.code(201).send(newItem);
 		} catch (err) {

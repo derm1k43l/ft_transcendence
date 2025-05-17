@@ -16,7 +16,7 @@ const { Friend, FriendDetails } = require('../schemas/friendsSchema');
 
 const authPreHandler = require('./authPreHandlerRoutes');
 
-// Options for get friends for a specific user (Requires AUTH + Matching User ID Check)
+// Options for get friends for a specific user (Requires AUTH)
 const getUserFriendsOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -117,7 +117,7 @@ const removeFriendshipOpts = {
 };
 
 function friendsRoutes (fastify, options, done) {
-	// Get friends for a specific user (Authenticated + Matching User ID)
+	// Get friends for a specific user (Authenticated)
 	fastify.get('/users/:userId', getUserFriendsOpts);
 
 	// Check if two users are friends (Authenticated + Participant)

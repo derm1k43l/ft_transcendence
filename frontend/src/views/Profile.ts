@@ -1,6 +1,6 @@
 import { Router } from '../core/router.js';
-import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats, uploadAvatar, uploadCover } from '../services/UserService.js';
 import { Listener, addListener, removeListener, removeListeners } from '../services/listener.js';
+import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats, uploadAvatar, uploadCover } from '../services/UserService.js';
 import { UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
@@ -14,7 +14,6 @@ export class ProfileView {
     private profileUserId: number;
 
     private boundListeners: Listener[] = [];
-    // private modalListeners: Listener[] = [];
     private addListener(l: Listener) { addListener(l, this.boundListeners); }
     private removeListeners() { removeListeners(this.boundListeners); this.boundListeners = []; }
 

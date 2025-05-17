@@ -1,4 +1,4 @@
-import { Achievement, GameSettings, UserStats } from '../types/index.js';
+import { Achievement, GameSettings, UserProfile, UserStats } from '../types/index.js';
 
 // Default game settings
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
@@ -33,15 +33,38 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+// NULL_USER to be used for default initialization
+export const NULL_USER: UserProfile = {
+  id: -1,
+  username: 'NULL_USER',
+  password: undefined,
+  display_name: 'NULL_USER',
+  email: undefined,
+  bio: undefined,
+  avatar_url: undefined,
+  cover_photo_url: undefined,
+  join_date: undefined,
+  has_two_factor_auth: undefined,
+  stats: undefined,
+  match_history: undefined,
+  achievements: undefined,
+  friends: undefined,
+  friend_requests: undefined,
+  game_settings: undefined,
+  notifications: undefined,
+  status: undefined,
+  last_active: undefined,
+};
+
 // Default user stats 
 export const DEFAULT_STATS: UserStats = {
-    played: 0,
-    wins: 0,
-    losses: 0,
-    winrate: 0,
-    rank: 'Bronze',
-    level: 1,
-  };
+  played: 0,
+  wins: 0,
+  losses: 0,
+  winrate: 0,
+  rank: 'Bronze',
+  level: 1,
+};
 
 // User profile defaults
 export const DEFAULT_COVER_PHOTO = "https://placehold.co/1200x300/7c00e3/ffffff?text=Game+Profile";
