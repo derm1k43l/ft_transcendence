@@ -12,7 +12,8 @@ const PADDLE_HEIGHT = 95;
 const HALF_PADDLE = PADDLE_HEIGHT / 2;
 const BOARD_WIDTH = 950;
 const BOARD_HEIGHT = 590;
-const POWERUP_FACTOR = 4;
+const POWERUP_FACTOR_X = 2.2;
+const POWERUP_FACTOR_Y = 1.3;
 
 export class PongGame {
     // DOM elements used in the game
@@ -137,12 +138,14 @@ export class PongGame {
         console.log('AI sees ball at:', observedBallX, observedBallY, '-> predicting Y:', predictedY);
 
         // Powerup
-        console.log(Math.abs(this.ballSpeedX)/200, Math.abs(this.ballSpeedY)/200);
-        console.log('chance: ', ((Math.abs(this.ballSpeedX)/200 + Math.abs(this.ballSpeedY)/200) * (Math.abs(this.ballSpeedX)/200 + Math.abs(this.ballSpeedY)/200))/200);
-        if (this.rightPowerAvailable === true && Math.random() < 0.05) { // some chance to use powerup each second random relative to ball speed
-            this.keyState['ArrowLeft'] = true;
-        } else {
-            this.keyState['ArrowLeft'] = false;
+        if (this.powerup) {
+            const chance = (Math.abs(this.ballSpeedX) + Math.abs(this.ballSpeedY))/20000;
+            console.log('chance: ', chance);
+            if (this.rightPowerAvailable === true && Math.random() < chance) { // some chance to use powerup each second random relative to ball speed
+                this.keyState['ArrowLeft'] = true;
+            } else {
+                this.keyState['ArrowLeft'] = false;
+            }
         }
     }
 
@@ -210,10 +213,8 @@ export class PongGame {
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
             // powerup
             if (this.leftPowerActive === true) {
-                if (Math.random() < 0.5)
-                    this.ballSpeedX *= POWERUP_FACTOR;
-                else
-                    this.ballSpeedY *= POWERUP_FACTOR;
+                this.ballSpeedX *= POWERUP_FACTOR_X;
+                this.ballSpeedY *= POWERUP_FACTOR_Y;
                 this.leftPowerActive = false;
             }
         }
@@ -229,10 +230,8 @@ export class PongGame {
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
             // powerup
             if (this.rightPowerActive === true) {
-                if (Math.random() < 0.5)
-                    this.ballSpeedX *= POWERUP_FACTOR;
-                else
-                    this.ballSpeedY *= POWERUP_FACTOR;
+                this.ballSpeedX *= POWERUP_FACTOR_X;
+                this.ballSpeedY *= POWERUP_FACTOR_Y;
                 this.rightPowerActive = false;
             }
         }
