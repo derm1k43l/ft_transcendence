@@ -145,22 +145,6 @@
     overflow: hidden;
 }
 
-#leftScore {
-    width: 85px;
-    display: inline-block;
-    border: 3px solid;
-    margin-right: 30px;
-    text-align: center;
-}
-
-#rightScore {
-    width: 85px;
-    display: inline-block;
-    border: 3px solid;
-    margin-left: 30px;
-    text-align: center;
-}
-
 #playerInputModal {
     padding: 14px 30px;
     font-size: 18px;
@@ -177,24 +161,7 @@
     margin: 0 auto;
 }
 
-#playerCount {
-    width: 100px; 
-    padding: 12px;
-    font-size: 18px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    border: 2px solid rgb(124, 92, 255);
-    background-color: #1a1a40;
-    color: #fff;
-}
-
-#playerCount:focus {
-    outline: none;
-    border-color: rgb(124, 92, 255);
-    background-color: #333;
-}
-
-#startGameButton {
+#twoPlayerButton, #fourPlayerButton {
     padding: 16px 30px;
     font-size: 20px;
     width: 100%;
@@ -207,7 +174,7 @@
     letter-spacing: 1px;
 }
 
-#startGameButton:hover {
+#twoPlayerButton:hover, #fourPlayerButton:hover {
     background-color: rgb(96, 68, 204);
     color: #1a1a40;
     transform: scale(1.05);

@@ -19,21 +19,24 @@ export class GameView {
                 <button id="multiplayerButton">Multiplayer</button>
             </div>
             <div id="playerInputModal" style="display: none;">
-                <label for="playerCount">Enter number of players:</label>
-                <input type="number" id="playerCount" min="2" max="4" value="2" />
-                <button id="startGameButton">Start Game</button>
+                <div id="playerCountSelection" style="display: none;">
+                    <p>Select number of players:</p>
+                    <button id="twoPlayerButton">2 Players</button>
+                    <button id="fourPlayerButton">4 Players</button>
+                </div>
             </div>
             <div id="game-container"></div>
-            `;
-            
+        `;
+    
         // Querying DOM elements
         const modeContainer = container.querySelector('#modeContainer') as HTMLElement;
         const singleplayerButton = container.querySelector('#singleplayerButton') as HTMLButtonElement;
         const multiplayerButton = container.querySelector('#multiplayerButton') as HTMLButtonElement;
         const gameContainer = container.querySelector('#game-container') as HTMLElement;
         const playerInputModal = container.querySelector('#playerInputModal') as HTMLElement;
-        const confirmButton = container.querySelector('#startGameButton') as HTMLButtonElement;
-        const playerCountInput = container.querySelector('#playerCount') as HTMLInputElement;
+        const playerCountSelection = container.querySelector('#playerCountSelection') as HTMLElement;
+        const twoPlayerButton = container.querySelector('#twoPlayerButton') as HTMLButtonElement;
+        const fourPlayerButton = container.querySelector('#fourPlayerButton') as HTMLButtonElement;
     
         // Singleplayer
         singleplayerButton.addEventListener('click', () => {
@@ -45,15 +48,21 @@ export class GameView {
         multiplayerButton.addEventListener('click', () => {
             modeContainer.style.display = 'none';
             playerInputModal.style.display = 'block';
+            playerCountSelection.style.display = 'block';
         });
     
-        // Confirm player count and start game
-        confirmButton.addEventListener('click', () => {
-            const playerCount = parseInt(playerCountInput.value);    
+        // 2-player mode
+        twoPlayerButton.addEventListener('click', () => {
             playerInputModal.style.display = 'none';
-            this.startGame(modeContainer, gameContainer, playerCount);
+            this.startGame(modeContainer, gameContainer, 2);
         });
-    }    
+    
+        // 4-player mode
+        fourPlayerButton.addEventListener('click', () => {
+            playerInputModal.style.display = 'none';
+            this.startGame(modeContainer, gameContainer, 4);
+        });
+    }       
 
     // Starts the Pong game, passing the container and the mode (single player or multiplayer)
     private startGame(modeContainer: HTMLElement, gameContainer: HTMLElement, nrPlayers: number) {

@@ -37,7 +37,6 @@ export class PongGame {
 
     // Game mode and key tracking
     private nrPlayers = 0;
-    private remotePlayer = false;
     private keyState: Record<string, boolean> = {};
     private aiTargetY: number = 250;
     private aiViewIntervalId: number | null = null;
@@ -46,11 +45,7 @@ export class PongGame {
     private player1Name: string = 'Player1';
     private player2Name: string = 'Player2';
 
-
-    // --------------------------------------------------------------------------
     private gameSettings: { ball_color: string; paddle_color: string; score_color: string; board_color: string } | undefined;
-    // --------------------------------------------------------------------------
-
     private onGameEnd: ((score: { leftScore: number; rightScore: number }) => void) | null = null;
 
     // Add a property to track the last update time
@@ -126,7 +121,7 @@ export class PongGame {
     start(nrPlayers = 1, player1Name?: string, player2Name?: string) {
         this.nrPlayers = nrPlayers;
         this.player1Name = player1Name ?? (nrPlayers === 1 ? currentUser?.display_name ?? 'Player 1' : 'Player 1');
-        this.player2Name = player2Name ?? (nrPlayers === 1 ? 'Computer' : 'Player 2');
+        this.player2Name = player2Name ?? (nrPlayers === 1 ? 'AI' : 'Player 2');
 
         // update player names in html
         const player1Element = this.container.querySelector('#player1');
@@ -284,13 +279,11 @@ export class PongGame {
     private getTemplate(): string {
         return `
         <div class="score">
-            <div class="score">
-                <div class="score__left">
-                    <span id="leftScore">0</span><span id="player1">${this.player1Name}</span>
-                </div>
-                <div class="score__right">
-                    <span id="player2">${this.player2Name}</span><span id="rightScore">0</span>
-                </div>
+            <div class="score__left">
+                <span id="leftScore">0</span><span id="player1">${this.player1Name}</span>
+            </div>
+            <div class="score__right">
+                <span id="player2">${this.player2Name}</span><span id="rightScore">0</span>
             </div>
         </div>
         <div class="game__container">
