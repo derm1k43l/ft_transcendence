@@ -17,7 +17,7 @@ export class LoginView {
         this.element = document.createElement('div');
         this.element.classList.add('login-view');
         this.element.innerHTML = `
-            <form id="login-form" class="auth-form">
+            <form id="login-form" class="auth-form" onsubmit="return false;" method="post">
                 <div class="form-group">
                     <label for="login-username">Username</label>
                     <input type="text" id="login-username" name="username" required>
