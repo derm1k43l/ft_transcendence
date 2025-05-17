@@ -359,11 +359,11 @@ function showAboutModal(): void {
 
 function setupEventListeners(): void {
     // Logout Button
-    logoutButton?.addEventListener('click', (event) => {
+    logoutButton?.addEventListener('click', async (event) => {
         event.preventDefault();
         isLoggedIn = false;
         currentUser = null;
-        Auth.logout();
+        await Auth.logout();
         updateUI();
 
         NotificationManager.show({

@@ -52,52 +52,15 @@ export class SettingsView {
                 <div class="settings-container">
                     <div class="settings-sidebar">
                         <ul class="settings-nav">
-                            <li><a href="#security" class="active">Security & Privacy</a></li>
-                            <li><a href="#game">Game Preferences</a></li>
+                            <li><a href="#game" class="active">Game Preferences</a></li>
+                            <li><a href="#security">Security & Privacy</a></li>
                         </ul>
                     </div>
                     
                     <div class="settings-content">
-
-                        <!-- Security Panel -->
-                        <div id="security" class="settings-panel active">
-                            <h3>Security & Privacy</h3>
-
-                            <div class="settings-section">
-                                <h4>Email Address</h4>
-                                <form id="email-form" class="settings-form">
-                                    <div class="form-group">
-                                        <label for="settings-email">Email</label>
-                                        <input type="email" id="settings-email" value="${user.email || ''}">
-                                        <small>Your email is used for important account notifications and security features</small>
-                                    </div>
-                                    <button type="submit" class="app-button">Update Email</button>
-                                </form>
-                            </div>
-                            
-                            <div class="settings-section">
-                                <h4>Password</h4>
-                                <form id="password-form" class="settings-form">
-                                    <div class="form-group">
-                                        <label for="current-password">Current Password</label>
-                                        <input type="password" id="current-password" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="new-password">New Password</label>
-                                        <input type="password" id="new-password" required>
-                                        <small class="form-hint">Use at least 8 characters</small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="confirm-password">Confirm New Password</label>
-                                        <input type="password" id="confirm-password" required>
-                                    </div>
-                                    <button type="submit" class="app-button">Change Password</button>
-                                </form>
-                            </div>
-                        </div>
                         
                         <!-- Game Preferences Panel -->
-                        <div id="game" class="settings-panel">
+                        <div id="game" class="settings-panel active">
                             <h3>Game Preferences</h3>
                             
                             <div class="settings-section">
@@ -141,6 +104,43 @@ export class SettingsView {
                                     
                                     <button type="button" class="app-button" id="save-game-settings">Save Game Settings</button>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Panel -->
+                        <div id="security" class="settings-panel">
+                            <h3>Security & Privacy</h3>
+
+                            <div class="settings-section">
+                                <h4>Email Address</h4>
+                                <form id="email-form" class="settings-form">
+                                    <div class="form-group">
+                                        <label for="settings-email">Email</label>
+                                        <input type="email" id="settings-email" value="${user.email || ''}">
+                                        <small>Your email is used for important account notifications and security features</small>
+                                    </div>
+                                    <button type="submit" class="app-button">Update Email</button>
+                                </form>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4>Password</h4>
+                                <form id="password-form" class="settings-form">
+                                    <div class="form-group">
+                                        <label for="current-password">Current Password</label>
+                                        <input type="password" id="current-password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-password">New Password</label>
+                                        <input type="password" id="new-password" required>
+                                        <small class="form-hint">Use at least 8 characters</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirm-password">Confirm New Password</label>
+                                        <input type="password" id="confirm-password" required>
+                                    </div>
+                                    <button type="submit" class="app-button">Change Password</button>
+                                </form>
                             </div>
                         </div>
                     </div>

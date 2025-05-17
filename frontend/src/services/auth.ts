@@ -43,7 +43,7 @@ export async function logout(): Promise<void> {
     try {
         // Call the logout endpoint if it exists
         if (localStorage.getItem('auth_token')) {
-            await api.post('/users/logout', {});
+            await api.post('/users/log-out', {});
         }
     } catch (error) {
         console.error('Error during logout:', error);

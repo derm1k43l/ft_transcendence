@@ -12,6 +12,7 @@ export class DashboardView {
     private currentUserID = -1;
     
     constructor(router: Router) {
+        console.log("--- CONSTRUCTING DASHBOARD VIEW ---");
         this.router = router;
     }
 
@@ -450,6 +451,7 @@ private setupEventListeners(): void {
     }
     
     destroy(): void {
+        console.log("--- DESTROYING DASHBOARD VIEW ---");
         this.charts.forEach(chart => {
             if (chart && typeof chart.destroy === 'function') {
                 chart.destroy();
