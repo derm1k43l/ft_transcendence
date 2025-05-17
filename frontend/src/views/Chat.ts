@@ -22,7 +22,9 @@ export class ChatView {
     private boundListeners: Listener[] = [];
     private addListener(l: Listener) { addListener(l, this.boundListeners); }
     private removeListeners() { removeListeners(this.boundListeners); this.boundListeners = []; }
-    private sendButton: Element | null | undefined = null;
+    private boundContactListeners: Listener[] = [];
+    private addContactListener(l: Listener) { addListener(l, this.boundContactListeners); }
+    private removeContactListeners() { removeListeners(this.boundContactListeners); this.boundContactListeners = []; }
 
     private intervalId: number | null = null;
 
@@ -93,15 +95,16 @@ export class ChatView {
         
         await this.renderContacts();
         await this.setupEventListeners();
+        await this.renderActiveChat();
 
         // refresh chat every 3 seconds. needs a smarter refresh function
-        // this.intervalId = window.setInterval(() => this.refreshChat(), 3000);
+        this.intervalId = window.setInterval(() => this.refreshChat(), 3000);
     }
 
     // refresh chat every 3 seconds. needs a smarter refresh function
     private async refreshChat() {
         await this.renderContacts();
-        // await this.renderActiveChat();
+        await this.renderActiveChat();
     }
 
     private async renderContacts(): Promise<void> {
@@ -113,47 +116,33 @@ export class ChatView {
             return;
         }
 
-        contactsContainer.innerHTML = '';
-
+        let newHTML: string = '';
         for (const friend of friends) {
             const {lastMessage, unreadCount} = (await getLastMessageAndUnreadCount(this.currentUser.id, friend.friend_id));
-            contactsContainer.innerHTML += `
-                <div class="chat-contact" data-id="${friend.friend_id}">
-                    <div class="chat-contact-avatar">
-                        <img src="${friend.friend_avatar_url}" alt="${friend.friend_display_name}">
-                        <span class="chat-status ${friend.friend_status}"></span>
-                    </div>
-                    <div class="chat-contact-info">
-                        <h4>${friend.friend_display_name}</h4>
-                        <p class="chat-last-message">
-                            ${lastMessage ? lastMessage.content.slice(0, 30) : 'No messages yet'}
-                        </p>
-                    </div>
-                    <div class="chat-contact-meta">
-                        <span class="chat-time">${lastMessage ? this.formatMessageTime(new Date(lastMessage.timestamp)) : ''}</span>
-                        ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
-                    </div>
-                </div>
+            newHTML += `
+            <div class="chat-contact" data-id="${friend.friend_id}">
+            <div class="chat-contact-avatar">
+            <img src="${friend.friend_avatar_url}" alt="${friend.friend_display_name}">
+            <span class="chat-status ${friend.friend_status}"></span>
+            </div>
+            <div class="chat-contact-info">
+            <h4>${friend.friend_display_name}</h4>
+            <p class="chat-last-message">
+            ${lastMessage ? lastMessage.content.slice(0, 30) : 'No messages yet'}
+            </p>
+            </div>
+            <div class="chat-contact-meta">
+            <span class="chat-time">${lastMessage ? this.formatMessageTime(new Date(lastMessage.timestamp)) : ''}</span>
+            ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
+            </div>
+            </div>
             `;
         }
+        contactsContainer.innerHTML = newHTML;
+        this.setupContactListeners();
     }
 
     private setupEventListeners() {
-        // Update this.activeChatPartnerId when clicking on a contact
-        const contacts = this.element?.querySelectorAll('.chat-contact');
-        if (!contacts) return;
-        for (const contact of contacts)
-        {
-            this.addListener({
-                element: contact,
-                event: 'click',
-                handler: () => {
-                    this.activeChatPartnerId = Number(contact.getAttribute('data-id'));
-                    this.renderActiveChat();
-                }
-            });
-        }
-
         // Setup search/filter listener
         const searchInput = this.element?.querySelector('#chat-search') as HTMLInputElement;
         if (searchInput) this.addListener({
@@ -183,6 +172,24 @@ export class ChatView {
                 }
             }
         });
+    }
+
+    private setupContactListeners() {
+        // Update this.activeChatPartnerId when clicking on a contact
+        const contacts = this.element?.querySelectorAll('.chat-contact');
+        if (!contacts) return;
+        this.removeContactListeners();
+        for (const contact of contacts)
+        {
+            this.addContactListener({
+                element: contact,
+                event: 'click',
+                handler: () => {
+                    this.activeChatPartnerId = Number(contact.getAttribute('data-id'));
+                    this.renderActiveChat();
+                }
+            });
+        }
     }
 
     private activateContact() {
@@ -217,7 +224,7 @@ export class ChatView {
 
         try {
             // Show loading state
-            messagesContainer.innerHTML = '<div class="loading-spinner">Loading messages...</div>';
+            // messagesContainer.innerHTML = '<div class="loading-spinner">Loading messages...</div>';
 
             // Get partner user profile
             const partner = await getUserById(this.activeChatPartnerId);
@@ -254,10 +261,8 @@ export class ChatView {
 
             // Render messages
             // messagesContainer.innerHTML = messages.map((msg: ChatMessage) => this.renderMessage(msg)).join('');
-            messagesContainer.innerHTML = '';
-            for (const msg of messages)
-                this.renderMessage(msg);
-            
+            this.renderAllMessages(messages);
+
             // Mark messages as read
             const messageInput = this.element?.querySelector('#message-input') as HTMLInputElement;
             messageInput?.focus();
@@ -322,6 +327,33 @@ export class ChatView {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
+    private renderAllMessages(messages: ChatMessage[]) {
+        const messagesContainer = this.element?.querySelector('#chat-messages');
+        if (!messagesContainer) return;
+        let newHTML: string = '';
+        for (const msg of messages) {
+            const isFromCurrentUser = msg.sender_id === this.currentUser.id;
+            const time = this.formatMessageTime(new Date(msg.timestamp));
+            
+            newHTML += `
+                <div class="chat-message ${isFromCurrentUser ? 'sent' : 'received'}">
+                    <div class="message-content">
+                        <p>${msg.content}</p>
+                        <span class="message-time">
+                            ${time} 
+                            ${isFromCurrentUser ? (msg.read ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-check"></i>') : ''}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+        const newMessages: boolean = (document.querySelectorAll('.chat-message').length !== messages.length);
+        // const newMessages = (messagesContainer.innerHTML !== newHTML);
+        messagesContainer.innerHTML = newHTML;
+        if (newMessages)
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
     // private renderMessage(message: ChatMessage): string {
     //     const isFromCurrentUser = message.sender_id === this.currentUser.id;
     //     const time = this.formatMessageTime(new Date(message.timestamp));
@@ -370,6 +402,7 @@ export class ChatView {
         console.log("--- DESTROYING CHAT VIEW ---");
         if (this.intervalId) clearInterval(this.intervalId);
         this.removeListeners();
+        this.removeContactListeners();
         this.element?.remove();
         this.element = null; 
     } 
