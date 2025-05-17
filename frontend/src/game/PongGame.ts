@@ -14,6 +14,7 @@ const BOARD_WIDTH = 950;
 const BOARD_HEIGHT = 590;
 const POWERUP_FACTOR_X = 2.2;
 const POWERUP_FACTOR_Y = 1.3;
+const POWERUP_FACTOR_PADDLE = 1.55;
 
 export class PongGame {
     // DOM elements used in the game
@@ -49,11 +50,12 @@ export class PongGame {
     private player1Name: string = 'Player1';
     private player2Name: string = 'Player2';
 
-    private powerup: boolean = true; //temp until backend integration
+    private powerup: boolean = true;
     private leftPowerAvailable: boolean = false;
     private rightPowerAvailable: boolean = false;
     private leftPowerActive: boolean = false;
     private rightPowerActive: boolean = false;
+    private paddleSpeed: number = PADDLE_SPEED;
 
 
     // --------------------------------------------------------------------------
@@ -65,7 +67,7 @@ export class PongGame {
 
     constructor(container: HTMLElement, onGameEnd?: (score: { leftScore: number; rightScore: number }) => void) {
         this.container = container;
-        if (this.powerup === true) { //temp until backend integration
+        if (this.powerup === true) {
             this.leftPowerAvailable = true;
             this.rightPowerAvailable = true;
         }
@@ -94,6 +96,7 @@ export class PongGame {
                 this.paddleRight.style.backgroundColor = settings.paddle_color;
                 this.leftScoreElement.style.color = settings.score_color;
                 this.rightScoreElement.style.color = settings.score_color;
+                // this.powerup = settings.powerup;
                 gameContainer.style.backgroundColor = settings.board_color;
             }
         }).catch(error => {
@@ -212,6 +215,7 @@ export class PongGame {
             if (this.leftPowerActive === true) {
                 this.ballSpeedX *= POWERUP_FACTOR_X;
                 this.ballSpeedY *= POWERUP_FACTOR_Y;
+                this.paddleSpeed *= POWERUP_FACTOR_PADDLE;
                 this.leftPowerActive = false;
             }
         }
@@ -229,6 +233,7 @@ export class PongGame {
             if (this.rightPowerActive === true) {
                 this.ballSpeedX *= POWERUP_FACTOR_X;
                 this.ballSpeedY *= POWERUP_FACTOR_Y;
+                this.paddleSpeed *= POWERUP_FACTOR_PADDLE;
                 this.rightPowerActive = false;
             }
         }
@@ -264,7 +269,7 @@ export class PongGame {
         }
 
         // Paddle movement
-        const paddleSpeed = PADDLE_SPEED * deltaTime;
+        const paddleSpeed = this.paddleSpeed * deltaTime;
         if (this.keyState['w']) 
             this.leftPaddleY = Math.max(this.leftPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
         if (this.keyState['s']) 
@@ -286,7 +291,7 @@ export class PongGame {
             }
             
             // MOVE PADDLE BASED ON KEY STATE (AI paddle is a bit slower (*0.7) to give a chance when playing without poweups)
-            const aiPaddleSpeed = PADDLE_SPEED * deltaTime * (this.powerup ? 1 : 0.7);
+            const aiPaddleSpeed = this.paddleSpeed * deltaTime * (this.powerup ? 1 : 0.7);
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - aiPaddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
@@ -316,9 +321,13 @@ export class PongGame {
         this.ballSpeedX *= -1;
         this.ballSpeedX = this.ballSpeedX < 0 ? -BASE_SPEED : BASE_SPEED;
         this.ballSpeedY = BASE_SPEED * Math.random() * 2 - BASE_SPEED;
-        if (this.powerup === true) { //temp until backend integration
+        this.paddleSpeed = PADDLE_SPEED;
+        if (this.powerup) {
             this.leftPowerAvailable = true;
             this.rightPowerAvailable = true;
+            if (this.nrPlayers == 1) { // AI game
+                this.keyState['ArrowLeft'] = false;
+            }
         }
         this.leftPowerActive = false;
         this.rightPowerActive = false;
@@ -332,7 +341,7 @@ export class PongGame {
         this.paddleRight.style.top = `${this.rightPaddleY}px`;
         this.leftScoreElement.textContent = `${this.leftScore}`;
         this.rightScoreElement.textContent = `${this.rightScore}`;
-        if (this.powerup) { //temp until backend integration
+        if (this.powerup) {
             if (this.leftPowerActive) this.leftPowerup.style.color = '#7c0e0e';
             else if (this.leftPowerAvailable) this.leftPowerup.style.color = '#d1bd51';
             else this.leftPowerup.style.color = '#212121';
