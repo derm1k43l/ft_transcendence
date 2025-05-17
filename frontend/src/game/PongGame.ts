@@ -248,7 +248,7 @@ export class PongGame {
                 this.onGameEnd({ leftScore: this.leftScore, rightScore: this.rightScore });
             }
             // add match history item (only singleplayer)
-            if (this.nrPlayers && currentUser)
+            if (this.nrPlayers === 1 && currentUser)
             {
                 const record: MatchRecord = {
                     user_id: currentUser.id,

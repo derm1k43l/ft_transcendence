@@ -329,7 +329,9 @@ export async function setMatchHistory(user: UserProfile): Promise<MatchRecord[]>
 }
 
 export async function setAchievements(user: UserProfile): Promise<Achievement[]> {
-    user.achievements = DEFAULT_ACHIEVEMENTS;
+    // user.achievements = JSON.parse(JSON.stringify(DEFAULT_ACHIEVEMENTS)) as Achievement[]; // deep copy
+    user.achievements = DEFAULT_ACHIEVEMENTS.map(e => ({ ...e })); // deep copy
+    console.log(user.id, ': ', user.achievements[0].completed, user.achievements[1].completed, user.achievements[2].completed);
 
     // check if user has won a game
     if (user.match_history) {
