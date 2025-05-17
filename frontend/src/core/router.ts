@@ -39,6 +39,10 @@ export class Router {
         window.addEventListener('hashchange', () => this.handleRouteChange());
     }
 
+    public setTarget(element: HTMLElement): void {
+        this.rootElement = element;
+    }
+
     reload() {
         this.handleRouteChange();
     }
