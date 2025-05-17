@@ -319,6 +319,10 @@ export async function completeUser(user: UserProfile | null) {
 export async function setMatchHistory(user: UserProfile): Promise<MatchRecord[]> {
     try {
         const records = (await api.get(`/match-history/users/${user.id}`)).data as MatchRecord[];
+        // records.sort((a: MatchRecord, b: MatchRecord) => 
+        //     new Date(b.date).getTime() - new Date(a.date).getTime()
+        // );
+        records.reverse();
         user.match_history = records;
     } catch (error: any) {
         console.error(`Failed to get match history`, error?.response?.data?.message || error);
@@ -329,9 +333,7 @@ export async function setMatchHistory(user: UserProfile): Promise<MatchRecord[]>
 }
 
 export async function setAchievements(user: UserProfile): Promise<Achievement[]> {
-    // user.achievements = JSON.parse(JSON.stringify(DEFAULT_ACHIEVEMENTS)) as Achievement[]; // deep copy
-    user.achievements = DEFAULT_ACHIEVEMENTS.map(e => ({ ...e })); // deep copy
-    console.log(user.id, ': ', user.achievements[0].completed, user.achievements[1].completed, user.achievements[2].completed);
+    user.achievements = JSON.parse(JSON.stringify(DEFAULT_ACHIEVEMENTS)) as Achievement[]; // deep copy
 
     // check if user has won a game
     if (user.match_history) {
