@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize user before proceeding
     currentUser = await Auth.getCurrentUser();
+    if (currentUser) isLoggedIn = true;
 
     // Proceed with the rest of the initialization
     initializeApp();
