@@ -10,26 +10,33 @@ const {
 const {
 	BasicErrorSchema,
 	ValidationErrorSchema,
+	UnauthorizedErrorSchema,
+	ForbiddenErrorSchema,
 } = require('../schemas/errorSchema');
 
 const { MatchHistoryItem } = require('../schemas/matchHistorySchema');
 
-// Options for get all Match History
+const authPreHandler = require('./authPreHandlerRoutes');
+
+// Options for get all Match History (Requires AUTH + Filtering by User/Opponent)
 const getMatchHistoryOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		response: {
 			200: {
 				type: 'array',
 				items: MatchHistoryItem,
 			},
+			401: UnauthorizedErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getMatchHistory,
 };
 
-// Options for get single Match History Item
+// Options for get single Match History Item (Requires AUTH)
 const getMatchHistoryItemOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -40,6 +47,8 @@ const getMatchHistoryItemOpts = {
 		},
 		response: {
 			200: MatchHistoryItem,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -47,8 +56,9 @@ const getMatchHistoryItemOpts = {
 	handler: getMatchHistoryItem,
 };
 
-// Options for get Match History for a specific user
+// Options for get Match History for a specific user (Requires AUTH)
 const getMatchHistoryForUserOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -62,42 +72,45 @@ const getMatchHistoryForUserOpts = {
 				type: 'array',
 				items: MatchHistoryItem,
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: getMatchHistoryForUser,
 };
 
-// Options for add Match History Item
+// Options for add Match History Item (Requires AUTH - authenticated user is  'user_id')
 const addMatchHistoryItemOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		body: {
 			type: 'object',
-			required: ['user_id', 'opponent_name', 'result', 'score', 'date', 'status'],
+			required: ['opponent_name', 'result', 'score', 'date', 'status'],
 			properties: {
-				user_id: { type: 'integer'},
-				opponent_id: { type: 'integer'},
-				opponent_name: { type: 'string'},
-				result: { type: 'string'},
-				score: { type: 'string'},
-				date: { type: 'string'},
-				duration: { type: 'string'},
-				game_mode: { type: 'string'},
-				status: { type: 'string' },
-				tournament_id: { type: 'integer' },
+				opponent_id: { type: 'integer', nullable: true },
+				opponent_name: { type: 'string', minLength: 1 },
+				result: { type: 'string', minLength: 1 },
+				score: { type: 'string', minLength: 1 },
+				date: { type: 'string', format: 'date-time' },
+				duration: { type: 'string', nullable: true },
+				game_mode: { type: 'string', minLength: 1 },
+				status: { type: 'string', minLength: 1 },
 			},
 		},
 		response: {
 			201: MatchHistoryItem,
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
 			500: BasicErrorSchema
 		},
 	},
 	handler: addMatchHistoryItem,
 };
 
-// Options for update Match History Item
+// Options for update Match History Item (Requires AUTH + Ownership Check - authenticated user is the 'user_id')
 const updateMatchHistoryItemOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -109,21 +122,20 @@ const updateMatchHistoryItemOpts = {
 		body: {
 			type: 'object',
 			properties: {
-				user_id: { type: 'integer'},
-				opponent_id: { type: 'integer'},
-				opponent_name: { type: 'string'},
-				result: { type: 'string'},
-				score: { type: 'string'},
-				date: { type: 'string'},
-				duration: { type: 'string'},
-				game_mode: { type: 'string'},
-				status: { type: 'string' },
-				tournament_id: { type: 'integer' },
-			}
+				opponent_name: { type: 'string', minLength: 1 },
+				result: { type: 'string', minLength: 1 },
+				score: { type: 'string', minLength: 1 },
+				duration: { type: 'string', nullable: true },
+				status: { type: 'string', minLength: 1 },
+			},
+			minProperties: 1,
+			additionalProperties: false
 		},
 		response: {
 			200: MatchHistoryItem,
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -131,8 +143,9 @@ const updateMatchHistoryItemOpts = {
 	handler: updateMatchHistoryItem,
 };
 
-// Options for delete Match History Item
+// Options for delete Match History Item (Requires AUTH + Ownership Check - authenticated user is the 'user_id')
 const deleteMatchHistoryItemOpts = {
+	preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -148,6 +161,8 @@ const deleteMatchHistoryItemOpts = {
 					message: {type: 'string'}
 				},
 			},
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		},
@@ -156,22 +171,22 @@ const deleteMatchHistoryItemOpts = {
 };
 
 function matchHistoryRoutes (fastify, options, done) {
-	// Get all match history
+	// Get all match history (Requires AUTH + Filtering by User/Opponent)
 	fastify.get('/', getMatchHistoryOpts);
 
-	// Get single match history item by ID
+	// Get single match history item by ID (Requires AUTH)
 	fastify.get('/:id', getMatchHistoryItemOpts);
 
-	// Get match history for a specific user
+	// Get match history for a specific user (Requires AUTH)
 	fastify.get('/users/:userId', getMatchHistoryForUserOpts);
 
-	// Add match history item
+	// Add match history item (Requires AUTH - authenticated user is  'user_id')
 	fastify.post('/', addMatchHistoryItemOpts);
 
-	// Update match history item by ID
+	// Update match history item by ID (Requires AUTH + Ownership Check - authenticated user is the 'user_id')
 	fastify.put('/:id', updateMatchHistoryItemOpts);
 
-	// Delete match history item by ID
+	// Delete match history item by ID (Requires AUTH + Ownership Check - authenticated user is the 'user_id')
 	fastify.delete('/:id', deleteMatchHistoryItemOpts);
 
 	done();

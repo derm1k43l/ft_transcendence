@@ -16,36 +16,36 @@ export class RegisterView {
         this.router = router;
     }
 
-    async render(rootElement: HTMLElement): Promise<void> {
+    render(rootElement: HTMLElement): void {
 
-        // temporary API test start
-        console.log('auth token: ', localStorage.getItem('auth_token'));
+        // // temporary API test start
+        // console.log('auth token: ', localStorage.getItem('auth_token'));
 
-        console.log("\n\ncurrent user: ");
-        const tmp1 = await Auth.getCurrentUser();
-        console.log(tmp1);
+        // console.log("\n\ncurrent user: ");
+        // const tmp1 = await Auth.getCurrentUser();
+        // console.log(tmp1);
 
-        console.log("\n\nall users");
-        const tmp = (await api.get('/users')).data as UserProfile[];
-        for (const user of tmp)
-            console.log(user);
+        // console.log("\n\nall users");
+        // const tmp = (await api.get('/users')).data as UserProfile[];
+        // for (const user of tmp)
+        //     console.log(user);
 
-        console.log("\n\nuser with name 'user1'");
-        const tmp2 = await Auth.findUserByUsername('user1');
-        console.log(tmp2);
+        // console.log("\n\nuser with name 'user1'");
+        // const tmp2 = await Auth.findUserByUsername('user1');
+        // console.log(tmp2);
 
-        console.log("\n\nuser with email 'test@gmail.com'");
-        const tmp3 = await Auth.findUserByEmail('test@gmail.com');
-        console.log(tmp3);
+        // console.log("\n\nuser with email 'test@gmail.com'");
+        // const tmp3 = await Auth.findUserByEmail('test@gmail.com');
+        // console.log(tmp3);
 
-        console.log("\n\nuser with ID '2'");
-        const tmp4 = await getUserById(1);
-        console.log(tmp4);
+        // console.log("\n\nuser with ID '2'");
+        // const tmp4 = await getUserById(1);
+        // console.log(tmp4);
 
-        console.log("\n\nuser with ID '42'");
-        const tmp5 = await getUserById(42);
-        console.log(tmp5);
-        // temporary API test end
+        // console.log("\n\nuser with ID '42'");
+        // const tmp5 = await getUserById(42);
+        // console.log(tmp5);
+        // // temporary API test end
 
 
 
@@ -170,6 +170,7 @@ export class RegisterView {
     }
 
     destroy(): void {
+        this.element?.remove();
         this.element = null;
     }
 }

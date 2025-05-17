@@ -36,7 +36,7 @@ const normalizeEmail = async (req, reply) => {
 	}
 };
 
-// Options for get all Users, not sure if it should be protected with auth
+// Options for get all Users (Public route - adjust if privacy needed)
 const getUsersOpts = {
 	schema: {
 		response: {
@@ -50,12 +50,10 @@ const getUsersOpts = {
 	handler: getUsers
 };
 
+// Options for get current User (Requires AUTH)
 const getCurrentUserOpts = {
 	preHandler: [authPreHandler],
 	schema: {
-		params: {
-			type: 'object'
-		},
 		response: {
 			200: User,
 			404: BasicErrorSchema,
@@ -67,8 +65,8 @@ const getCurrentUserOpts = {
 	handler: getCurrentUser
 };
 
+// Options for get single User by ID (Public route)
 const getUserOpts = {
-	// preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -87,8 +85,8 @@ const getUserOpts = {
 	handler: getUser
 };
 
+// Options for get User by Username (Public route)
 const getUserByNameOpts = {
-	// preHandler: [authPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -107,28 +105,31 @@ const getUserByNameOpts = {
 	handler: getUserByName
 };
 
+// Options for get User by Email (Requires AUTH + MATCHING ID CHECK in controller)
 const getUserByEmailOpts = {
-	// preHandler: [authPreHandler],
-	preHandler: [normalizeEmail],
+	preHandler: [authPreHandler, normalizeEmail],
 	schema: {
 		params: {
 			type: 'object',
 			properties: {
-				email: { type: 'string' }
+				email: { type: 'string', format: 'email' }
 			},
 			required: ['email']
 		},
 		response: {
 			200: User,
-			404: BasicErrorSchema,
 			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
+			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		}
 	},
 	handler: getUserByEmail
 };
 
-const getUserProfileOpts = { //not sure if this should be protected with auth
+// Options for get user profile by ID (Public route)
+const getUserProfileOpts = {
 	schema: {
 		params: {
 			type: 'object',
@@ -147,6 +148,7 @@ const getUserProfileOpts = { //not sure if this should be protected with auth
 	handler: getUserProfile
 };
 
+// Options for add User (Public route - account creation)
 const postUserOpts = {
 	preHandler: [normalizeEmail],
 	schema: {
@@ -154,14 +156,15 @@ const postUserOpts = {
 			type: 'object',
 			required: ['username', 'password', 'display_name'],
 			properties: {
-				username: { type: 'string' },
-				password: { type: 'string' },
-				display_name: { type: 'string' },
-				email: { type: 'string' },
+				username: { type: 'string', minLength: 1 },
+				password: { type: 'string', minLength: 4 },
+				display_name: { type: 'string', minLength: 1 },
+				email: { type: 'string', format: 'email', nullable: true },
 				bio: { type: 'string', nullable: true },
-				avatar_url: { type: 'string', nullable: true }, //check these if they are required
-				cover_photo_url: { type: 'string', nullable: true }
-			}
+				// avatar_url: { type: 'string', nullable: true }, //check these if they are required
+				// cover_photo_url: { type: 'string', nullable: true }
+			},
+			additionalProperties: false
 		},
 		response: {
 			201: User,
@@ -173,7 +176,7 @@ const postUserOpts = {
 	handler: addUser
 };
 
-//controller needs to check if req.user.id matches req.params.id., so only the req user can update itself
+// Options for update User (full update) (Requires AUTH + MATCHING ID CHECK)
 const updateUserOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -187,21 +190,23 @@ const updateUserOpts = {
 		body: {
 			type: 'object',
 			properties: {
-				username: { type: 'string' }, // not sure if username update should be allowed UNIQUE constraints could have problems
-				display_name: { type: 'string' },
-				email: { type: 'string' }, // not sure if email update should be allowed UNIQUE constraints could have problems
+				username: { type: 'string', minLength: 1 },
+				display_name: { type: 'string', minLength: 1 },
+				email: { type: 'string', format: 'email', nullable: true },
 				bio: { type: 'string', nullable: true },
-				avatar_url: { type: 'string', nullable: true },
-				cover_photo_url: { type: 'string', nullable: true },
-				has_two_factor_auth: { type: 'integer', enum: [0, 1] }, // has to be 0 or 1
-				status: { type: 'string' }
+				avatar_url: { type: 'string', nullable: true, format: 'uri-reference' },
+				cover_photo_url: { type: 'string', nullable: true, format: 'uri-reference' },
+				has_two_factor_auth: { type: 'integer', enum: [0, 1] }, // could be changed to bool
+				status: { type: 'string', enum: ['online', 'offline', 'ingame', 'invisible'] }
 			},
-			minProperties: 1 // must provide at least one field to update
+			minProperties: 1, // must provide at least one field to update
+			additionalProperties: false
 		},
 		response: {
 			200: User,
 			400: ValidationErrorSchema,
 			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			409: BasicErrorSchema,
 			500: BasicErrorSchema
@@ -210,6 +215,7 @@ const updateUserOpts = {
 	handler: updateUser
 };
 
+// Options for update User Profile (partial update) (Requires AUTH + MATCHING ID CHECK)
 const updateUserProfileOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -223,17 +229,19 @@ const updateUserProfileOpts = {
 		body: {
 			type: 'object',
 			properties: {
-				display_name: { type: 'string' },
+				display_name: { type: 'string', minLength: 1 },
 				bio: { type: 'string', nullable: true },
-				avatar_url: { type: 'string', nullable: true },
-				cover_photo_url: { type: 'string', nullable: true }
+				avatar_url: { type: 'string', nullable: true, format: 'uri-reference' },
+				cover_photo_url: { type: 'string', nullable: true, format: 'uri-reference' }
 			},
-			minProperties: 1 // at least 1
+			minProperties: 1, // at least 1
+			additionalProperties: false
 		},
 		response: {
 			200: User,
 			400: ValidationErrorSchema,
 			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		}
@@ -241,6 +249,7 @@ const updateUserProfileOpts = {
 	handler: updateUserProfile
 };
 
+// Options for delete User (Requires AUTH + MATCHING ID CHECK)
 const deleteUserOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -255,6 +264,7 @@ const deleteUserOpts = {
 			200: BasicErrorSchema, // fine for just the message
 			400: ValidationErrorSchema,
 			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
 			404: BasicErrorSchema,
 			500: BasicErrorSchema
 		}
@@ -262,6 +272,7 @@ const deleteUserOpts = {
 	handler: deleteUser
 };
 
+// Options for login User (Public route)
 const loginUserOpts = {
 	schema: {
 		body: loginBody,
@@ -275,6 +286,7 @@ const loginUserOpts = {
 	handler: loginUser,
 };
 
+// Options for log out User (Requires AUTH)
 const logoutUserOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -287,6 +299,7 @@ const logoutUserOpts = {
 	handler: logoutUser,
 };
 
+// Options for upload Avatar (Requires AUTH + MATCHING USER ID CHECK)
 const uploadAvatarOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -318,6 +331,7 @@ const uploadAvatarOpts = {
 	handler: uploadAvatar,
 };
 
+// Options for upload Cover Photo (Requires AUTH + MATCHING USER ID CHECK)
 const uploadCoverOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -349,6 +363,7 @@ const uploadCoverOpts = {
 	handler: uploadCover,
 };
 
+// Options for update password (Requires AUTH + MATCHING ID CHECK)
 const updatePasswordOpts = {
 	preHandler: [authPreHandler],
 	schema: {
@@ -373,46 +388,48 @@ const updatePasswordOpts = {
 };
 
 function userRoutes(fastify, options, done) {
-	// Get all Users (verify if auth is needed)
+	// Get all Users (Public route by default)
 	fastify.get('/', getUsersOpts);
 
-	// Get current User - Private
+	// Get current User - Requires AUTH
 	fastify.get('/current', getCurrentUserOpts);
 
 	// Get single User - Public
 	fastify.get('/:id', getUserOpts);
+	// Get single User by Username - Public
 	fastify.get('/byname/:username', getUserByNameOpts);
+	// Get single User by Email - Requires AUTH + MATCHING ID CHECK in controller
 	fastify.get('/byemail/:email', getUserByEmailOpts);
 
-	// Get user profile (same as getUser but might include more data in future) - (verify if auth is needed)
+	// Get user profile by ID (Public route by default)
 	fastify.get('/:id/profile', getUserProfileOpts);
 
-	// Add User - Public
-	fastify.post('/', postUserOpts);
+	// Update User (full update) - Requires AUTH + MATCHING ID CHECK
+	fastify.put('/:id', updateUserOpts);
+	
+	// Update User Profile (partial update) - Requires AUTH + MATCHING ID CHECK
+	fastify.patch('/:id/profile', updateUserProfileOpts);
+	
+	// Update password - Requires AUTH + MATCHING ID CHECK + OLD PASSWORD CHECK
+	fastify.put('/:id/password', updatePasswordOpts);
+	
+	// Delete User - Requires AUTH + MATCHING ID CHECK
+	fastify.delete('/:id', deleteUserOpts);
 
+	// Add User - Public (Account creation)
+	fastify.post('/', postUserOpts);
+	
 	// Login User - Public
 	fastify.post('/login', loginUserOpts);
 
-	// Log out User
+	// Log out User - Requires AUTH
 	fastify.post('/log-out', logoutUserOpts);
 
-	// Update User (full update) - Protected, make sure only authenticated user's data can be updated
-	fastify.put('/:id', updateUserOpts);
-
-	// Update User Profile (partial update) - Protected, make sure only authenticated user's data can be updated
-	fastify.patch('/:id/profile', updateUserProfileOpts);
-
-	// Upload Avatar - Protected + Authorized
+	// Upload Avatar - Requires AUTH + MATCHING USER ID CHECK
 	fastify.put('/:userId/avatar', uploadAvatarOpts);
 
-	// Upload Cover Photo - Protected + Authorized
+	// Upload Cover Photo - Requires AUTH + MATCHING USER ID CHECK
 	fastify.put('/:userId/cover', uploadCoverOpts);
-
-	// Update password
-	fastify.put('/:id/password', updatePasswordOpts);
-
-	// Delete User - protected, should only delete authenticated user's account
-	fastify.delete('/:id', deleteUserOpts);
 
 	done();
 }

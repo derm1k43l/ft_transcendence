@@ -106,11 +106,27 @@ export interface FriendRequest {
 
 export interface ChatMessage {
     id: number;
-    senderId: number;
-    receiverId: number;
+    sender_id: number;
+    receiver_id: number;
     content: string;
     timestamp: Date;
     read: boolean;
+}
+
+export interface ChatMessageDetail {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    content: string;
+    timestamp: Date;
+    read: boolean;
+
+    sender_username: string;
+    sender_display_name: string;
+    sender_avatar_url: string;
+    receiver_username: string;
+    receiver_display_name: string;
+    receiver_avatar_url: string;
 }
 
 export interface AppNotification {

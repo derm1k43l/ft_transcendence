@@ -68,5 +68,7 @@ export class AboutView {
 
     destroy(): void {
         console.log('AboutView destroyed');
+        this.element?.remove();
+        this.element = null;
     }
 }

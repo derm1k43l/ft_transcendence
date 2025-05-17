@@ -1,25 +1,7 @@
 import { api } from './api.js';
 import { UserProfile, LoginResponse } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
-
-// Authentication state
-let currentUser: UserProfile | null = null;
-let isAuthenticated: boolean = false;
-
-// Initialize the authentication state from localStorage
-export async function initializeAuth(): Promise<UserProfile | null> {
-    try {
-        currentUser = await getCurrentUser();
-        if (currentUser) {
-            isAuthenticated = true;
-        }
-        return currentUser;
-    } catch (error) {
-        // Token invalid or expired
-        clearAuthData();
-        return null;
-    }
-}
+import { completeUser } from './UserService.js';
 
 export async function login(credentials: { 
     username: string; 
@@ -28,16 +10,13 @@ export async function login(credentials: {
     try {
         const response: LoginResponse = (await api.post('/users/login', credentials)).data;
         
-        // Store token for future requests
+        // Store auth_token for future requests
         if (response.token) {
             localStorage.setItem('auth_token', response.token);
         }
+        const user = await getCurrentUser();
         
-        // Set authentication state
-        currentUser = await getCurrentUser();
-        isAuthenticated = true;
-        
-        return currentUser;
+        return user;
     } catch (error: any) {
         console.error('Login error:', error.response?.data?.message || error);
         throw error.response?.data?.message || 'Login failed. Please check your credentials.';
@@ -51,8 +30,9 @@ export async function register(userData: {
     display_name?: string;
 }): Promise<UserProfile> {
     try {
-        const response = await api.post('/users', userData);
-        return response.data;
+        const user = (await api.post('/users', userData)).data as UserProfile;
+        completeUser(user);
+        return user;
     } catch (error: any) {
         console.error('Error registering user:', error.response?.data?.message || error);
         throw error.response?.data?.message || 'Registration failed. Please try again.';
@@ -63,7 +43,7 @@ export async function logout(): Promise<void> {
     try {
         // Call the logout endpoint if it exists
         if (localStorage.getItem('auth_token')) {
-            await api.post('/users/logout', {});
+            await api.post('/users/log-out', {});
         }
     } catch (error) {
         console.error('Error during logout:', error);
@@ -75,14 +55,20 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
     try {
+        if (!localStorage.getItem('auth_token')) {
+            console.log('user has no auth_token');
+            clearAuthData();
+            return null;
+        }
         const user = (await api.get(`/users/current`)).data as UserProfile;
+        await completeUser(user);
         return user;
     } catch (error) {
         console.error(`Failed to fetch current user: not logged in`);
+        clearAuthData();
         return null;
     }
 }
-
 
 // mywbe here also some security 
 export async function updateUserPassword(userId: number, oldPassword: string, newPassword: string): Promise<boolean> {
@@ -98,27 +84,13 @@ export async function updateUserPassword(userId: number, oldPassword: string, ne
     }
 }
 
-export function isUserAuthenticated(): boolean {
-    return isAuthenticated;
-}
-
-
-// Get the current user object
-export function getAuthenticatedUser(): UserProfile | null {
-    return currentUser;
-}
-
 export function clearAuthData(): void {
     localStorage.removeItem('auth_token');
-    currentUser = null;
-    isAuthenticated = false;
 }
 
-export async function socialLogin(provider: 'google' | 'fortytwo'): Promise<void> {
-    // Implementation for social login for google only
-    
-    throw new Error(`${provider} login not implemented`);
-}
+// export async function googleLogin(): Promise<UserProfile | null> {
+
+// }
 
 //testt
 export async function deleteUserAccount(userId: number): Promise<boolean> {
@@ -145,6 +117,7 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
 export async function findUserByUsername(username: string): Promise<UserProfile | null> {
     try {
         const user = (await api.get(`/users/byname/${username}`)).data as UserProfile;
+        await completeUser(user);
         return user;
     } catch (error) {
         console.error(`Failed to fetch user with Username ${username}:`);
@@ -156,6 +129,7 @@ export async function findUserByUsername(username: string): Promise<UserProfile 
 export async function findUserByEmail(email: string): Promise<UserProfile | null> {
     try {
         const user = (await api.get(`/users/byemail/${email}`)).data as UserProfile;
+        await completeUser(user);
         return user;
     } catch (error) {
         console.error(`Failed to fetch user with Email ${email}:`);

@@ -13,6 +13,7 @@ if (!fs.existsSync(COVER_UPLOAD_DIR)) {
 	fs.mkdirSync(COVER_UPLOAD_DIR, { recursive: true });
 }
 
+// Controller for GET / (Get all Users - Public)
 const getUsers = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
@@ -20,24 +21,27 @@ const getUsers = async (req, reply) => {
 			SELECT 
 			id, username, display_name, email, bio,
 			avatar_url, cover_photo_url, join_date,
-			has_two_factor_auth, status, last_active, created_at
+			status, last_active
 			FROM users
 		`).all();
-		reply.send(users);
+		reply.code(200).send(users);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving users' });
 	}
 };
 
+// Controller for GET /current (Get current User - Requires AUTH)
 const getCurrentUser = async (req, reply) => {
-	try {
-		const decodedToken = await req.jwtVerify();
-		if (!decodedToken || !decodedToken.id) {
-			return reply.code(401).send({ message: 'Invalid or missing token' });
-		}
+	// const decodedToken = await req.jwtVerify();
+	// if (!decodedToken || !decodedToken.id) {
+	// 	return reply.code(401).send({ message: 'Invalid or missing token' });
+	// }
+	// const { id } = decodedToken;
 
-		const { id } = decodedToken;
+	const authenticatedUserId = req.user.id;
+	try {
+
 		const db = req.server.betterSqlite3;
 
 		const user = db.prepare(`
@@ -47,37 +51,41 @@ const getCurrentUser = async (req, reply) => {
 			has_two_factor_auth, status, last_active, created_at
 			FROM users 
 			WHERE id = ?
-		`).get(id);
+		`).get(authenticatedUserId);
 
 		if (!user) {
-			reply.code(404).send({ message: 'User not found' });
-		} else {
-			reply.send(user);
+			return reply.code(404).send({ message: 'User not found' });
 		}
+
+		const { password, ...userResponse } = user;
+		reply.code(200).send(userResponse);
+
+		reply.send(user);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving user' });
 	}
 };
 
+// Controller for GET /:id (Get single User by ID - Public)
 const getUser = async (req, reply) => {
 	try {
-		const { id } = req.params;
+		const targetUserId = parseInt(req.params.id, 10);
 		const db = req.server.betterSqlite3;
 		
 		const user = db.prepare(`
 			SELECT 
-			id, username, display_name, email, bio,
+			id, username, display_name, bio,
 			avatar_url, cover_photo_url, join_date,
-			has_two_factor_auth, status, last_active, created_at
+			status, last_active
 			FROM users 
 			WHERE id = ?
-		`).get(id);
+		`).get(targetUserId);
 
 		if (!user) {
 			reply.code(404).send({ message: 'User not found' });
 		} else {
-			reply.send(user);
+			reply.code(200).send(user);
 		}
 	} catch (error) {
 		req.log.error(error);
@@ -85,6 +93,7 @@ const getUser = async (req, reply) => {
 	}
 };
 
+// Controller for GET /byname/:username (Get User by Username - Public)
 const getUserByName = async (req, reply) => {
 	try {
 		const { username } = req.params;
@@ -92,9 +101,9 @@ const getUserByName = async (req, reply) => {
 		
 		const user = db.prepare(`
 			SELECT 
-			id, username, display_name, email, bio,
+			id, username, display_name, bio,
 			avatar_url, cover_photo_url, join_date,
-			has_two_factor_auth, status, last_active, created_at
+			status, last_active
 			FROM users 
 			WHERE username = ?
 		`).get(username);
@@ -102,7 +111,7 @@ const getUserByName = async (req, reply) => {
 		if (!user) {
 			reply.code(404).send({ message: 'User not found' });
 		} else {
-			reply.send(user);
+			reply.code(200).send(user);
 		}
 	} catch (error) {
 		req.log.error(error);
@@ -110,9 +119,11 @@ const getUserByName = async (req, reply) => {
 	}
 };
 
+// Controller for GET /byemail/:email (Get User by Email - Requires AUTH + MATCHING ID CHECK)
 const getUserByEmail = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const { email } = req.params;
 	try {
-		const { email } = req.params;
 		const db = req.server.betterSqlite3;
 		
 		const user = db.prepare(`
@@ -126,33 +137,42 @@ const getUserByEmail = async (req, reply) => {
 
 		if (!user) {
 			reply.code(404).send({ message: 'User not found' });
-		} else {
-			reply.send(user);
+			return;
 		}
+
+		// AUTHORIZATION CHECK: Ensure the authenticated user is the owner of this email
+		if (user.id !== authenticatedUserId) {
+			reply.code(403).send({ message: 'Forbidden: You can only look up your own email address.' });
+			return;
+		}
+
+		const { password, ...userResponse } = user;
+		reply.code(200).send(userResponse);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving user' });
 	}
 };
 
+// Controller for GET /:id/profile (Get user profile by ID - Public)
 const getUserProfile = async (req, reply) => {
 	try {
-		const { id } = req.params;
+		const targetUserId = parseInt(req.params.id, 10);
 		const db = req.server.betterSqlite3;
 		
 		const user = db.prepare(`
 			SELECT 
-			id, username, display_name, email, bio,
+			id, username, display_name, bio,
 			avatar_url, cover_photo_url, join_date,
 			status, last_active
 			FROM users 
 			WHERE id = ?
-		`).get(id);
+		`).get(targetUserId);
 
 		if (!user) {
 			reply.code(404).send({ message: 'User not found' });
 		} else {
-			reply.send(user);
+			reply.code(200).send(user);
 		}
 	} catch (error) {
 		req.log.error(error);
@@ -160,7 +180,7 @@ const getUserProfile = async (req, reply) => {
 	}
 };
 
-// we hash the password now
+// Controller for POST / (Add User - Public), we hash the password now
 const addUser = async (req, reply) => {
 	try {
 		const {
@@ -169,16 +189,11 @@ const addUser = async (req, reply) => {
 			display_name,
 			email,
 			bio,
-			avatar_url,
-			cover_photo_url
+			// avatar_url,
+			// cover_photo_url
 		} = req.body;
 
 		const db = req.server.betterSqlite3;
-
-		// Basic validation
-		if (!username || !password || !display_name) {
-			return reply.code(400).send({ message: 'Username, password and display name are required' });
-		}
 
 		const paswordHash = await argon2.hash(password);
 
@@ -186,25 +201,28 @@ const addUser = async (req, reply) => {
 			const userResult = db.prepare(`
 			INSERT INTO users (
 				username, password, display_name, email, bio,
-				avatar_url, cover_photo_url, join_date
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+				join_date, created_at
+			) VALUES (?, ?, ?, ?, ?, ?, ?)
 			`).run(
 				username,
 				paswordHash,
 				display_name,
 				email || null,
 				bio || null,
-				avatar_url || null,
-				cover_photo_url || null,
+				// avatar_url || null,
+				// cover_photo_url || null,
+				new Date().toISOString(),
 				new Date().toISOString()
 			);
 
 			const newUserId = userResult.lastInsertRowid;
 
+			// Insert initial game settings
 			db.prepare(
 				'INSERT INTO game_settings (user_id, board_color, paddle_color, ball_color, score_color) VALUES (?, ?, ?, ?, ?)'
 			).run(newUserId, '#000000', '#FFFFFF', '#FFFFFF', '#FFFFFF');
 
+			// Insert initial user stats
 			db.prepare(
 				'INSERT INTO user_stats (user_id, wins, losses, rank, level) VALUES (?, ?, ?, ?, ?)'
 			).run(newUserId, 0, 0, 'Bronze', 1);
@@ -246,118 +264,155 @@ const addUser = async (req, reply) => {
 	}
 };
 
+// Controller for PUT /:id (Update User - Requires AUTH + MATCHING ID CHECK)
 const updateUser = async (req, reply) => {
-	try {
-		const { id } = req.params; // target user ID
-		const authenticatedUserId = req.user.id; // Authenticated user ID from JWT (user not showing up)
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.id, 10);
 
-		if (parseInt(id, 10) !== authenticatedUserId) {
-			return reply.code(403).send({ message: 'Unauthorized: You can only update your own profile.' });
-		}
+	if (isNaN(targetUserId)) {
+		req.log.warn(`Invalid user ID parameter received for updateUser: ${req.params.id}`);
+		return reply.code(400).send({ message: 'Invalid user ID format in URL.' });
+	}
 
-		const updates = req.body;
-		const db = req.server.betterSqlite3;
+	// AUTHORIZATION CHECK: Ensure authenticated user is updating their OWN account
+	if (targetUserId !== authenticatedUserId) {
+		return reply.code(403).send({ message: 'Forbidden: You can only update your own profile.' });
+	}
 
-		// Don't allow updating certain fields directly
-		const { password, ...allowedUpdates } = updates;
+	const updates = req.body;
+	const db = req.server.betterSqlite3;
 
-		const setClauses = [];
-		const params = [];
-		
-		// Convert camelCase to snake_case and build SQL
-		Object.entries(allowedUpdates).forEach(([key, value]) => {
-			const dbKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+	if (Object.keys(updates).length === 0) {
+		return reply.code(400).send({ message: 'No valid updates provided' });
+	}
+
+	if (updates.hasOwnProperty('password')) {
+		return reply.code(400).send({ message: 'Password cannot be updated via this endpoint. Use the dedicated password update route.' });
+	}
+
+	if (updates.hasOwnProperty('join_date') || updates.hasOwnProperty('created_at')) {
+		return reply.code(400).send({ message: 'Join date and creation date cannot be updated.' });
+	}
+
+	const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(authenticatedUserId);
+	if (!userExists) {
+		req.log.error(`Authenticated user ID ${authenticatedUserId} not found in DB during updateUser existence check.`);
+		return reply.code(404).send({ message: 'User not found.' });
+	}
+
+	const setClauses = [];
+	const params = [];
+
+	const allowedFields = [
+		'username', 'display_name', 'email', 'bio',
+		'avatar_url', 'cover_photo_url', 'has_two_factor_auth', 'status'
+	];
+
+	Object.entries(updates).forEach(([key, value]) => {
+		const dbKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+
+		if (allowedFields.includes(key)) {
 			setClauses.push(`${dbKey} = ?`);
 			params.push(value);
-		});
-
-		if (setClauses.length === 0) {
-			return reply.code(400).send({ message: 'No valid updates provided' });
+		} else {
+			req.log.warn(`Ignoring disallowed update field "${key}" for user ${authenticatedUserId}`);
 		}
+	});
 
-		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ? AND id = ?`; // updated
-		params.push(id); // param ID
-		params.push(authenticatedUserId); // auth ID
-
-		try {
-			const result = db.prepare(sql).run(...params);
-
-			if (result.changes === 0) {
-			return reply.code(404).send({ message: 'User not found or no changes made' });
-			}
-
-			// Return updated user
-			const updatedUser = db.prepare(`
-			SELECT 
-				id, username, display_name, email, bio,
-				avatar_url, cover_photo_url, join_date,
-				has_two_factor_auth, status, last_active, created_at
-			FROM users 
-			WHERE id = ?
-			`).get(id);
-
-			reply.send(updatedUser);
-		} catch (err) {
-			if (err.message && err.message.includes('UNIQUE constraint failed: users.username')) {
-				reply.code(409).send({ message: 'Username already exists' });
-			} else if (err.message && err.message.includes('UNIQUE constraint failed: users.email')) {
-				reply.code(409).send({ message: 'Email already exists' });
-			} else {
-				throw err;
-			}
-		}
-	} catch (error) {
-	req.log.error(error);
-	reply.code(500).send({ message: 'Error updating user' });
+	if (setClauses.length === 0) {
+		return reply.code(400).send({ message: 'No valid fields provided for update.' });
 	}
-};
 
-const updateUserProfile = async (req, reply) => {
+	const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+	params.push(authenticatedUserId);
+
 	try {
-		const { id } = req.params;
-		const authenticatedUserId = req.user.id;
-
-		// Auth check
-		if (parseInt(id, 10) !== authenticatedUserId) {
-			return reply.code(403).send({ message: 'Unauthorized: You can only update your own profile.' });
-		}
-
-		const { display_name, bio, avatar_url, cover_photo_url } = req.body;
-		const db = req.server.betterSqlite3;
-
-		// Validate at least one field is being updated
-		if (!display_name && bio === undefined && avatar_url === undefined && cover_photo_url === undefined) {
-			return reply.code(400).send({ message: 'No profile updates provided' });
-		}
-
-		const setClauses = [];
-		const params = [];
-		
-		if (display_name !== undefined) {
-			setClauses.push('display_name = ?');
-			params.push(display_name);
-		}
-		if (bio !== undefined) {
-			setClauses.push('bio = ?');
-			params.push(bio);
-		}
-		if (avatar_url !== undefined) {
-			setClauses.push('avatar_url = ?');
-			params.push(avatar_url);
-		}
-		if (cover_photo_url !== undefined) {
-			setClauses.push('cover_photo_url = ?');
-			params.push(cover_photo_url);
-		}
-
-		const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ? AND id = ?`;
-		params.push(id); // param ID
-		params.push(authenticatedUserId); // auth ID
-
 		const result = db.prepare(sql).run(...params);
 
 		if (result.changes === 0) {
-			return reply.code(404).send({ message: 'User not found or no changes made' });
+			return reply.code(200).send({ message: 'No changes made to user (values were already the same).' });
+		}
+
+		// Return updated user
+		const updatedUser = db.prepare(`
+		SELECT 
+			id, username, display_name, email, bio,
+			avatar_url, cover_photo_url, join_date,
+			has_two_factor_auth, status, last_active, created_at
+		FROM users 
+		WHERE id = ?
+		`).get(authenticatedUserId);
+
+		const { password: _, ...userResponse } = updatedUser;
+		reply.code(200).send(userResponse);
+	} catch (err) {
+		if (err.message && err.message.includes('UNIQUE constraint failed: users.username')) {
+			reply.code(409).send({ message: 'Username already exists' });
+		} else if (err.message && err.message.includes('UNIQUE constraint failed: users.email')) {
+			reply.code(409).send({ message: 'Email already exists' });
+		} else {
+			req.log.error('Error updating user:', err);
+			reply.code(500).send({ message: 'Error updating user' });
+		}
+	}
+};
+
+// Controller for PATCH /:id/profile (Update User Profile - Requires AUTH + MATCHING ID CHECK)
+const updateUserProfile = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.id, 10);
+
+	if (isNaN(targetUserId)) {
+		req.log.warn(`Invalid user ID parameter received for updateUserProfile: ${req.params.id}`);
+		return reply.code(400).send({ message: 'Invalid user ID format in URL.' });
+	}
+
+	// AUTHORIZATION CHECK: Ensure authenticated user is updating their OWN profile
+	if (targetUserId !== authenticatedUserId) {
+		return reply.code(403).send({ message: 'Forbidden: You can only update your own profile.' });
+	}
+
+	const updates = req.body;
+	const db = req.server.betterSqlite3;
+
+	if (Object.keys(updates).length === 0) {
+		return reply.code(400).send({ message: 'No profile updates provided' });
+	}
+
+	const userExists = db.prepare('SELECT id FROM users WHERE id = ?').get(authenticatedUserId);
+	if (!userExists) {
+		req.log.error(`Authenticated user ID ${authenticatedUserId} not found in DB during updateUserProfile existence check.`);
+		return reply.code(404).send({ message: 'User not found.' });
+	}
+
+	const setClauses = [];
+	const params = [];
+
+	const allowedFields = ['display_name', 'bio', 'avatar_url', 'cover_photo_url'];
+
+	Object.entries(updates).forEach(([key, value]) => {
+		const dbKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+
+		if (allowedFields.includes(key)) {
+			setClauses.push(`${dbKey} = ?`);
+			params.push(value);
+		} else {
+			req.log.warn(`Ignoring disallowed profile update field "${key}" for user ${authenticatedUserId}`);
+		}
+	});
+
+	if (setClauses.length === 0) {
+		return reply.code(400).send({ message: 'No valid profile updates provided.' });
+	}
+
+	const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+	params.push(authenticatedUserId);
+
+	try {
+		const result = db.prepare(sql).run(...params);
+
+		if (result.changes === 0) {
+			return reply.code(200).send({ message: 'No changes made to user profile (values were already the same).' });
 		}
 
 		// Return updated user profile
@@ -368,35 +423,35 @@ const updateUserProfile = async (req, reply) => {
 			status, last_active
 			FROM users 
 			WHERE id = ?
-		`).get(id);
+		`).get(authenticatedUserId);
 
-		reply.send(updatedUser);
+		reply.code(200).send(updatedUser);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error updating user profile' });
 	}
 };
 
+// Controller for DELETE /:id (Delete User - Requires AUTH + MATCHING ID CHECK)
 const deleteUser = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.id, 10);
+
+	// AUTHORIZATION CHECK: Ensure authenticated user is deleting their OWN account
+	if (targetUserId !== authenticatedUserId) {
+		return reply.code(403).send({ message: 'Forbidden: You can only delete your own account.' });
+	}
 	try {
-		const { id } = req.params;
-
-		const authenticatedUserId = req.user.id; // auth id from JWT
-		// Auth check
-		if (parseInt(id, 10) !== authenticatedUserId) {
-			return reply.code(403).send({ message: 'Unauthorized: You can only delete your own account.' }); // 403 Forbidden
-		}
-
 		const db = req.server.betterSqlite3;
 		// Make sure we don't delete the wrong user
-		const sql = 'DELETE FROM users WHERE id = ? AND id = ?';
+		const sql = 'DELETE FROM users WHERE id = ?';
 
-		const result = db.prepare(sql).run(id, authenticatedUserId);
+		const result = db.prepare(sql).run(authenticatedUserId);
 
 		if (result.changes === 0) {
 			reply.code(404).send({ message: 'User not found or does not match authenticated user.' });
 		} else {
-			reply.send({ message: `User ${id} has been removed` });
+			reply.code(200).send({ message: `User ${authenticatedUserId} has been removed` });
 		}
 	} catch (error) {
 		req.log.error(error);
@@ -405,17 +460,13 @@ const deleteUser = async (req, reply) => {
 };
 
 //frontend code must immediately clear the JWT from localStorage after logging out
-// user is logged in when they have a valid JWT token, this is mostly aesthetic
+// Controller for POST /login (Login User - Public)
 const loginUser = async (req, reply) => {
 	try {
 		const { username, password } = req.body;
 
 		const db = req.server.betterSqlite3;
-
-		if (!username || !password) {
-			return reply.code(400).send({ message: 'Username and password required' });
-		}
-
+	
 		const user = db.prepare(`
 			SELECT id, username, password, display_name, status FROM users WHERE username = ?
 		`).get(username);
@@ -430,14 +481,6 @@ const loginUser = async (req, reply) => {
 			return reply.code(401).send({ message: 'Invalid credentials' });
 		}
 
-		// if (user.status === 'online') {
-		// 	req.log.info(`Login attempted for user ${user.id} but they are already online.`);
-		// 	// just issue a new token
-		// 	const token = req.server.jwt.sign({ id: user.id, username: user.username });
- 		// 	// send the same response structure as a fresh login
-		// 	return reply.code(200).send({ token: token, user: { id: user.id, username: user.username, display_name: user.display_name} });
-		// }
-
 		// update user status
 		db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('online', user.id);
 
@@ -451,23 +494,30 @@ const loginUser = async (req, reply) => {
 	}
 };
 
-// user is logged out when they don' have a valid JWT token, this is mostly aesthetic
+// Controller for POST /log-out (Log out User - Requires AUTH)
 const logoutUser = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
 	try {
-		const authenticatedUserId = req.user.id;
-
-		const db = req.server.betterSqlite3; // Access the database connection
+		const db = req.server.betterSqlite3;
 
 		const userStatus = db.prepare('SELECT status FROM users WHERE id = ?').get(authenticatedUserId);
-		if (!userStatus || userStatus.status === 'offline') {
+		if (!userStatus) {
+			req.log.error(`User ID ${authenticatedUserId} not found during logout.`);
+			return reply.code(404).send({ message: 'User not found.' });
+		}
+		if (userStatus.status === 'offline') {
 			req.log.info(`Logout attempted for user ${authenticatedUserId} but they are already offline.`);
 			return reply.code(200).send({ message: 'User is already logged out.' });
 		}
 
 		// update status
-		db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('offline', authenticatedUserId);
+		const result = db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('offline', authenticatedUserId);
 
-		req.log.info(`User ${authenticatedUserId} status updated to offline.`);
+		if (result.changes > 0) {
+			req.log.info(`User ${authenticatedUserId} status updated to offline.`);
+		} else {
+			req.log.warn(`Logout attempted for user ${authenticatedUserId} but no changes were made.`);
+		}
 
 		reply.code(200).send({ message: 'Logged out successfully' });
 
@@ -477,25 +527,18 @@ const logoutUser = async (req, reply) => {
 	}
 };
 
+// Controller for PUT /:userId/avatar (Upload Avatar - Requires AUTH + MATCHING USER ID CHECK)
 const uploadAvatar = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.userId, 10);
+
+	// AUTHORIZATION CHECK: Ensure authenticated user is uploading for their OWN account
+	if (authenticatedUserId !== targetUserId) {
+		reply.code(403).send({ message: 'Forbidden: You can only upload your own avatar.' });
+		return;
+	}
+
 	try {
-		const authenticatedUserId = req.user ? req.user.id : null; // Get user ID from token
-
-		// Get the target user ID from the route parameters
-		const targetUserId = parseInt(req.params.userId, 10);
-
-		// If user is not authenticated OR authenticated user ID does not match the target ID
-		if (!authenticatedUserId || authenticatedUserId !== targetUserId) {
-			reply.code(403).send({ message: 'Forbidden: You can only upload your own avatar.' });
-			return;
-		}
-
-		// Ensure the request is multipart/form-data
-		if (!req.isMultipart()) {
-			reply.code(415).send({ message: 'Unsupported Media Type: Must be multipart/form-data' });
-			return;
-		}
-
 		// Process the file upload
 		const file = await req.file(); // Get the file from the request (returns a stream)
 
@@ -505,12 +548,10 @@ const uploadAvatar = async (req, reply) => {
 		}
 
 		// maybe implement stricter validation
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-		if (!allowedTypes.includes(file.mimetype)) {
-			reply.code(400).send({ message: `Invalid file type. Only ${allowedTypes.join(', ')} are allowed.` });
+		if (!file.mimetype.startsWith('image/')) {
+			reply.code(400).send({ message: 'Invalid file type. Only image files are allowed.' });
 			return;
 		}
-
 		// Generate a unique filename to avoid collisions
 		const fileExtension = path.extname(file.filename);
 		const uniqueFilename = `${targetUserId}-${Date.now()}${fileExtension}`;
@@ -535,9 +576,13 @@ const uploadAvatar = async (req, reply) => {
 
 		const db = req.server.betterSqlite3;
 
-		const result = db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(fileUrl, targetUserId);
+		// optionally we could fetch and delete the old file
+		const result = db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(fileUrl, authenticatedUserId);
 
 		if (result.changes === 0) {
+			if (fs.existsSync(filePath)) {
+				fs.unlinkSync(filePath);
+			}
 			reply.code(404).send({ message: 'User not found or no changes made' });
 		} else {
 			// maybe delete old avatar
@@ -550,31 +595,26 @@ const uploadAvatar = async (req, reply) => {
 		req.log.error(error);
 		if (error.message === 'Reach file size limit') {
 			reply.code(413).send({ message: 'File size exceeds limit.' });
+		} else if (error.message.includes('Failed to save file to disk.')) {
+			reply.code(500).send({ message: 'Error saving uploaded file.' });
 		} else {
 			reply.code(500).send({ message: 'Error uploading avatar' });
 		}
 	}
 };
 
+// Controller for PUT /:userId/cover (Upload Cover Photo - Requires AUTH + MATCHING USER ID CHECK)
 const uploadCover = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.userId, 10);
+
+	// AUTHORIZATION CHECK: Ensure authenticated user is uploading for their OWN account
+	if (authenticatedUserId !== targetUserId) {
+		reply.code(403).send({ message: 'Forbidden: You can only upload your own cover photo.' });
+		return;
+	}
+
 	try {
-		const authenticatedUserId = req.user ? req.user.id : null; // Get user ID from token
-
-		// Get the target user ID from the route parameters
-		const targetUserId = parseInt(req.params.userId, 10);
-
-		// If user is not authenticated OR authenticated user ID does not match the target ID
-		if (!authenticatedUserId || authenticatedUserId !== targetUserId) {
-			reply.code(403).send({ message: 'Forbidden: You can only upload your own cover.' });
-			return;
-		}
-
-		// Ensure the request is multipart/form-data
-		if (!req.isMultipart()) {
-			reply.code(415).send({ message: 'Unsupported Media Type: Must be multipart/form-data' });
-			return;
-		}
-
 		// Process the file upload
 		const file = await req.file(); // Get the file from the request (returns a stream)
 
@@ -584,9 +624,8 @@ const uploadCover = async (req, reply) => {
 		}
 
 		// maybe implement stricter validation
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-		if (!allowedTypes.includes(file.mimetype)) {
-			reply.code(400).send({ message: `Invalid file type. Only ${allowedTypes.join(', ')} are allowed.` });
+		if (!file.mimetype.startsWith('image/')) {
+			reply.code(400).send({ message: 'Invalid file type. Only image files are allowed.' });
 			return;
 		}
 
@@ -614,9 +653,13 @@ const uploadCover = async (req, reply) => {
 
 		const db = req.server.betterSqlite3;
 
-		const result = db.prepare('UPDATE users SET cover_photo_url = ? WHERE id = ?').run(fileUrl, targetUserId);
+		// optionally delete old cover photo
+		const result = db.prepare('UPDATE users SET cover_photo_url = ? WHERE id = ?').run(fileUrl, authenticatedUserId);
 
 		if (result.changes === 0) {
+			if (fs.existsSync(filePath)) {
+				fs.unlinkSync(filePath);
+			}
 			reply.code(404).send({ message: 'User not found or no changes made' });
 		} else {
 			// maybe delete old cover
@@ -629,15 +672,19 @@ const uploadCover = async (req, reply) => {
 		req.log.error(error);
 		if (error.message === 'Reach file size limit') {
 			reply.code(413).send({ message: 'File size exceeds limit.' });
-		} else {
+		} else if (error.message.includes('Failed to save file to disk.')) {
+			reply.code(500).send({ message: 'Error saving uploaded file.' });
+		}
+		else {
 			reply.code(500).send({ message: 'Error uploading cover' });
 		}
 	}
 };
 
+// Controller for PUT /:id/password (Update password - Requires AUTH + MATCHING ID CHECK + OLD PASSWORD CHECK)
 const updatePassword = async (req, reply) => {
-	const targetUserId = parseInt(req.params.id, 10); 
 	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.id, 10);
 
 	// AUTHORIZATION CHECK: Ensure user is updating their own password
 	if (targetUserId !== authenticatedUserId) {
@@ -652,7 +699,6 @@ const updatePassword = async (req, reply) => {
 		const user = db.prepare('SELECT id, password FROM users WHERE id = ?').get(authenticatedUserId);
 
 		if (!user) {
-			// This case should ideally not happen if authPreHandler passed, but safety check
 			req.log.error(`User ID ${authenticatedUserId} not found after JWT verification.`);
 			return reply.code(500).send({ message: 'Internal server error: User data not found.' });
 		}

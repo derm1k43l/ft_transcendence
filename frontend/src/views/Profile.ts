@@ -1,21 +1,27 @@
 import { Router } from '../core/router.js';
+import { Listener, addListener, removeListener, removeListeners } from '../services/listener.js';
 import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats, uploadAvatar, uploadCover } from '../services/UserService.js';
+import { UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
 import { DEFAULT_ACHIEVEMENTS } from '../constants/defaults.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;
+    private modal: HTMLElement | null = null;
     private router: Router;
     private currentUserId: number = currentUser?.id || -1;
-    
     private profileUserId: number;
 
+    private boundListeners: Listener[] = [];
+    private addListener(l: Listener) { addListener(l, this.boundListeners); }
+    private removeListeners() { removeListeners(this.boundListeners); this.boundListeners = []; }
+
+
+
     constructor(router: Router, userId?: string) {
+        console.log("--- CONSTRUCTING PROFILE VIEW ---");
         this.router = router;
-        
-        // If userId is provided as a string parameter from the router, convert it to number
-        // Otherwise view the current user's profile
         this.profileUserId = userId ? parseInt(userId) : this.currentUserId;
     }
 
@@ -28,7 +34,7 @@ export class ProfileView {
             this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
             rootElement.appendChild(this.element);
 
-            const user = await getUserById(this.profileUserId);
+            const user: UserProfile | null = await getUserById(this.profileUserId);
             
             
             if (!this.element) return;
@@ -39,10 +45,10 @@ export class ProfileView {
 
 
 
-            user.match_history = await setMatchHistory(user);
-            user.achievements = await setAchievements(user);
-            user.stats = await setUserStats(user);
-            if (!this.element) return;
+            // user.match_history = await setMatchHistory(user);
+            // user.achievements = await setAchievements(user);
+            // user.stats = await setUserStats(user);
+            if (!this.element || !user.stats) return;
 
             // Check if viewing own profile
             const isOwnProfile = this.profileUserId === this.currentUserId;
@@ -198,71 +204,72 @@ export class ProfileView {
             </div>
             `;
 
-            // Setup event listeners
-            this.setupEventListeners(isOwnProfile, user);
+        // Setup event listeners
+        this.setupEventListeners(isOwnProfile, user);
         } catch (error) {
             console.error("Error rendering profile:", error);
             if (this.element)
                 this.element.innerHTML = '<div class="profile-error"><h2>Error Loading Profile</h2><p>There was an error loading this profile. Please try again later.</p></div>';
         }
     }
-    
+
+    private async sendFriendRequest(user: UserProfile) {
+        try {
+            // Import dynamically to avoid circular dependencies
+            const { sendFriendRequest } = await import('../services/UserService.js');
+            
+            const success = await sendFriendRequest(this.currentUserId, this.profileUserId);
+            
+            if (success) {
+                NotificationManager.show({
+                    title: 'Friend Request Sent',
+                    message: `A friend request has been sent to ${user.display_name}.`,
+                    type: 'success',
+                    duration: 3000
+                });
+                
+                // Update button to show pending
+                const addFriendButton = this.element?.querySelector('#add-friend-btn');
+                if (addFriendButton) {
+                    addFriendButton.innerHTML = '<i class="fas fa-clock"></i> Request Pending';
+                    addFriendButton.setAttribute('disabled', 'true');
+                }
+            }
+        } catch (error) {
+            console.error("Error sending friend request:", error);
+            NotificationManager.show({
+                title: 'Error',
+                message: 'Failed to send friend request',
+                type: 'error',
+                duration: 3000
+            });
+        }
+    }
+
     private setupEventListeners(isOwnProfile: boolean, user: any): void {
         if (!this.element) return;
         
         if (isOwnProfile) {
-            // Edit profile button
-            const editBtn = this.element.querySelector('#profile-edit-btn');
-            if (editBtn) {
-                editBtn.addEventListener('click', () => {
-                    this.showEditProfileModal(user);
-                });
-            }
+            this.addListener({
+                element: this.element.querySelector('#profile-edit-btn'),
+                event: 'click',
+                handler: () => { this.showEditProfileModal(user); }
+            });
         } else {
-            // Add friend button for other users' profiles
-            const addFriendBtn = this.element.querySelector('#add-friend-btn');
-            addFriendBtn?.addEventListener('click', async () => {
-                try {
-                    // Import dynamically to avoid circular dependencies
-                    const { sendFriendRequest } = await import('../services/UserService.js');
-                    
-                    const success = await sendFriendRequest(this.currentUserId, this.profileUserId);
-                    
-                    if (success) {
-                        NotificationManager.show({
-                            title: 'Friend Request Sent',
-                            message: `A friend request has been sent to ${user.display_name}.`,
-                            type: 'success',
-                            duration: 3000
-                        });
-                        
-                        // Update button to show pending
-                        const addFriendButton = this.element?.querySelector('#add-friend-btn');
-                        if (addFriendButton) {
-                            addFriendButton.innerHTML = '<i class="fas fa-clock"></i> Request Pending';
-                            addFriendButton.setAttribute('disabled', 'true');
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error sending friend request:", error);
-                    NotificationManager.show({
-                        title: 'Error',
-                        message: 'Failed to send friend request',
-                        type: 'error',
-                        duration: 3000
-                    });
-                }
+            this.addListener({
+                element: this.element.querySelector('#add-friend-btn'),
+                event: 'click',
+                handler: () => { this.sendFriendRequest(user); }
             });
         }
-        
-        // Load more matches button
-        const loadMoreBtn = this.element.querySelector('#load-more-matches');
-        loadMoreBtn?.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.loadMoreMatches(user);
+
+        this.addListener({
+            element: this.element.querySelector('#load-more-matches'),
+            event: 'click',
+            handler: (e) => { e.preventDefault(); this.loadMoreMatches(user); }
         });
     }
-    
+
     private loadMoreMatches(user: any): void {
         if (!this.element) return;
         
@@ -312,233 +319,182 @@ export class ProfileView {
             loadMoreBtn.setAttribute('disabled', 'true');
         }
     }
-    
-    // Modal for editing profile including cover photo
-    private showEditProfileModal(user: any): void {
-        if (!this.element) return;
+
+    private initEditProfileModal(user: any): void {
+        this.modal = document.createElement('div');
+        this.modal.id = 'profile-edit-modal';
+        this.modal.className = 'modal';
         
-        // Create modal if it doesn't exist yet
-        let modal = document.getElementById('profile-edit-modal');
-        
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'profile-edit-modal';
-            modal.className = 'modal';
-            
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Edit Profile</h3>
-                        <button class="modal-close">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="profile-edit-form">
-                            <!-- Cover Photo -->
-                            <div class="cover-upload-container">
-                                <div class="cover-preview" style="background-image: url('${user.cover_photo_url || 'https://placehold.co/1200x300/7c00e3/ffffff?text=Cover+Photo'}');">
-                                    <div class="cover-overlay">
-                                        <label for="cover-upload" class="upload-btn">
-                                            <i class="fas fa-camera"></i> Change Cover
-                                        </label>
-                                    </div>
-                                </div>
-                                <input type="file" id="cover-upload" accept="image/*" style="display:none;">
-                            </div>
-                            
-                            <!-- Avatar -->
-                            <div class="avatar-upload-container">
-                                <img src="${user.avatar_url || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.display_name}" class="edit-avatar-preview">
-                                <div class="avatar-overlay">
-                                    <label for="avatar-upload" class="upload-btn">
-                                        <i class="fas fa-camera"></i>
+        this.modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Profile</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="profile-edit-form">
+                        <!-- Cover Photo -->
+                        <div class="cover-upload-container">
+                            <div class="cover-preview" style="background-image: url('${user.cover_photo_url || 'https://placehold.co/1200x300/7c00e3/ffffff?text=Cover+Photo'}');">
+                                <div class="cover-overlay">
+                                    <label for="cover-upload" class="upload-btn">
+                                        <i class="fas fa-camera"></i> Change Cover
                                     </label>
                                 </div>
-                                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
                             </div>
-                            
-                            <!-- User Info -->
-                            <div class="form-group">
-                                <label for="displayName">Display Name</label>
-                                <input type="text" id="displayName" name="displayName" value="${user.display_name}" required>
+                            <input type="file" id="cover-upload" accept="image/*" style="display:none;">
+                        </div>
+                        
+                        <!-- Avatar -->
+                        <div class="avatar-upload-container">
+                            <img src="${user.avatar_url || 'https://placehold.co/150x150/1d1f21/ffffff?text=User'}" alt="${user.display_name}" class="edit-avatar-preview">
+                            <div class="avatar-overlay">
+                                <label for="avatar-upload" class="upload-btn">
+                                    <i class="fas fa-camera"></i>
+                                </label>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="bio">Bio</label>
-                                <textarea id="bio" name="bio" rows="4">${user.bio || ''}</textarea>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="app-button secondary" id="cancel-edit">Cancel</button>
-                                <button type="submit" class="app-button" id="save-profile">Save Changes</button>
-                            </div>
-                        </form>
-                    </div>
+                            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+                        </div>
+                        
+                        <!-- User Info -->
+                        <div class="form-group">
+                            <label for="displayName">Display Name</label>
+                            <input type="text" id="displayName" name="displayName" value="${user.display_name}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" name="bio" rows="4">${user.bio || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="app-button secondary" id="cancel-edit">Cancel</button>
+                            <button type="submit" class="app-button" id="save-profile">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-        
-        // Show modal
-        modal.style.display = 'flex';
-        
+            </div>
+        `;
+        document.body.appendChild(this.modal);
+
+        // set up modal event listeners only once
+
         // Get form elements
         const form = document.getElementById('profile-edit-form') as HTMLFormElement;
         const coverUpload = document.getElementById('cover-upload') as HTMLInputElement;
         const avatarUpload = document.getElementById('avatar-upload') as HTMLInputElement;
-        const coverPreview = modal.querySelector('.cover-preview') as HTMLElement;
-        const avatarPreview = modal.querySelector('.edit-avatar-preview') as HTMLImageElement;
-        const closeButton = modal.querySelector('.modal-close') as HTMLButtonElement;
+        const coverPreview = this.modal.querySelector('.cover-preview') as HTMLElement;
+        const avatarPreview = this.modal.querySelector('.edit-avatar-preview') as HTMLImageElement;
+        const closeButton = this.modal.querySelector('.modal-close') as HTMLButtonElement;
         const cancelButton = document.getElementById('cancel-edit') as HTMLButtonElement;
 
-        // cover photo change
-        coverUpload?.addEventListener('change', function(e) {
-            const fileInput = e.target as HTMLInputElement;
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    if (coverPreview && e.target) {
-                        coverPreview.style.backgroundImage = `url(${e.target.result})`;
-                    }
-                    if (!fileInput.files || !fileInput.files[0]) return;
-                    const file = fileInput.files[0];
-                    const url = await uploadCover(user.id, file);
-                    const profileCover = document.querySelector('.profile-cover');
-                    if (profileCover && url)
-                        profileCover.setAttribute('style', `background-image: url(${url})`);
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        });
-        // avatar change
-        avatarUpload?.addEventListener('change', function(e) {
-            const fileInput = e.target as HTMLInputElement;
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    if (avatarPreview && e.target) {
-                        avatarPreview.src = e.target.result as string;
-                    }
-                    if (!fileInput.files || !fileInput.files[0]) return;
-                    const file = fileInput.files[0];
-                    const url = await uploadAvatar(user.id, file);
-                    const sidebarAvatar = document.querySelector('.avatar');
-                    if (sidebarAvatar && url)
-                        sidebarAvatar.setAttribute('src', url);
-                    const profileAvatar = document.querySelector('.profile-avatar');
-                    if (profileAvatar && url)
-                        profileAvatar.setAttribute('src', url);
-                };
-                reader.readAsDataURL(fileInput.files[0]);
+        this.addListener({
+            element: coverUpload,
+            event: 'change',
+            handler: async (e) => {
+                const fileInput = e.target as HTMLInputElement;
+                if (!fileInput.files || !fileInput.files[0]) return;
+                const file = fileInput?.files[0];
+                const url = await uploadCover(user.id, file);
+                document.querySelector('.cover-preview')?.setAttribute('style', `background-image: url(${url})`);
+                document.querySelector('.profile-cover')?.setAttribute('style', `background-image: url(${url})`);
             }
         });
 
-        // Handle form submission
-        form?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Show loading state
-            const saveButton = form.querySelector('#save-profile');
-            if (saveButton) {
-                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-                saveButton.setAttribute('disabled', 'true');
+        this.addListener({
+            element: avatarUpload,
+            event: 'change',
+            handler: async (e) => {
+                const fileInput = e.target as HTMLInputElement;
+                if (!fileInput.files || !fileInput.files[0]) return;
+                const file = fileInput.files[0];
+                const url = await uploadAvatar(user.id, file);
+                document.querySelector('.avatar')?.setAttribute('src', url);
+                document.querySelector('.profile-avatar')?.setAttribute('src', url);
+                document.querySelector('.edit-avatar-preview')?.setAttribute('src', url);
             }
-            
-            try {
-                // Get form data
+        });
+
+        this.addListener({
+            element: form,
+            event: 'submit',
+            handler: async (e) => {
+                e.preventDefault();
+                const saveButton = form.querySelector('#save-profile');
+                if (saveButton) {
+                    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    saveButton.setAttribute('disabled', 'true');
+                }
+
                 const displayName = (document.getElementById('displayName') as HTMLInputElement).value;
                 const bio = (document.getElementById('bio') as HTMLTextAreaElement).value;
-                
-                // In a real app, you would upload the files to a server and then update the user profile with the URLs
-                // For demo purposes, we'll simulate file uploads with async operations
-                
-                let avatarUrl = user.avatar_url;
-                let coverPhotoUrl = user.cover_photo_url;
-
-                if (avatarUpload.files && avatarUpload.files[0]) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    avatarUrl = URL.createObjectURL(avatarUpload.files[0]);
-                }
-
-                if (coverUpload.files && coverUpload.files[0]) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    coverPhotoUrl = URL.createObjectURL(coverUpload.files[0]);
-                }
-
-                // Update the user profile
-                const updatedProfile = {
-                    display_name: displayName,
-                    bio,
-                    avatar_url: avatarUrl,
-                    cover_photo_url: coverPhotoUrl
-                };
-                
-                // Call your update service
-                const success = await updateUserProfile(user.id, updatedProfile);
-                user = await getUserById(user.id);
-                
-                if (success) {
-                    // Show notification
+                if (await updateUserProfile(user.id, { display_name: displayName, bio: bio })) {
                     NotificationManager.show({
                         title: 'Profile Updated',
                         message: 'Your profile has been updated successfully.',
                         type: 'success',
                         duration: 3000
                     });
-                    
-                    // Reload the profile to show updates
-                    // window.location.reload();
-                    // window.location.hash = '#/profile/';
-                    // this.router.navigate('/profile');
-                    // window.dispatchEvent(new HashChangeEvent('hashchange', {
-                    //     oldURL: window.location.href,
-                    //     newURL: window.location.href
-                    // }));
-                    this.router.reload();
-                    // const sidebarAvatar = document.querySelector('.avatar');
-                    // if (sidebarAvatar)
-                    //     sidebarAvatar.setAttribute('src', user.avatar_url);
+                    if (this.modal) this.modal.style.display = 'none';
+                    // this.router.reload();
+                    document.querySelector('.bio')!.innerHTML = bio ? bio : 'No bio yet';
+                    document.querySelector('.user-profile > .username')!.innerHTML = displayName;
+                    document.querySelector('.profile-info-main > h2')!.innerHTML = displayName;
                 } else {
-                    throw new Error('Failed to update profile');
+                    NotificationManager.show({
+                        title: 'Error',
+                        message: 'Failed to update profile. Please try again.',
+                        type: 'error',
+                        duration: 3000
+                    });
                 }
-                
-                // Close modal
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-            } catch (error) {
-                console.error("Error updating profile:", error);
-                NotificationManager.show({
-                    title: 'Error',
-                    message: 'Failed to update profile. Please try again.',
-                    type: 'error',
-                    duration: 3000
-                });
-                
-            }
-            // Reset save button
-            if (saveButton) {
-                saveButton.innerHTML = 'Save Changes';
-                saveButton.removeAttribute('disabled');
-            }
-        }, { once: true });
 
-        // Close modal when clicking the close button or cancel or outside
-        closeButton?.addEventListener('click', async () => {
-            modal!.style.display = 'none';
-        });
-        cancelButton?.addEventListener('click', async () => {
-            modal!.style.display = 'none';
-        });
-        window.addEventListener('click', async (e) => {
-            if (e.target === modal) {
-                modal!.style.display = 'none';
+                if (saveButton) {
+                    saveButton.innerHTML = 'Save Changes';
+                    saveButton.removeAttribute('disabled');
+                }
             }
+        });
+
+        this.addListener({
+            element: closeButton,
+            event: 'click',
+            handler: async () => {this.modal!.style.display = 'none';}
+        });
+
+        this.addListener({
+            element: cancelButton,
+            event: 'click',
+            handler: async () => {this.modal!.style.display = 'none';}
+        });
+
+        this.addListener({
+            element: window,
+            event: 'click',
+            handler: async (e) => {if (e.target === this.modal) {this.modal!.style.display = 'none';}}
         });
     }
 
+    // Modal for editing profile
+    private showEditProfileModal(user: any): void {
+        if (!this.element) return;
+        // let modal = document.getElementById('profile-edit-modal'); // Select modal
+        if (!this.modal) { this.initEditProfileModal(user); } // Create modal if it doesn't exist yet
+        if (this.modal) this.modal.style.display = 'flex'; // Show modal
+
+        document.querySelector('.cover-preview')?.setAttribute('style', `background-image: url(${user.cover_photo_url})`);
+        document.querySelector('.edit-avatar-preview')?.setAttribute('src', user.avatar_url);
+        // (document.getElementById('displayName') as HTMLTextAreaElement).value = user.displayName;
+        const nameBox = document.getElementById('displayName') as HTMLInputElement;
+        const bioBox = document.getElementById('bio') as HTMLTextAreaElement;
+        if (nameBox) nameBox.value = user.display_name;
+        if (bioBox) bioBox.value = user.bio ? user.bio : '';
+    }
+
     destroy(): void {
-        // this.element?.remove();
+        console.log("--- DESTROYING PROFILE VIEW ---");
+        this.removeListeners();
+        this.element?.remove();
         this.element = null;
     }
 }

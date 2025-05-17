@@ -52,17 +52,21 @@ export class Router {
     addParamRoute(pattern: string, handler: ParamRouteHandler): void {
         // Replace :param placeholders with regex capture groups
         const regexPattern = pattern.replace(/:([^\s/]+)/g, '([^/]+)');
-        
-        // Create a regex object, ensuring starting slash and proper escapes
-        const regex = new RegExp(
-            `^${regexPattern.replace(/^\/|\/$/g, '').replace(/\//g, '\\/')}$`
-        );
-        
+
+        // Ensure leading slash is preserved, remove trailing slash if any, escape slashes
+        const escapedPattern = regexPattern
+            .replace(/\/$/, '')          // Remove trailing slash if present
+            .replace(/\//g, '\\/');      // Escape all slashes for regex
+
+        // Create the final regex with ^ and $ anchors
+        const regex = new RegExp(`^${escapedPattern}$`);
+
         this.paramRoutes.push({
             pattern: regex,
             handler
         });
     }
+
 
     hasRoute(path: string): boolean {
         // Normalize path for checking

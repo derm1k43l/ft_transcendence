@@ -1,13 +1,13 @@
 // Controller for get friends for a specific user (Requires AUTH + Matching User ID Check)
 const getUserFriends = async (req, reply) => {
 	const { userId } = req.params;
-	const authenticatedUserId = req.user.id;
+	// const authenticatedUserId = req.user.id;
 
-	// AUTHORIZATION CHECK: Ensure the user ID in the URL matches the authenticated user ID
-	if (parseInt(userId, 10) !== authenticatedUserId) {
-		reply.code(403).send({ message: 'Forbidden: You can only view your own friends list.' });
-		return;
-	}
+	// // AUTHORIZATION CHECK: Ensure the user ID in the URL matches the authenticated user ID
+	// if (parseInt(userId, 10) !== authenticatedUserId) {
+	// 	reply.code(403).send({ message: 'Forbidden: You can only view your own friends list.' });
+	// 	return;
+	// }
 
 	try {
 		const db = req.server.betterSqlite3;
@@ -23,7 +23,7 @@ const getUserFriends = async (req, reply) => {
 			FROM friends f
 			JOIN users u ON f.friend_id = u.id
 			WHERE f.user_id = ? -- Filter by the authenticated user ID
-		`).all(authenticatedUserId);
+		`).all(userId);
 		reply.code(200).send(friends);
 	} catch (error) {
 		req.log.error(error);

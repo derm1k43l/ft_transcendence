@@ -470,6 +470,7 @@ export class FriendsView {
     }
 
     destroy(): void {
+        this.element?.remove();
         this.element = null;
     }
 }

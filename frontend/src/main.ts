@@ -44,17 +44,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing application...');
 
     // Initialize user before proceeding
-    await initializeUser();
+    currentUser = await Auth.getCurrentUser();
+    if (currentUser) isLoggedIn = true;
 
     // Proceed with the rest of the initialization
     initializeApp();
 });
-
-async function initializeUser(): Promise<void> {
-    currentUser = await Auth.initializeAuth();
-    if (currentUser)
-        isLoggedIn = true;
-}
 
 function initializeApp(): void {
     // Get main view containers
@@ -133,15 +128,15 @@ function initializeApp(): void {
 
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash;
-        console.log(`Hash changed to: ${hash}`);
+        // console.log(`Hash changed to: ${hash}`);
         
     if (isLoggedIn) {
-        // Handle case where hash is exactly '#'
-        if (hash === '#') {
-            router.navigate('/');
-        } else {
-            router.handleRouteChange();
-        }
+        // // Handle case where hash is exactly '#'
+        // if (hash === '#') {
+        //     router.navigate('/');
+        // } else {
+        //     // router.handleRouteChange();
+        // }
         updateSidebarLinks(window.location.hash);
     } else if (hash === '#/register' && loginFormContainer) {
         handleRegisterView();
@@ -364,11 +359,11 @@ function showAboutModal(): void {
 
 function setupEventListeners(): void {
     // Logout Button
-    logoutButton?.addEventListener('click', (event) => {
+    logoutButton?.addEventListener('click', async (event) => {
         event.preventDefault();
         isLoggedIn = false;
         currentUser = null;
-        Auth.logout();
+        await Auth.logout();
         updateUI();
 
         NotificationManager.show({
@@ -378,9 +373,9 @@ function setupEventListeners(): void {
             duration: 3000
         });
 
-        window.location.reload();
-        //or?
+        // window.location.reload();
         window.location.hash = '#';
+        router.reload();
     });
 }
 

@@ -17,7 +17,7 @@ export class LoginView {
         this.element = document.createElement('div');
         this.element.classList.add('login-view');
         this.element.innerHTML = `
-            <form id="login-form" class="auth-form">
+            <form id="login-form" class="auth-form" onsubmit="return false;" method="post">
                 <div class="form-group">
                     <label for="login-username">Username</label>
                     <input type="text" id="login-username" name="username" required>
@@ -65,16 +65,16 @@ export class LoginView {
         const googleButton = this.element.querySelector('.social-button.google');
         googleButton?.addEventListener('click', async () => {
             console.log('Google login button clicked');
-            try {
-                await Auth.socialLogin('google');
-            } catch (error) {
+            // try {
+            //     await Auth.socialLogin('google');
+            // } catch (error) {
                 NotificationManager.show({
                     title: 'Google Login',
                     message: 'Google login is not implemented yet.',
                     type: 'info',
                     duration: 3000
                 });
-            }
+            // }
         });
     }
     
