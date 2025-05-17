@@ -29,7 +29,7 @@ export class GameView {
             </div>
             <div id="game-container">
                 <div id="board1" class="game-board" style="display: none;"></div>
-                <div id="board2" class="game-board" style="display: none; margin-top: 20px;"></div>
+                <div id="board2" class="game-board" style="display: none;"></div>
             </div>
         `;
     

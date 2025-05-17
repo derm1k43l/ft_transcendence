@@ -57,8 +57,6 @@ export class PongGame {
     private rightPowerActive: boolean = false;
     private paddleSpeed: number = PADDLE_SPEED;
 
-
-    // --------------------------------------------------------------------------
     private gameSettings: { ball_color: string; paddle_color: string; score_color: string; board_color: string } | undefined;
     private onGameEnd: ((score: { leftScore: number; rightScore: number }) => void) | null = null;
 

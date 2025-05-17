@@ -388,6 +388,8 @@ body {
 .main-content {
     flex-grow: 1;
     padding: 2rem;
+    padding-top: 0;
+    padding-bottom: 0;
     overflow-y: auto; 
     max-width: var(--max-content-width);
     margin: 0 auto;
