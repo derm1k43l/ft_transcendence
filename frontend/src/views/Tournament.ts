@@ -30,7 +30,10 @@ export class TournamentView {
 			<div class="tournament-container">
 			    <div class="tournament-content">
 
-					<div id="header-info" class="center-content">Create a tournament - Choose how many players you want to play with</div>
+					<div id="header-info" class="center-content">
+						Create a tournament<br>
+						Choose how many players you want to play with
+					</div>
 					<div class="create-tournament">
 					    <div id="tournament-create-buttons" class="tournament-buttons">
 					        <button type="button" tournament-size="4">4</button>
@@ -56,8 +59,7 @@ export class TournamentView {
 
 		// show creation form or bracket
 		const tournaments = await getAllTournaments();
-		const buttonContainer = this.element?.querySelector('#tournament-create-buttons') as HTMLElement;
-		if (!buttonContainer) return ;
+		const buttonContainer = this.element?.querySelector<HTMLElement>('#tournament-create-buttons')!;
 		
 		if (tournaments.length === 0) {
 			buttonContainer.style.display = 'flex';
@@ -97,6 +99,7 @@ export class TournamentView {
 
 		const inputFields = this.element.querySelectorAll<HTMLInputElement>('.input-wrapper input');
 		let playerNames: string[] = [];
+
 		for (const input of inputFields) {
 			const name = input.value.trim();
 
@@ -124,6 +127,8 @@ export class TournamentView {
 		if (!playerNames || playerNames.length === 0)
 			return ;
 
+		const createButtons = this.element?.querySelector<HTMLElement>('#tournament-create-buttons')!;
+		createButtons.remove();
 		userInputDiv.remove();
 		const shuffledNames = this.shuffleArray(playerNames);
 
@@ -146,7 +151,7 @@ export class TournamentView {
 	}
 
 	private addInputFields(size: number): void {
-		const userInput = this.element?.querySelector('#userinput-container');
+		const userInput = this.element?.querySelector<HTMLElement>('#userinput-container')!;
 		if (!userInput) return ;
 
 		userInput.innerHTML = ''; // Clear previous
@@ -199,23 +204,30 @@ export class TournamentView {
 		return [];
 	}
 
-	private async startGameButton(): Promise<void> {
+	private async startGameButton(index: number): Promise<void> {
 		if (!this.tournament) return ;
 
 		const gameContainer = document.getElementById('game-container') as HTMLElement;
 		const pageContainer = document.getElementById('tournament-view') as HTMLElement;
 		pageContainer.style.display = 'none';
 
-		this.game = new PongGame(gameContainer, (score) => {
+		this.game = new PongGame(gameContainer, async (score) => {
 			if (!this.tournament) return ;
 
 			console.log("Game ended with score:", score);
 
-			const scoreString = `${score.leftScore}-${score.rightScore}`;
-			this.tournament.matches[0].score = scoreString;
-			this.tournament.matches[0].status = 'finished';
+			// use result to set tournament values
+			this.tournament.matches[index].status = 'finished';
 
-			updateTournament(this.tournament.id, this.tournament);
+			const scoreString = `${score.leftScore}-${score.rightScore}`;
+			this.tournament.matches[index].score = scoreString;
+
+			if (score.leftScore > score.rightScore)
+				this.tournament.matches[index].winner_name = this.tournament.matches[index].player1_name;
+			else
+				this.tournament.matches[index].winner_name = this.tournament.matches[index].player2_name;
+
+			await updateTournament(this.tournament.id, this.tournament);
 			pageContainer.style.display = 'block';
 			this.tournament = null;
 			this.router.reload();
@@ -226,7 +238,7 @@ export class TournamentView {
 	private async deleteTournamentButton(): Promise<void> {
 		if (!this.tournament) return ;
 		
-		deleteTournament(this.tournament.id);
+		await deleteTournament(this.tournament.id);
 		this.tournament = null;
 		this.router.reload();
 	}
@@ -276,18 +288,39 @@ export class TournamentView {
 	}
 
 	private createManageButtons(): void {
-		const manageButtonsContainer = this.element?.querySelector('#tournament-manage-buttons');
-		if (!manageButtonsContainer) return ;
+		if (!this.tournament) return ;
 
-		const collectButton = document.createElement('button');
-		collectButton.type = 'button';
-		collectButton.id = 'startMatchButton';
-		collectButton.className = 'tournament-button';
-		collectButton.textContent = 'Start Match'; //maybe show whos playing
-		collectButton.addEventListener('click', () => {
-			this.startGameButton();
+		const manageButtonsContainer = this.element?.querySelector<HTMLElement>('#tournament-manage-buttons')!;
+
+		const i = this.tournament.matches.findIndex(match => match.status === "pending");
+		if (i === -1) {
+			const contentHeader = this.element?.querySelector<HTMLElement>('#header-info')!;
+			contentHeader.textContent = `Tournament Winner is: ${this.tournament.matches[this.tournament.matches.length - 1].winner_name}`;
+
+			const finishButton = document.createElement('button');
+			finishButton.type = 'button';
+			finishButton.id = 'finishButton';
+			finishButton.className = 'tournament-button';
+			finishButton.textContent = 'Finish';
+			finishButton.addEventListener('click', () => {
+				this.deleteTournamentButton();
+			});
+			manageButtonsContainer.appendChild(finishButton);
+			return ;
+		}
+
+		const contentHeader = this.element?.querySelector<HTMLElement>('#header-info')!;
+		contentHeader.textContent = `Next Match: | ${this.tournament.matches[i].player1_name} vs ${this.tournament.matches[i].player2_name} |`;
+
+		const startButton = document.createElement('button');
+		startButton.type = 'button';
+		startButton.id = 'startMatchButton';
+		startButton.className = 'tournament-button';
+		startButton.textContent = 'Start Match';
+		startButton.addEventListener('click', () => {
+			this.startGameButton(i);
 		});
-		manageButtonsContainer.appendChild(collectButton);
+		manageButtonsContainer.appendChild(startButton);
 
 		const deleteButton = document.createElement('button');
 		deleteButton.type = 'button';
@@ -303,9 +336,7 @@ export class TournamentView {
 	private buildTournament(): void {
 		if (!this.tournament) return ;
 
-		const bracketContainer = this.element?.querySelector('#tournament-bracket');
-		if (!bracketContainer) return ;
-
+		const bracketContainer = this.element?.querySelector<HTMLElement>('#tournament-bracket')!;
 		console.log(this.tournament);
 		bracketContainer.innerHTML = ''; // Clear previous
 
@@ -326,10 +357,6 @@ export class TournamentView {
 
 		this.createMatches(rounds);
 		console.log(`Generated a ${this.tournament.player_amount}-player tournament with id: ${this.tournament.id}.`);
-
-		// create play button
-		const mButtonsContainer = this.element?.querySelector('#tournament-manage-buttons');
-		if (!mButtonsContainer) return ;
 
 		this.createManageButtons();
 	}
