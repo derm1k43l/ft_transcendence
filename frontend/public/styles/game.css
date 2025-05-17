@@ -118,6 +118,14 @@
     z-index: 2;
 }
 
+.powerup {
+  border: solid;
+  height: 70px;
+  width: 70px;
+  font-size: 65px;
+  margin-top: 12px;
+}
+
 .score {
     width: 950px;
     font-size: 45px;

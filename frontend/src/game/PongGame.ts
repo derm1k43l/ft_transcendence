@@ -12,6 +12,9 @@ const PADDLE_HEIGHT = 95;
 const HALF_PADDLE = PADDLE_HEIGHT / 2;
 const BOARD_WIDTH = 950;
 const BOARD_HEIGHT = 590;
+const POWERUP_FACTOR_X = 2.2;
+const POWERUP_FACTOR_Y = 1.3;
+const POWERUP_FACTOR_PADDLE = 1.55;
 
 export class PongGame {
     // DOM elements used in the game
@@ -22,6 +25,8 @@ export class PongGame {
     private scoreDisplay: HTMLElement;
     private leftScoreElement: HTMLElement;
     private rightScoreElement: HTMLElement;
+    private leftPowerup: HTMLElement;
+    private rightPowerup: HTMLElement;
 
     // Ball position and speed
     private ballX = CENTER_X;
@@ -45,6 +50,15 @@ export class PongGame {
     private player1Name: string = 'Player1';
     private player2Name: string = 'Player2';
 
+    private powerup: boolean = true;
+    private leftPowerAvailable: boolean = false;
+    private rightPowerAvailable: boolean = false;
+    private leftPowerActive: boolean = false;
+    private rightPowerActive: boolean = false;
+    private paddleSpeed: number = PADDLE_SPEED;
+
+
+    // --------------------------------------------------------------------------
     private gameSettings: { ball_color: string; paddle_color: string; score_color: string; board_color: string } | undefined;
     private onGameEnd: ((score: { leftScore: number; rightScore: number }) => void) | null = null;
 
@@ -53,6 +67,10 @@ export class PongGame {
 
     constructor(container: HTMLElement, onGameEnd?: (score: { leftScore: number; rightScore: number }) => void) {
         this.container = container;
+        if (this.powerup === true) {
+            this.leftPowerAvailable = true;
+            this.rightPowerAvailable = true;
+        }
         if (onGameEnd)
             this.onGameEnd = onGameEnd;
         this.container.innerHTML = this.getTemplate();
@@ -64,6 +82,8 @@ export class PongGame {
         this.scoreDisplay = this.container.querySelector('.score')!;
         this.leftScoreElement = this.container.querySelector('#leftScore')!;
         this.rightScoreElement = this.container.querySelector('#rightScore')!;
+        this.leftPowerup = this.container.querySelector('.powerup__left')!;
+        this.rightPowerup = this.container.querySelector('.powerup__right')!;
         const gameContainer = this.container.querySelector('.game__container') as HTMLElement;
         
         // Apply settings from gameSettings
@@ -76,6 +96,7 @@ export class PongGame {
                 this.paddleRight.style.backgroundColor = settings.paddle_color;
                 this.leftScoreElement.style.color = settings.score_color;
                 this.rightScoreElement.style.color = settings.score_color;
+                // this.powerup = settings.powerup;
                 gameContainer.style.backgroundColor = settings.board_color;
             }
         }).catch(error => {
@@ -115,7 +136,18 @@ export class PongGame {
         this.aiTargetY = predictedY;
     
         console.log('AI sees ball at:', observedBallX, observedBallY, '-> predicting Y:', predictedY);
-    }    
+
+        // Powerup
+        if (this.powerup) {
+            const chance = (Math.abs(this.ballSpeedX) + Math.abs(this.ballSpeedY))/20000;
+            // console.log('chance: ', chance);
+            if (this.rightPowerAvailable === true && Math.random() < chance) { // some chance to use powerup each second random relative to ball speed
+                this.keyState['ArrowLeft'] = true;
+            } else {
+                this.keyState['ArrowLeft'] = false;
+            }
+        }
+    }
 
     // Start the game loop and optionally enable single-player mode
     start(nrPlayers = 1, player1Name?: string, player2Name?: string) {
@@ -179,6 +211,13 @@ export class PongGame {
             // increase ball speed after each paddle collision, slightly changing angle by random
             this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
+            // powerup
+            if (this.leftPowerActive === true) {
+                this.ballSpeedX *= POWERUP_FACTOR_X;
+                this.ballSpeedY *= POWERUP_FACTOR_Y;
+                this.paddleSpeed *= POWERUP_FACTOR_PADDLE;
+                this.leftPowerActive = false;
+            }
         }
         if (this.ballX >= BOARD_WIDTH - 26 && 
             this.ballY >= this.rightPaddleY - HALF_PADDLE - 9 &&
@@ -190,6 +229,13 @@ export class PongGame {
             // increase ball speed after each paddle collision, slightly changing angle by random
             this.ballSpeedX += Math.sign(this.ballSpeedX) * (BASE_SPEED / 4 * Math.random());
             this.ballSpeedY += Math.sign(this.ballSpeedY) * (BASE_SPEED / 4 * Math.random());
+            // powerup
+            if (this.rightPowerActive === true) {
+                this.ballSpeedX *= POWERUP_FACTOR_X;
+                this.ballSpeedY *= POWERUP_FACTOR_Y;
+                this.paddleSpeed *= POWERUP_FACTOR_PADDLE;
+                this.rightPowerActive = false;
+            }
         }
 
         // Player scores
@@ -223,12 +269,16 @@ export class PongGame {
         }
 
         // Paddle movement
-        const paddleSpeed = PADDLE_SPEED * deltaTime;
+        const paddleSpeed = this.paddleSpeed * deltaTime;
         if (this.keyState['w']) 
             this.leftPaddleY = Math.max(this.leftPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
         if (this.keyState['s']) 
             this.leftPaddleY = Math.min(this.leftPaddleY + paddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
-        if (this.nrPlayers == 1) {
+        if (this.keyState['d'] && this.leftPowerAvailable === true) {
+            this.leftPowerActive = true;
+            this.leftPowerAvailable = false;
+        }
+        if (this.nrPlayers == 1) { // AI game
             if (this.rightPaddleY < this.aiTargetY - 5) {
                 this.keyState['ArrowDown'] = true;
                 this.keyState['ArrowUp'] = false;
@@ -240,17 +290,25 @@ export class PongGame {
                 this.keyState['ArrowDown'] = false;
             }
             
-            // MOVE PADDLE BASED ON KEY STATE (AI paddle is a bit slower (*0.7) to give a chance
-            const aiPaddleSpeed = PADDLE_SPEED * 0.7 * deltaTime;
+            // MOVE PADDLE BASED ON KEY STATE (AI paddle is a bit slower (*0.7) to give a chance when playing without poweups)
+            const aiPaddleSpeed = this.paddleSpeed * deltaTime * (this.powerup ? 1 : 0.7);
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - aiPaddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
                 this.rightPaddleY = Math.min(this.rightPaddleY + aiPaddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
-        } else if (this.nrPlayers >= 2) {
+            if (this.keyState['ArrowLeft'] && this.rightPowerAvailable === true) {
+                this.rightPowerActive = true;
+                this.rightPowerAvailable = false;
+            }
+        } else if (this.nrPlayers >= 2) { // 2 Player game
             if (this.keyState['ArrowUp']) 
                 this.rightPaddleY = Math.max(this.rightPaddleY - paddleSpeed,            0 + HALF_PADDLE + 5);
             if (this.keyState['ArrowDown']) 
                 this.rightPaddleY = Math.min(this.rightPaddleY + paddleSpeed, BOARD_HEIGHT - HALF_PADDLE - 5);
+            if (this.keyState['ArrowLeft'] && this.rightPowerAvailable === true) {
+                this.rightPowerActive = true;
+                this.rightPowerAvailable = false;
+            }
         }        
         // Update visual positions
         this.updateUI();
@@ -263,6 +321,16 @@ export class PongGame {
         this.ballSpeedX *= -1;
         this.ballSpeedX = this.ballSpeedX < 0 ? -BASE_SPEED : BASE_SPEED;
         this.ballSpeedY = BASE_SPEED * Math.random() * 2 - BASE_SPEED;
+        this.paddleSpeed = PADDLE_SPEED;
+        if (this.powerup) {
+            this.leftPowerAvailable = true;
+            this.rightPowerAvailable = true;
+            if (this.nrPlayers == 1) { // AI game
+                this.keyState['ArrowLeft'] = false;
+            }
+        }
+        this.leftPowerActive = false;
+        this.rightPowerActive = false;
     }
 
     // Update DOM elements to reflect current game state
@@ -273,6 +341,14 @@ export class PongGame {
         this.paddleRight.style.top = `${this.rightPaddleY}px`;
         this.leftScoreElement.textContent = `${this.leftScore}`;
         this.rightScoreElement.textContent = `${this.rightScore}`;
+        if (this.powerup) {
+            if (this.leftPowerActive) this.leftPowerup.style.color = '#7c0e0e';
+            else if (this.leftPowerAvailable) this.leftPowerup.style.color = '#d1bd51';
+            else this.leftPowerup.style.color = '#212121';
+            if (this.rightPowerActive) this.rightPowerup.style.color = '#7c0e0e';
+            else if (this.rightPowerAvailable) this.rightPowerup.style.color = '#d1bd51';
+            else this.rightPowerup.style.color = '#212121';
+        }
     }
 
     // Return the HTML layout for the game
@@ -291,6 +367,16 @@ export class PongGame {
             <div class="paddle paddle__left"></div>
             <div class="paddle paddle__right"></div>
             <div class="middle__line"></div>
+        </div>
+        <div class="score">
+            <div class="score">
+                <div class="score__left">
+                    <i class="fas fa-angles-right powerup powerup__left"></i>
+                </div>
+                <div class="score__right">
+                    <i class="fas fa-angles-left powerup powerup__right"></i>
+                </div>
+            </div>
         </div>
         `;
     }
