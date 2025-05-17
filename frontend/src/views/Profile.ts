@@ -45,10 +45,10 @@ export class ProfileView {
 
 
 
-            user.match_history = await setMatchHistory(user);
-            user.achievements = await setAchievements(user);
-            user.stats = await setUserStats(user);
-            if (!this.element) return;
+            // user.match_history = await setMatchHistory(user);
+            // user.achievements = await setAchievements(user);
+            // user.stats = await setUserStats(user);
+            if (!this.element || !user.stats) return;
 
             // Check if viewing own profile
             const isOwnProfile = this.profileUserId === this.currentUserId;

@@ -40,7 +40,7 @@ const getMatchHistoryItem = async (req, reply) => {
 // Controller for get Match History for a specific user (Requires AUTH)
 const getMatchHistoryForUser = async (req, reply) => {
 	// const authenticatedUserId = req.user.id;
-	// const targetId = parseInt(req.params.userId, 10);
+	const targetId = parseInt(req.params.userId, 10);
 
 	// AUTHORIZATION CHECK: Ensure the user ID in the URL matches the authenticated user ID
 	// if (authenticatedUserId !== targetId) {
@@ -49,7 +49,7 @@ const getMatchHistoryForUser = async (req, reply) => {
 	// }
 	try {
 		const db = req.server.betterSqlite3;
-		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE user_id = ? OR opponent_id = ?').all(req.user.id, req.user.id);
+		const history = db.prepare('SELECT id, user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status FROM match_history WHERE user_id = ? OR opponent_id = ?').all(targetId, targetId);
 		reply.code(200).send(history);
 	} catch (error) {
 		req.log.error(error);

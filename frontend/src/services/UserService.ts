@@ -31,7 +31,7 @@ import { getCurrentUser } from './auth.js';
 export async function getUserById(id: number): Promise<UserProfile | null> {
 	try {
 		const user = (await api.get(`/users/${id}`)).data as UserProfile;
-        completeUser(user);
+        await completeUser(user);
 		return user;
 	} catch (error: any) {
 		console.error(`Failed to fetch user with ID ${id}: `, error?.response?.data?.message || error);
@@ -43,7 +43,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 	try {
 		const users: UserProfile[] = (await api.get(`/users/`)).data as UserProfile[];
         for (const user of users)
-            completeUser(user);
+            await completeUser(user);
 		return users;
 	} catch (error: any) {
 		console.error(`Failed to fetch all users: `, error?.response?.data?.message || error);
@@ -313,7 +313,7 @@ export async function completeUser(user: UserProfile | null) {
     await setMatchHistory(user);
     await setAchievements(user);
     await setUserStats(user);
-    setRealStatus(user);
+    await setRealStatus(user);
 }
 
 export async function setMatchHistory(user: UserProfile): Promise<MatchRecord[]> {

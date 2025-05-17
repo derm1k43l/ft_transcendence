@@ -44,17 +44,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing application...');
 
     // Initialize user before proceeding
-    await initializeUser();
+    currentUser = await Auth.getCurrentUser();
 
     // Proceed with the rest of the initialization
     initializeApp();
 });
-
-async function initializeUser(): Promise<void> {
-    currentUser = await Auth.initializeAuth();
-    if (currentUser)
-        isLoggedIn = true;
-}
 
 function initializeApp(): void {
     // Get main view containers

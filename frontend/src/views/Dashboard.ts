@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { getAllUsers, setMatchHistory, setUserStats } from '../services/UserService.js';
+import { getAllUsers } from '../services/UserService.js';
 // import { user } from '../main.js';
 import { UserProfile } from '../types/index.js';
 import { getCurrentUser } from '../services/auth.js';
@@ -27,10 +27,8 @@ export class DashboardView {
             if (!user) { window.location.reload(); return; }
             if (!this.element) return;
             this.currentUserID = user.id;
-            user.match_history = await setMatchHistory(user);
-            user.stats = await setUserStats(user);
 
-            if (!this.element) return;
+            if (!this.element || !user.stats) return;
 
 
             this.element.innerHTML = `
