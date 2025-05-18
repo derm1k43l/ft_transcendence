@@ -729,6 +729,64 @@ const updatePassword = async (req, reply) => {
 	}
 };
 
+// Controller for POST /game-start (Set user status to 'ingame')
+const gameStart = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.id, 10);
+
+	// AUTHORIZATION CHECK: Ensure user is updating their own status
+	if (targetUserId !== authenticatedUserId) {
+		return reply.code(403).send({ message: 'Forbidden: You can only update your own status.' });
+	}
+
+	try {
+		const db = req.server.betterSqlite3;
+
+		// update to ingame
+		const result = db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('ingame', authenticatedUserId);
+
+		if (result.changes === 0) {
+			req.log.warn(`Game start status update attempted for user ${authenticatedUserId}, but no changes made.`);
+			return reply.code(200).send({ message: 'User status is already ingame or user not found.' });
+		}
+
+		req.log.info(`User ${authenticatedUserId} status set to ingame.`);
+		reply.code(200).send({ message: 'User status set to ingame.' });
+	} catch (error) {
+		req.log.error('Error setting user status to ingame:', error);
+		reply.code(500).send({ message: 'Failed to set user status to ingame.' });
+	}
+};
+
+// Controller for POST /game-end (Set user status back to 'online')
+const gameEnd = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	const targetUserId = parseInt(req.params.id, 10);
+
+	// AUTHORIZATION CHECK: Ensure user is updating their own status
+	if (targetUserId !== authenticatedUserId) {
+		return reply.code(403).send({ message: 'Forbidden: You can only update your own status.' });
+	}
+
+	try {
+		const db = req.server.betterSqlite3;
+
+		// Update user status back to 'online'
+		const result = db.prepare('UPDATE users SET status = ?, last_active = CURRENT_TIMESTAMP WHERE id = ?').run('online', authenticatedUserId);
+
+		if (result.changes === 0) {
+			req.log.warn(`Game end status update attempted for user ${authenticatedUserId}, but no changes made.`);
+			return reply.code(200).send({ message: 'User status is already online or user not found.' });
+		}
+
+		req.log.info(`User ${authenticatedUserId} status set to online.`);
+		reply.code(200).send({ message: 'User status set to online.' });
+	} catch (error) {
+		req.log.error('Error setting user status to online:', error);
+		reply.code(500).send({ message: 'Failed to set user status to online.' });
+	}
+};
+
 module.exports = {
 	getUsers,
 	getCurrentUser,
@@ -744,5 +802,7 @@ module.exports = {
 	logoutUser,
 	uploadAvatar,
 	uploadCover,
-	updatePassword
+	updatePassword,
+	gameStart,
+	gameEnd
 };

@@ -124,6 +124,7 @@ export class RegisterView {
         const display_name = displayNameInput.value.trim() || username;
         const password = passwordInput.value;
         const confirmPassword = confirmInput.value;
+        const avatar_url = 'https://placehold.co/80x80/1d1f21/ffffff?text=User';
         
         // Validation
         if (password !== confirmPassword) {
@@ -147,7 +148,8 @@ export class RegisterView {
                 username,
                 email,
                 password,
-                display_name
+                display_name,
+                avatar_url,
             });
 
             console.log("User registered:", newUser);

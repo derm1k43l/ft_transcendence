@@ -21,7 +21,7 @@ export let currentUser: UserProfile | null = null; // Store logged-in user detai
 let loginViewElement: HTMLElement | null;
 let appViewElement: HTMLElement | null;
 let appContentRoot: HTMLElement | null;
-let sidebarLinks: NodeListOf<HTMLAnchorElement>;
+let sidebarLinks: NodeListOf<HTMLAnchorElement> | null;
 let logoutButton: HTMLAnchorElement | null;
 let sidebarUsernameElement: HTMLElement | null;
 let sidebarAvatarElement: HTMLImageElement | null;
@@ -55,15 +55,7 @@ function initializeApp(): void {
     // Get main view containers
     loginViewElement = document.getElementById('login-view');
     appViewElement = document.getElementById('app-view');
-    appContentRoot = document.getElementById('app-content-root');
     loginFormContainer = document.querySelector('.login-form-container');
-
-    // Get sidebar elements
-    sidebar = document.querySelector('.sidebar');
-    sidebarLinks = document.querySelectorAll('.sidebar-nav a[data-view]');
-    logoutButton = document.getElementById('logout-button') as HTMLAnchorElement;
-    sidebarUsernameElement = document.querySelector('.sidebar .user-profile .username');
-    sidebarAvatarElement = document.querySelector('.sidebar .user-profile .avatar');
 
     // Get about elements
     aboutLink = document.getElementById('about-link');
@@ -71,14 +63,14 @@ function initializeApp(): void {
     aboutContent = document.getElementById('about-content');
     closeAboutButton = document.querySelector('.close-about');
 
-    if (!loginViewElement || !appViewElement || !appContentRoot || 
-        !logoutButton || !sidebarUsernameElement || !sidebarAvatarElement) {
+    if (!loginViewElement || !appViewElement) {
         console.error('Essential layout elements not found!');
         return;
     }
 
-    // Setup Router - Targets the app's content area
-    router = new Router(appContentRoot);
+    // Create a temporary div element to initialize the router
+    const tempElement = document.createElement('div');
+    router = new Router(tempElement);
 
     // --- Define Routes for the main app content area ---
     router.addRoute('/', DashboardView); // Default IS profile
@@ -94,13 +86,8 @@ function initializeApp(): void {
     router.addRoute('/tournament', TournamentView);
     router.addRoute('/settings', SettingsView);
 
-    // --- Setup Responsive UI Elements ---
-    setupResponsiveElements();
-
-    // --- Event Listeners ---
-    setupEventListeners();
+    // --- Setup About Modal ---
     setupAboutModal();
-    setupResponsiveNavigation();
     NotificationManager.initialize();
 
     // --- Initial UI State ---
@@ -125,24 +112,16 @@ function initializeApp(): void {
         updateSidebarLinks(window.location.hash);
     }
 
-
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash;
-        // console.log(`Hash changed to: ${hash}`);
         
-    if (isLoggedIn) {
-        // // Handle case where hash is exactly '#'
-        // if (hash === '#') {
-        //     router.navigate('/');
-        // } else {
-        //     // router.handleRouteChange();
-        // }
-        updateSidebarLinks(window.location.hash);
-    } else if (hash === '#/register' && loginFormContainer) {
-        handleRegisterView();
-    } else if ((hash === '' || hash === '#' || hash === '#/') && loginFormContainer) {
-        handleLoginView();
-    }
+        if (isLoggedIn) {
+            updateSidebarLinks(window.location.hash);
+        } else if (hash === '#/register' && loginFormContainer) {
+            handleRegisterView();
+        } else if ((hash === '' || hash === '#' || hash === '#/') && loginFormContainer) {
+            handleLoginView();
+        }
     });
 }
 
@@ -241,13 +220,13 @@ function updateResponsiveLayout(): void {
 }
 
 function setupResponsiveNavigation(): void {
-    if (!menuToggle || !sidebarOverlay) return;
+    if (!menuToggle || !sidebarOverlay || !sidebar) return;
     
     // Toggle sidebar when hamburger menu is clicked
     menuToggle.addEventListener('click', () => {
-        if (!menuToggle || !sidebarOverlay || !sidebar) return;
-
-        const isActive = sidebar?.classList.contains('active');
+        if (!sidebar || !sidebarOverlay || !menuToggle) return;
+        
+        const isActive = sidebar.classList.contains('active');
         
         // Toggle active class
         if (isActive) {
@@ -268,8 +247,8 @@ function setupResponsiveNavigation(): void {
     
     // Close sidebar when overlay is clicked
     sidebarOverlay.addEventListener('click', () => {
-        if (!menuToggle || !sidebarOverlay || !sidebar) return;
-
+        if (!sidebar || !sidebarOverlay || !menuToggle) return;
+        
         sidebar.classList.remove('active');
         sidebarOverlay.classList.remove('active');
         sidebar.style.transform = 'translateX(-100%)';
@@ -282,8 +261,8 @@ function setupResponsiveNavigation(): void {
     const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
     sidebarLinks.forEach(link => {
         link.addEventListener('click', () => {
-            if (!menuToggle || !sidebarOverlay || !sidebar) return;
-
+            if (!sidebar || !sidebarOverlay || !menuToggle) return;
+            
             if (window.innerWidth <= 992) {
                 sidebar.classList.remove('active');
                 sidebarOverlay.classList.remove('active');
@@ -296,7 +275,8 @@ function setupResponsiveNavigation(): void {
 
     // Close sidebar when escape key is pressed
     document.addEventListener('keydown', (e) => {
-        if (!menuToggle || !sidebarOverlay || !sidebar) return;
+        if (!sidebar || !sidebarOverlay || !menuToggle) return;
+        
         if (e.key === 'Escape' && sidebar.classList.contains('active')) {
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
@@ -305,7 +285,7 @@ function setupResponsiveNavigation(): void {
             sidebar.setAttribute('aria-hidden', 'true');
         }
     });
-    if (!menuToggle || !sidebarOverlay || !sidebar) return; // whY???????
+
     // Initialize ARIA attributes for accessibility
     sidebar.setAttribute('id', 'sidebar');
     sidebar.setAttribute('aria-hidden', window.innerWidth <= 992 ? 'true' : 'false');
@@ -373,7 +353,6 @@ function setupEventListeners(): void {
             duration: 3000
         });
 
-        // window.location.reload();
         window.location.hash = '#';
         router.reload();
     });
@@ -381,50 +360,57 @@ function setupEventListeners(): void {
 
 function updateUI(): void {
     if (isLoggedIn && currentUser) {
+        // Create app view if it hasn't been created yet
+        if (!appContentRoot) {
+            createAppView();
+        } else {
+            // Just update the profile info if view already exists
+            if (sidebarUsernameElement) {
+                sidebarUsernameElement.textContent = sanitizeInput(currentUser.display_name);
+            }
+            if (sidebarAvatarElement) {
+                sidebarAvatarElement.src = currentUser.avatar_url as string;
+                sidebarAvatarElement.alt = `${sanitizeInput(currentUser.display_name)}'s avatar`;
+            }
+        }
+        
         loginViewElement?.classList.remove('active');
         appViewElement?.classList.add('active');
-
-        // Update sidebar profile info
-        if (sidebarUsernameElement) {
-            sidebarUsernameElement.textContent = currentUser.display_name;
-        }
-        if (sidebarAvatarElement && currentUser.avatar_url) {
-            sidebarAvatarElement.src = currentUser.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'; // Default avatar
-            sidebarAvatarElement.alt = `${currentUser.display_name}'s avatar`;
-        }
 
         // Apply responsive layout
         updateResponsiveLayout();
         if (!window.location.hash || window.location.hash === '#/') {
             router.navigate('/');
         }
-
     } else {
         loginViewElement?.classList.add('active');
-        appViewElement?.classList.remove('active');
+        if (appViewElement) {
+            appViewElement.classList.remove('active');
+            // Clear app content when logged out
+            appViewElement.innerHTML = '';
+        }
+        
         if (window.location.hash && window.location.hash !== '#/') {
             if (window.location.hash !== '#/register') {
                 history.pushState("", document.title, window.location.pathname + window.location.search);
             }
         }
-        if (appContentRoot) appContentRoot.innerHTML = '';
-        if (sidebarUsernameElement) sidebarUsernameElement.textContent = 'User Name';
-        if (sidebarAvatarElement) sidebarAvatarElement.src = 'https://placehold.co/80x80/1d1f21/ffffff?text=User';
         
-        // Hide hamburger menu and sidebar when logged out
-        if (menuToggle) {
-            menuToggle.style.display = 'none';
-        }
-        if (sidebar) {
-            sidebar.classList.remove('active');
-        }
-        if (sidebarOverlay) {
-            sidebarOverlay.classList.remove('active');
-        }
+        // Reset references
+        appContentRoot = null;
+        sidebar = null;
+        sidebarLinks = null as any;
+        logoutButton = null;
+        sidebarUsernameElement = null;
+        sidebarAvatarElement = null;
+        menuToggle = null;
+        sidebarOverlay = null;
     }
 }
 
 function updateSidebarLinks(currentHash: string): void {
+    if (!sidebarLinks) return;
+    
     sidebarLinks.forEach(link => {
         const href = link.getAttribute('href');
         
@@ -440,4 +426,85 @@ function updateSidebarLinks(currentHash: string): void {
             link.classList.remove('active');
         }
     });
+}
+
+// Add this function to your main.ts
+function createAppView(): void {
+  if (!appViewElement || !currentUser) return;
+  
+  // Clear any existing content
+  appViewElement.innerHTML = '';
+  
+  const appHTML = `
+      <div class="app-layout-container">
+          <div class="app-layout">
+              <aside class="sidebar">
+                  <div class="user-profile">
+                    <img src="${currentUser.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'}" 
+                           alt="${sanitizeInput(currentUser.display_name)}'s avatar" 
+                           class="avatar">
+                      <span class="username">${sanitizeInput(currentUser.display_name)}</span>
+                  </div>
+                  <nav class="sidebar-nav">
+                      <ul>
+                          <li><a href="#/" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                          <li><a href="#/profile" data-view="profile"><i class="fas fa-user"></i> Profile</a></li>
+                          <li><a href="#/chat" data-view="chat"><i class="fas fa-comments"></i> Chat</a></li>
+                          <li><a href="#/friends" data-view="friends"><i class="fas fa-user-friends"></i> Friends</a></li>
+                          <li><a href="#/game" data-view="game"><i class="fas fa-gamepad"></i> Game</a></li>
+                          <li><a href="#/tournament" data-view="tournament"><i class="fas fa-trophy"></i> Tournament</a></li>
+                          <li><a href="#/settings" data-view="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                          <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                      </ul>
+                  </nav>
+              </aside>
+              <main class="main-content" id="app-content-root"> 
+                  <!-- Dynamic content will go here -->
+              </main>
+          </div>
+      </div>
+      <button class="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">
+          <i class="fas fa-bars"></i>
+      </button>
+      <div class="sidebar-overlay"></div>
+  `;
+  
+  // Set the HTML
+  appViewElement.innerHTML = appHTML;
+  
+  // Update references to DOM elements
+  appContentRoot = document.getElementById('app-content-root');
+  sidebar = document.querySelector('.sidebar');
+  sidebarLinks = document.querySelectorAll('.sidebar-nav a[data-view]');
+  logoutButton = document.getElementById('logout-button') as HTMLAnchorElement;
+  sidebarUsernameElement = document.querySelector('.sidebar .user-profile .username');
+  sidebarAvatarElement = document.querySelector('.sidebar .user-profile .avatar');
+  menuToggle = document.querySelector('.menu-toggle');
+  sidebarOverlay = document.querySelector('.sidebar-overlay');
+  
+  // Setup now that elements are available
+  setupEventListeners();
+  setupResponsiveNavigation();
+  setupResponsiveElements();
+  
+  // Set router target now that appContentRoot exists
+  setupRouterTarget();
+}
+
+// Function to set the router target once appContentRoot exists
+function setupRouterTarget(): void {
+  if (appContentRoot) {
+    router.setTarget(appContentRoot);
+  }
+}
+
+// XSS simple sanitizer 
+function sanitizeInput(input: string): string {
+    if (!input) return '';
+    return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }

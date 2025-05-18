@@ -143,6 +143,7 @@ fastify.after((err) => {
 			paddle_color TEXT DEFAULT '#FFFFFF',
 			ball_color TEXT DEFAULT '#FFFFFF',
 			score_color TEXT DEFAULT '#FFFFFF',
+			powerup INTEGER DEFAULT 0,
 			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 			);
 

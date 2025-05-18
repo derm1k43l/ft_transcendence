@@ -11,7 +11,7 @@ const getUserGameSettings = async (req, reply) => {
 
 	try {
 		const db = req.server.betterSqlite3;
-		const settings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(authenticatedUserId);
+		const settings = db.prepare('SELECT user_id, board_color, paddle_color, ball_color, score_color, powerup FROM game_settings WHERE user_id = ?').get(authenticatedUserId);
 
 		if (!settings) {
 			reply.code(404).send({ message: 'Game settings not found' });
@@ -54,7 +54,7 @@ const updateGameSettings = async (req, reply) => {
 
 		let query = 'UPDATE game_settings SET';
 		const params = [];
-		const allowedFields = [ 'board_color', 'paddle_color', 'ball_color', 'score_color'];
+		const allowedFields = ['board_color', 'paddle_color', 'ball_color', 'score_color', 'powerup'];
 		let firstField = true;
 
 		allowedFields.forEach(field => {
@@ -81,7 +81,7 @@ const updateGameSettings = async (req, reply) => {
 		if (result.changes === 0) {
 			reply.code(200).send({ message: 'No changes made to game settings' });
 		} else {
-			const updatedSettings = db.prepare('SELECT * FROM game_settings WHERE user_id = ?').get(authenticatedUserId);
+			const updatedSettings = db.prepare('SELECT user_id, board_color, paddle_color, ball_color, score_color, powerup FROM game_settings WHERE user_id = ?').get(authenticatedUserId);
 			reply.code(200).send(updatedSettings);
 		}
 	} catch (error) {

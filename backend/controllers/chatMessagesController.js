@@ -105,6 +105,16 @@ const addChatMessage = async (req, reply) => {
 			return;
 		}
 
+		// Friendship check
+		const friendship = db.prepare(`
+			SELECT 1 FROM friends
+			WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)
+		`).get(authenticatedUserId, receiver_id, receiver_id, authenticatedUserId);
+
+		if (!friendship) {
+			return reply.code(403).send({ message: 'Forbidden: You can only send messages to friends.' });
+		}
+
 		try {
 			const result = db.prepare('INSERT INTO chat_messages (sender_id, receiver_id, content) VALUES (?, ?, ?)').run(authenticatedUserId, receiver_id, content);
 			const newMessageId = result.lastInsertRowid;

@@ -28,6 +28,7 @@ export async function register(userData: {
     password: string; 
     email: string;
     display_name?: string;
+    avatar_url: 'https://placehold.co/80x80/1d1f21/ffffff?text=User'; // all get same avatar! and we never check if it exist BECOUSE IT DOES!!!
 }): Promise<UserProfile> {
     try {
         const user = (await api.post('/users', userData)).data as UserProfile;
