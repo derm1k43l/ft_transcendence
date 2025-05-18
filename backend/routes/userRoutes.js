@@ -38,6 +38,26 @@ const normalizeEmail = async (req, reply) => {
 	}
 };
 
+const updateOnlineStatusPreHandler = async (req, reply) => {
+	const authenticatedUserId = req.user.id;
+	try {
+		const db = req.server.betterSqlite3;
+		const result = db.prepare(`
+			UPDATE users
+			SET status = 'online', last_active = CURRENT_TIMESTAMP
+			WHERE id = ? AND status != 'ingame'
+		`).run(authenticatedUserId);
+
+		if (result.changes > 0) {
+			req.log.debug(`User ${authenticatedUserId} status updated to online and last_active.`);
+		} else {
+			req.log.debug(`User ${authenticatedUserId} status not updated (already ingame or not found).`);
+		}
+	} catch (error) {
+		req.log.error('Error updating online status in pre-handler:', error);
+	}
+};
+
 // Options for get all Users (Public route - adjust if privacy needed)
 const getUsersOpts = {
 	schema: {
@@ -54,7 +74,7 @@ const getUsersOpts = {
 
 // Options for get current User (Requires AUTH)
 const getCurrentUserOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		response: {
 			200: User,
@@ -109,7 +129,7 @@ const getUserByNameOpts = {
 
 // Options for get User by Email (Requires AUTH + MATCHING ID CHECK in controller)
 const getUserByEmailOpts = {
-	preHandler: [authPreHandler, normalizeEmail],
+	preHandler: [authPreHandler, normalizeEmail, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -180,7 +200,7 @@ const postUserOpts = {
 
 // Options for update User (full update) (Requires AUTH + MATCHING ID CHECK)
 const updateUserOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -219,7 +239,7 @@ const updateUserOpts = {
 
 // Options for update User Profile (partial update) (Requires AUTH + MATCHING ID CHECK)
 const updateUserProfileOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -253,7 +273,7 @@ const updateUserProfileOpts = {
 
 // Options for delete User (Requires AUTH + MATCHING ID CHECK)
 const deleteUserOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -303,7 +323,7 @@ const logoutUserOpts = {
 
 // Options for upload Avatar (Requires AUTH + MATCHING USER ID CHECK)
 const uploadAvatarOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -335,7 +355,7 @@ const uploadAvatarOpts = {
 
 // Options for upload Cover Photo (Requires AUTH + MATCHING USER ID CHECK)
 const uploadCoverOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
@@ -367,7 +387,7 @@ const uploadCoverOpts = {
 
 // Options for update password (Requires AUTH + MATCHING ID CHECK)
 const updatePasswordOpts = {
-	preHandler: [authPreHandler],
+	preHandler: [authPreHandler, updateOnlineStatusPreHandler],
 	schema: {
 		params: {
 			type: 'object',
