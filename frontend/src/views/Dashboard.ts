@@ -255,7 +255,7 @@ private initializeCharts(user: UserProfile): void {
     const performanceChartCanvas = document.getElementById('performance-chart') as HTMLCanvasElement;
     if (performanceChartCanvas && user.match_history && user.match_history.length > 0) {
         // Process match history data
-        const matchData = [...user.match_history].reverse().slice(0, 40).reverse();
+        const matchData = [...user.match_history];
         const labels = matchData.map((_, index) => `${index + 1}`);
 
 
