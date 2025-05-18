@@ -13,7 +13,9 @@ const {
 	logoutUser,
 	uploadAvatar,
 	uploadCover,
-	updatePassword
+	updatePassword,
+	gameStart,
+	gameEnd
 } = require('../controllers/userController');
 
 const {
@@ -387,6 +389,52 @@ const updatePasswordOpts = {
 	handler: updatePassword,
 };
 
+// Options for game-start route (Requires AUTH + Matching ID in URL)
+const gameStartOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
+		},
+		response: {
+			200: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
+		}
+	},
+	handler: gameStart,
+};
+
+// Options for game-end route (Requires AUTH + Matching ID in URL)
+const gameEndOpts = {
+	preHandler: [authPreHandler],
+	schema: {
+		params: {
+			type: 'object',
+			properties: {
+				id: { type: 'integer' }
+			},
+			required: ['id']
+		},
+		response: {
+			200: BasicErrorSchema,
+			400: ValidationErrorSchema,
+			401: UnauthorizedErrorSchema,
+			403: ForbiddenErrorSchema,
+			404: BasicErrorSchema,
+			500: BasicErrorSchema
+		}
+	},
+	handler: gameEnd,
+};
+
 function userRoutes(fastify, options, done) {
 	// Get all Users (Public route by default)
 	fastify.get('/', getUsersOpts);
@@ -430,6 +478,11 @@ function userRoutes(fastify, options, done) {
 
 	// Upload Cover Photo - Requires AUTH + MATCHING USER ID CHECK
 	fastify.put('/:userId/cover', uploadCoverOpts);
+
+	// Game start -- requires AUTH
+	fastify.post('/:id/status/game-start', gameStartOpts);
+	// Game end -- requires AUTH
+	fastify.post('/:id/status/game-end', gameEndOpts);
 
 	done();
 }
