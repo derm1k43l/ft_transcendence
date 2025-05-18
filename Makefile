@@ -9,7 +9,7 @@ all: setup_env setup_ssl start_docker start_containers
 
 # Generate SSL certificates if they don't exist
 setup_ssl:
-	@if [ ! -f "certs/key.pem" ] || [ ! -f "certs/cert.pem" ]; then \
+	@if [ ! -f "certs/priv-key.pem" ] || [ ! -f "certs/certificate.pem" ]; then \
 		echo "Executing ssl script..."; \
 		./setup-ssl.sh; \
 	fi
