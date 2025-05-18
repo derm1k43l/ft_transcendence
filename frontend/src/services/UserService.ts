@@ -13,6 +13,8 @@ import {
     MatchRecord,
     Achievement,
     UserStats,
+	TournamentMatch,
+	Tournament
 } from '../types/index.js';
 
 import {
@@ -416,4 +418,56 @@ export function setRealStatus(user: UserProfile | null) {
 
     if (new Date(user.last_active) < timeout)
         user.status = 'offline';
+}
+
+// ===== Tournament =====
+
+export async function getAllTournaments(): Promise<Tournament[]> {
+    try {
+        const tournaments = (await api.get(`/tournament/`)).data as Tournament[];
+        return tournaments;
+    } catch (error: any) {
+        console.error(`Failed to get tournaments for user ID: `, error?.response?.data?.message || error);
+        return [];
+    }
+}
+
+export async function addTournament(tournamentInfos: {
+	id: number,
+	tournament_name: string,
+	creator_id: number,
+	player_amount: number,
+	status: 'pending' | 'running' | 'finished',
+	winner_name?: string | null,
+	players: string[],
+	matches: TournamentMatch[],
+}): Promise<Tournament | null> {
+    try {
+        const tournament = (await api.post(`/tournament/`, tournamentInfos)).data as Tournament;
+        return tournament;
+    } catch (error: any) {
+        console.error(`Failed to create tournament: `, error?.response?.data?.message || error);
+        return null;
+    }
+}
+
+export async function updateTournament(tournamentId: number, tournament: Tournament): Promise<boolean> {
+    try {
+        await api.put(`/tournament/${tournamentId}`, tournament);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to update tournament: ${tournamentId}`, error?.response?.data?.message || error);
+        return false;
+    }
+}
+
+export async function deleteTournament(tournamentId: number): Promise<boolean> {
+    try {
+        const response = (await api.delete(`/tournament/${tournamentId}`)).data as { message: string };
+        console.log(`${response.message} with id: ${tournamentId}`);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to delete tournament: ${tournamentId}`, error?.response?.data?.message || error);
+        return false;
+    }
 }

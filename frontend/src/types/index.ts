@@ -146,3 +146,25 @@ export interface NotificationOptions {
     duration?: number; // in milliseconds
     type?: 'info' | 'success' | 'warning' | 'error';
 }
+
+export interface TournamentMatch {
+
+	id: number;
+	round: number;
+	player1_name?: string | null;
+	player2_name?: string | null;
+	score?: string | null;
+	winner_name?: string | null;
+	status: 'pending' | 'running' | 'finished';
+};
+
+export interface Tournament {
+	id: number;
+	tournament_name: string;
+	creator_id: number;
+	player_amount: number;
+	status: 'pending' | 'running' | 'finished';
+	winner_name?: string | null;
+	players: string[];
+	matches: TournamentMatch[];
+}
