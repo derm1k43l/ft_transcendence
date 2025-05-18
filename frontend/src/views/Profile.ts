@@ -1,6 +1,6 @@
 import { Router } from '../core/router.js';
 import { Listener, addListener, removeListener, removeListeners } from '../services/listener.js';
-import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats, uploadAvatar, uploadCover } from '../services/UserService.js';
+import { getUserById, updateUserProfile, setAchievements, setMatchHistory, setUserStats, uploadAvatar, uploadCover, getFriendsList, getFriendStatus } from '../services/UserService.js';
 import { UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
@@ -52,6 +52,9 @@ export class ProfileView {
 
             // Check if viewing own profile
             const isOwnProfile = this.profileUserId === this.currentUserId;
+            const isFriend = await getFriendStatus(this.currentUserId, this.profileUserId);
+            console.log('own profile: ', isOwnProfile);
+            console.log('is friend: ', isFriend);
 
             this.element.innerHTML = `
             <div class="profile-view">
@@ -74,10 +77,12 @@ export class ProfileView {
                         ${isOwnProfile ? 
                             `<button class="app-button" id="profile-edit-btn">
                                 <i class="fas fa-edit"></i> Edit Profile
-                            </button>` : 
-                            `<button class="app-button" id="add-friend-btn">
-                                <i class="fas fa-user-plus"></i> Add Friend
-                            </button>`
+                            </button>` :
+                            `${isFriend?
+                                `` : `<button class="app-button" id="add-friend-btn">
+                                    <i class="fas fa-user-plus"></i> Add Friend
+                                </button>`
+                            }`
                         }
                     </div>
                 </div>

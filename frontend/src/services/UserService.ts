@@ -155,6 +155,16 @@ export async function getFriendsList(userId: number): Promise<Friend[]> {
     }
 }
 
+export async function getFriendStatus(userId1: number, userId2: number): Promise<boolean> {
+    try {
+        const response = await api.get(`/friends/users/${userId1}/${userId2}`);
+        return response.data.isFriend as boolean;
+    } catch (error: any) {
+        console.error(`Failed to get friend status between ${userId1} and ${userId1}`, error?.response?.data?.message || error);
+        return false;
+    }
+}
+
 export async function sendFriendRequest(fromUserId: number, toUserId: number): Promise<boolean> {
     try {
         await api.post('/friend-requests', {

@@ -363,3 +363,7 @@
     align-items: center;
     gap: 5px;
 }
+
+.friends-content, .friends-sidebar {
+    max-height: inherit;
+}

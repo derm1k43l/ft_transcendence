@@ -120,22 +120,22 @@ export class ChatView {
         for (const friend of friends) {
             const {lastMessage, unreadCount} = (await getLastMessageAndUnreadCount(this.currentUser.id, friend.friend_id));
             newHTML += `
-            <div class="chat-contact" data-id="${friend.friend_id}">
-            <div class="chat-contact-avatar">
-            <img src="${friend.friend_avatar_url}" alt="${friend.friend_display_name}">
-            <span class="chat-status ${friend.friend_status}"></span>
-            </div>
-            <div class="chat-contact-info">
-            <h4>${friend.friend_display_name}</h4>
-            <p class="chat-last-message">
-            ${lastMessage ? lastMessage.content.slice(0, 30) : 'No messages yet'}
-            </p>
-            </div>
-            <div class="chat-contact-meta">
-            <span class="chat-time">${lastMessage ? this.formatMessageTime(new Date(lastMessage.timestamp)) : ''}</span>
-            ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
-            </div>
-            </div>
+                <div class="chat-contact" data-id="${friend.friend_id}">
+                    <div class="chat-contact-avatar">
+                        <img src="${friend.friend_avatar_url}" alt="${friend.friend_display_name}">
+                        <span class="chat-status ${friend.friend_status}"></span>
+                    </div>
+                    <div class="chat-contact-info">
+                        <h4>${friend.friend_display_name}</h4>
+                        <p class="chat-last-message">
+                            ${lastMessage ? lastMessage.content.slice(0, 30) : 'No messages yet'}
+                        </p>
+                    </div>
+                    <div class="chat-contact-meta">
+                        <span class="chat-time">${lastMessage ? this.formatMessageTime(new Date(lastMessage.timestamp)) : ''}</span>
+                        ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
+                    </div>
+                </div>
             `;
         }
         contactsContainer.innerHTML = newHTML;

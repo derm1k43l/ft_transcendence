@@ -1,8 +1,9 @@
 
 /* ===== CHAT VIEW ===== */
 .chat-view {
-    max-width: 1200px;
-    min-width: 700px;
+  max-width: 1200px;
+  min-width: 760px;
+  width: 100%;
 }
 
 .chat-search {
