@@ -7,10 +7,16 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+      - "3443:3443" # HTTPS port
     volumes:
       - backend_data:/app/db
-    # networks:
-    #   - ft_transcendence_network
+      - ./certs:/app/certs
+      - ./.env:/app/.env
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./.env
+
   frontend:
     build:
       context: ./frontend
@@ -19,10 +25,13 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+      - "8443:8443" # HTTPS port
     volumes:
       - frontend_data:/app/public
-    # networks:
-    #   - ft_transcendence_network
+      - ./certs:/app/certs
+      - ./.env:/app/.env
+    env_file:
+      - ./.env
     depends_on:
       - backend
 
@@ -31,65 +40,3 @@ volumes:
     driver: local
   backend_data:
     driver: local
-
-# network doesn't work at this point because the api calls are made from the browser and not from the docker container.
-# we would have to run a proxy server that forwards api calls made in the browser through the frontend docker container to the backend docker container through the docker network.
-# or we keep the backend port exposed, which is bad practice and less secure.
-
-# networks:
-#   ft_transcendence_network:
-#     name: ft_transcendence_network
-#     driver: bridge
-
-
-
-
-
-# old version for reference and future merging
-
-# services:
-#   backend:
-#     build:
-#       context: ./backend
-#       dockerfile: Dockerfile
-#     container_name: ft_transcendence_backend
-#     restart: unless-stopped
-#     ports:
-#       - "3000:3000"
-#     volumes:
-#       - backend_data:/app/db
-#     networks:
-#       - ft_transcendence_network
-
-#   frontend:
-#     build:
-#       context: ./frontend
-#       dockerfile: Dockerfile
-#     container_name: ft_transcendence_frontend
-#     restart: unless-stopped
-#     ports:
-#       - "8080:80"
-#     volumes:
-#       - frontend_data:/app/public
-#     networks:
-#       - ft_transcendence_network
-#     depends_on:
-#       - backend
-
-# networks:
-#   ft_transcendence_network:
-#     driver: bridge
-
-# volumes:
-#   frontend_data:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: ${HOME}/data/frontend
-#       o: bind
-#   backend_data:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: ${HOME}/data/backend
-#       o: bind

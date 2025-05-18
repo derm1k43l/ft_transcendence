@@ -12,7 +12,7 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 - **Major**: Google Sign-in authentication
 
 ### Gameplay:
-- **Major**: Remote multiplayer functionality
+- **Major**: Multiplayer (more than 2 players in the same game).
 - **Minor**: Game customization options
 - **Major**: Live chat system
 
@@ -20,21 +20,17 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 - **Major**: AI opponent with strategic gameplay
 - **Minor**: User and game statistics dashboards
 
-### Cybersecurity:
-- **Major**: Two-Factor Authentication (2FA) and JWT implementation
-
 ### Accessibility:
 - **Minor**: Cross-device compatibility
 - **Minor**: Multi-browser support
 
+8,5 > 7
+
 ## Table of Contents
 - [Technologies](#technologies)
 - [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
+- [Project Structure](#getting-started)
 - [Configuration](#configuration)
-- [Development](#development)
-- [Security Features](#security-features)
 
 ## Technologies
 
@@ -74,12 +70,10 @@ Our chat implementation allows users to:
 ### User Experience
 - User registration and authentication
 - Google Sign-in integration
-- Two-factor authentication
 - Profile customization with avatars
 - Friend management system
 
 ### Gameplay
-- Real-time multiplayer Pong with latency compensation
 - AI opponents with varying difficulty levels
 - Tournament system with rankings
 - Game customization options
@@ -94,9 +88,7 @@ Our chat implementation allows users to:
 ### Security
 - JWT authentication
 - CSRF protection
-- Data privacy controls (GDPR compliant)
 - Input validation and sanitization
-- Secure  WebSockets
 
 ## Getting Started
 

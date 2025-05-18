@@ -5,7 +5,25 @@ NAME = ./docker-compose.yml
 export COMPOSE_HTTP_TIMEOUT=200
 
 # Default target
-all: start_docker start_containers
+all: setup_env setup_ssl start_docker start_containers
+
+# Generate SSL certificates if they don't exist
+setup_ssl:
+	@if [ ! -f "certs/key.pem" ] || [ ! -f "certs/cert.pem" ]; then \
+		echo "Executing ssl script..."; \
+		./setup-ssl.sh; \
+	fi
+
+# Make sure .env file exists
+setup_env:
+	@if [ ! -f ".env" ]; then \
+		echo "Creating .env file from .env.example..."; \
+		cp .env.example .env; \
+		echo "Generated random JWT secret..."; \
+		echo "JWT_SECRET=$$(openssl rand -hex 32)" >> .env; \
+		echo "Please update any other values in .env with your own credentials"; \
+	fi
+
 
 # make sure docker daemon is running
 start_docker:
@@ -87,4 +105,4 @@ logs_backend: start_docker
 logs_database: start_docker
 	@docker-compose -f $(NAME) logs database
 
-.PHONY: all start_docker docker_goinfre start_containers frontend_dev backend_dev down fclean re ps db logs_frontend logs_backend logs_database
+.PHONY: all setup_env setup_ssl start_docker docker_goinfre start_containers frontend_dev backend_dev down fclean re ps db logs_frontend logs_backend logs_database

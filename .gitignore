@@ -44,3 +44,6 @@ coverage/
 
 # .json package
 package-lock.json
+
+# ssl 
+/certs/

@@ -160,10 +160,13 @@ export class RegisterView {
                 title: 'Registration Successful',
                 message: 'Your account has been created. You can login.',
                 type: 'success',
-                duration: 5000
+                duration: 4000
             });
-            
-            window.location.hash = '#/';
+
+            setTimeout(function() {
+                window.location.hash = '#/';
+            }, 4000);
+
         } catch(error: any) {
             if (errorElement) {
                 errorElement.textContent = error;

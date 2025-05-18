@@ -499,12 +499,13 @@ function setupRouterTarget(): void {
 }
 
 // XSS simple sanitizer 
-function sanitizeInput(input: string): string {
+function sanitizeInput(input: string | null | undefined): string {
     if (!input) return '';
     return input
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/'/g, '&#039;')
+        .trim();
 }

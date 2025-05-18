@@ -1,19 +1,21 @@
-# Use Nginx to serve static files
+# Use Node base image
 FROM node:18
 
-COPY package*.json ./
+WORKDIR /app
 
+# Install dependencies
+COPY package*.json ./
 RUN npm install
 
-#.dockerignore excludes node_modules from being copied (they will be built inside the container)
+# Copy app source
 COPY . .
 
-# RUN npm run build
-
-# Expose port 80
-EXPOSE 8080
-
+# Build the application
 RUN npm run build
+
+# Expose ports for HTTP and HTTPS
+EXPOSE 8080
+EXPOSE 8443
 
 # Start the server
 CMD ["npm", "run", "serve:local"]
