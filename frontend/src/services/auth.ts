@@ -27,12 +27,12 @@ export async function register(userData: {
     username: string; 
     password: string; 
     email: string;
-    display_name?: string;
-    avatar_url: 'https://placehold.co/80x80/1d1f21/ffffff?text=User'; // all get same avatar! and we never check if it exist BECOUSE IT DOES!!!
+    display_name: string;
+    avatar_url: string;
+    cover_photo_url: string;
 }): Promise<UserProfile> {
     try {
         const user = (await api.post('/users', userData)).data as UserProfile;
-        completeUser(user);
         return user;
     } catch (error: any) {
         console.error('Error registering user:', error.response?.data?.message || error);

@@ -181,10 +181,10 @@ const postUserOpts = {
 				username: { type: 'string', minLength: 1 },
 				password: { type: 'string', minLength: 4 },
 				display_name: { type: 'string', minLength: 1 },
-				email: { type: 'string', format: 'email', nullable: true },
+				email: { type: 'string', format: 'email' },
 				bio: { type: 'string', nullable: true },
-				// avatar_url: { type: 'string', nullable: true }, //check these if they are required
-				// cover_photo_url: { type: 'string', nullable: true }
+				avatar_url: { type: 'string' },
+				cover_photo_url: { type: 'string' }
 			},
 			additionalProperties: false
 		},

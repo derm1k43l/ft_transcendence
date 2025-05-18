@@ -189,8 +189,8 @@ const addUser = async (req, reply) => {
 			display_name,
 			email,
 			bio,
-			// avatar_url,
-			// cover_photo_url
+			avatar_url,
+			cover_photo_url
 		} = req.body;
 
 		const db = req.server.betterSqlite3;
@@ -200,17 +200,17 @@ const addUser = async (req, reply) => {
 		const newUserResponse = db.transaction(() => {
 			const userResult = db.prepare(`
 			INSERT INTO users (
-				username, password, display_name, email, bio,
+				username, password, display_name, email, bio, avatar_url, cover_photo_url,
 				join_date, created_at
-			) VALUES (?, ?, ?, ?, ?, ?, ?)
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 			`).run(
 				username,
 				paswordHash,
 				display_name,
-				email || null,
+				email,
 				bio || null,
-				// avatar_url || null,
-				// cover_photo_url || null,
+				avatar_url,
+				cover_photo_url,
 				new Date().toISOString(),
 				new Date().toISOString()
 			);
