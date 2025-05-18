@@ -36,8 +36,8 @@ export class TournamentView {
 					</div>
 					<div class="create-tournament">
 					    <div id="tournament-create-buttons" class="tournament-buttons">
-					        <button type="button" tournament-size="4">4</button>
-					        <button type="button" tournament-size="8">8</button>
+					        <button type="button" tournament-size="4">4 players</button>
+					        <button type="button" tournament-size="8">8 players</button>
 					    </div>
 						<div id="userinput-container"></div>
 					</div>
@@ -61,7 +61,9 @@ export class TournamentView {
 		const tournaments = await getAllTournaments();
 		const buttonContainer = this.element?.querySelector<HTMLElement>('#tournament-create-buttons')!;
 		
-		if (tournaments.length === 0) {
+		if (!buttonContainer) {
+			return ;
+		} else if (tournaments.length === 0) {
 			buttonContainer.style.display = 'flex';
 		} else {
 			buttonContainer.style.display = 'none';
@@ -73,7 +75,7 @@ export class TournamentView {
 	}
 
 	private setupEventListeners(): void {
-		if (!this.element) return;
+		if (!this.element) return ;
 
 		const sizeButtons = this.element.querySelectorAll<HTMLButtonElement>('#tournament-create-buttons button');
 		sizeButtons.forEach(button => {
@@ -94,7 +96,7 @@ export class TournamentView {
 		return array;
 	}
 
-	private async checkInput(inputAmount: number): Promise<string[] | null | undefined> {
+	private async checkInput(): Promise<string[] | null | undefined> {
 		if (!this.element) return ;
 
 		const inputFields = this.element.querySelectorAll<HTMLInputElement>('.input-wrapper input');
@@ -104,26 +106,30 @@ export class TournamentView {
 			const name = input.value.trim();
 
 			if (!name) {
-				console.warn('All fields must be filled.');
+				NotificationManager.show({
+					title: 'Invalid input',
+					message: 'All fields must be filled.',
+					type: 'warning',
+					duration: 3000
+				});
 				return [];
 			}
 			if (playerNames.includes(name)) {
-				console.warn(`Duplicate name detected: ${name}`);
+				NotificationManager.show({
+					title: 'Invalid input',
+					message: `Duplicate name detected: ${name}.`,
+					type: 'warning',
+					duration: 3000
+				});
 				return [];
 			}
 			playerNames.push(name);
 		}
-
-		if (playerNames.length !== inputAmount) {
-			console.warn(`Expected ${inputAmount} names, got ${playerNames.length}`);
-			return [];
-		}
-
 		return playerNames;
 	}
 
-	private async handleCreateButton(inputAmount: number, size: number, userInputDiv: HTMLElement): Promise<void> {
-		const playerNames = await this.checkInput(size);
+	private async handleCreateButton(size: number, userInputDiv: HTMLElement): Promise<void> {
+		const playerNames = await this.checkInput();
 		if (!playerNames || playerNames.length === 0)
 			return ;
 
@@ -143,11 +149,8 @@ export class TournamentView {
 			matches: [],
 		});
 
-		if (this.tournament) {
-			this.buildTournament();
-		} else {
-			console.error("Tournament creation failed.");
-		}
+		if (!this.tournament) return ;
+		this.buildTournament();
 	}
 
 	private addInputFields(size: number): void {
@@ -160,7 +163,6 @@ export class TournamentView {
 		userInputDiv.className = 'input-wrapper';
 
 		// create input fields
-		let inputAmount: number;
 		for (let i = 0; i < size; i++) {
 			const inputWrapper = document.createElement('div');
 			inputWrapper.className = 'input-structure';
@@ -176,7 +178,6 @@ export class TournamentView {
 			inputWrapper.appendChild(nameLabel);
 			inputWrapper.appendChild(nameInput);
 			userInputDiv.appendChild(inputWrapper);
-			inputAmount = i + 1;
 		}
 
 		// create button
@@ -189,7 +190,7 @@ export class TournamentView {
 		collectButton.id = 'collectDataButton';
 		collectButton.textContent = 'Create Bracket';
 		collectButton.addEventListener('click', () => {
-			this.handleCreateButton(inputAmount, size, userInputDiv);
+			this.handleCreateButton(size, userInputDiv);
 		});
 
 		// append everything
@@ -213,8 +214,6 @@ export class TournamentView {
 
 		this.game = new PongGame(gameContainer, async (score) => {
 			if (!this.tournament) return ;
-
-			console.log("Game ended with score:", score);
 
 			// use result to set tournament values
 			this.tournament.matches[index].status = 'finished';
@@ -243,9 +242,11 @@ export class TournamentView {
 		this.router.reload();
 	}
 
-	private createPlayerElement(name: string | null | undefined, score?: string): HTMLDivElement {
+	private createPlayerElement(name: string | null | undefined, isWinner: boolean, score?: string): HTMLDivElement {
 		const player = document.createElement('div');
 		player.className = 'player';
+		if (isWinner)
+			player.id = 'winner';
 
 		const displayName = name ?? 'tbd';
 		player.textContent = displayName;
@@ -268,22 +269,19 @@ export class TournamentView {
 
 			const [score1 = '0', score2 = '0'] = this.tournament.matches[i].score?.split('-') || [];
 
-			const match = this.tournament.matches[i];
-			const player1 = this.createPlayerElement(match.player1_name, match.score ? score1 : undefined);
-			const player2 = this.createPlayerElement(match.player2_name, match.score ? score2 : undefined);
+			const m = this.tournament.matches[i];
+			const player1 = this.createPlayerElement(m.player1_name,
+				m.winner_name != null && m.player1_name != null && m.winner_name === m.player1_name, m.score ? score1 : undefined);
+			const player2 = this.createPlayerElement(m.player2_name,
+				m.winner_name != null && m.player2_name != null && m.winner_name === m.player2_name, m.score ? score2 : undefined);
 
 			matchDiv.appendChild(player1);
 			matchDiv.appendChild(player2);
 
 			const roundName = rounds[this.tournament.matches[i].round - 1];
 			const roundId = roundName.toLowerCase().replace(/\s/g, '');
-			const roundDiv = document.getElementById(roundId);
-
-			if (roundDiv) {
-				roundDiv.appendChild(matchDiv);
-			} else {
-				console.warn(`No round div found for round number: ${this.tournament.matches[i].round}`);
-			}
+			const roundDiv = document.getElementById(roundId) as HTMLElement;
+			roundDiv.appendChild(matchDiv);
 		}
 	}
 
@@ -292,10 +290,11 @@ export class TournamentView {
 
 		const manageButtonsContainer = this.element?.querySelector<HTMLElement>('#tournament-manage-buttons')!;
 
+		const matches = this.tournament.matches;
 		const i = this.tournament.matches.findIndex(match => match.status === "pending");
 		if (i === -1) {
 			const contentHeader = this.element?.querySelector<HTMLElement>('#header-info')!;
-			contentHeader.textContent = `Tournament Winner is: ${this.tournament.matches[this.tournament.matches.length - 1].winner_name}`;
+			contentHeader.textContent = `Tournament Winner is: ${matches[matches.length - 1].winner_name}`;
 
 			const finishButton = document.createElement('button');
 			finishButton.type = 'button';
@@ -310,7 +309,7 @@ export class TournamentView {
 		}
 
 		const contentHeader = this.element?.querySelector<HTMLElement>('#header-info')!;
-		contentHeader.textContent = `Next Match: | ${this.tournament.matches[i].player1_name} vs ${this.tournament.matches[i].player2_name} |`;
+		contentHeader.textContent = `Next Match: | ${matches[i].player1_name} vs ${matches[i].player2_name} |`;
 
 		const startButton = document.createElement('button');
 		startButton.type = 'button';
@@ -325,7 +324,7 @@ export class TournamentView {
 		const deleteButton = document.createElement('button');
 		deleteButton.type = 'button';
 		deleteButton.id = 'deleteTournamentButton';
-		deleteButton.className = 'tournament-button';
+		deleteButton.className = 'delete-button';
 		deleteButton.textContent = 'Delete Tournament';
 		deleteButton.addEventListener('click', () => {
 			this.deleteTournamentButton();
@@ -337,7 +336,6 @@ export class TournamentView {
 		if (!this.tournament) return ;
 
 		const bracketContainer = this.element?.querySelector<HTMLElement>('#tournament-bracket')!;
-		console.log(this.tournament);
 		bracketContainer.innerHTML = ''; // Clear previous
 
 		// create rounds
@@ -356,8 +354,6 @@ export class TournamentView {
 		}
 
 		this.createMatches(rounds);
-		console.log(`Generated a ${this.tournament.player_amount}-player tournament with id: ${this.tournament.id}.`);
-
 		this.createManageButtons();
 	}
 
