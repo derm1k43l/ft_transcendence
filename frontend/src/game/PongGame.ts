@@ -65,10 +65,6 @@ export class PongGame {
 
     constructor(container: HTMLElement, onGameEnd?: (score: { leftScore: number; rightScore: number }) => void) {
         this.container = container;
-        if (this.powerup === true) {
-            this.leftPowerAvailable = true;
-            this.rightPowerAvailable = true;
-        }
         if (onGameEnd)
             this.onGameEnd = onGameEnd;
         this.container.innerHTML = this.getTemplate();
@@ -86,7 +82,7 @@ export class PongGame {
         
         // Apply settings from gameSettings
         // getUserGameSettings(this.currentUserId).then(settings => {
-        getUserGameSettings(currentUser?.id || 1).then(settings => {
+        getUserGameSettings(currentUser?.id || -1).then(settings => {
             if (settings) {
                 this.gameSettings = settings;
                 this.ball.style.backgroundColor = settings.ball_color;
@@ -94,8 +90,15 @@ export class PongGame {
                 this.paddleRight.style.backgroundColor = settings.paddle_color;
                 this.leftScoreElement.style.color = settings.score_color;
                 this.rightScoreElement.style.color = settings.score_color;
-                // this.powerup = settings.powerup; //waiting for backend integration
                 gameContainer.style.backgroundColor = settings.board_color;
+                this.powerup = settings.powerup;
+                if (this.powerup) {
+                    this.leftPowerAvailable = true;
+                    this.rightPowerAvailable = true;
+                } else {
+                    const powerupContainer = document.getElementById('powerups_container')
+                    if (powerupContainer) powerupContainer.style.display = 'none';
+                }
             }
         }).catch(error => {
             console.error('Failed to load game settings:', error);
@@ -314,7 +317,7 @@ export class PongGame {
         this.ballSpeedX = this.ballSpeedX < 0 ? -BASE_SPEED : BASE_SPEED;
         this.ballSpeedY = BASE_SPEED * Math.random() * 2 - BASE_SPEED;
         this.paddleSpeed = PADDLE_SPEED;
-        if (this.powerup === true) {
+        if (this.powerup) {
             this.leftPowerAvailable = true;
             this.rightPowerAvailable = true;
         }
@@ -357,7 +360,7 @@ export class PongGame {
             <div class="paddle paddle__right"></div>
             <div class="middle__line"></div>
         </div>
-        <div class="score">
+        <div class="score" id="powerups_container">
             <div class="score">
                 <div class="score__left">
                     <i class="fas fa-angles-right powerup powerup__left"></i>

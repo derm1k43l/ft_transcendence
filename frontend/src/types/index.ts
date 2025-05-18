@@ -45,6 +45,7 @@ export interface GameSettings {
     paddle_color: string;
     ball_color: string;
     score_color: string;
+    powerup: boolean;
 }
 
 export interface MatchRecord {

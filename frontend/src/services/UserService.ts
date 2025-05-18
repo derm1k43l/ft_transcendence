@@ -237,6 +237,8 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
 }
 
 export async function getUserGameSettings(userId: number): Promise<GameSettings> {
+    if (userId <= 0)
+        return DEFAULT_GAME_SETTINGS;
     try {
         const settings = (await api.get(`/game-settings/users/${userId}`)).data as GameSettings;
         return settings;

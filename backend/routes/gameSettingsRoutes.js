@@ -55,6 +55,7 @@ const updateGameSettingsOpts = {
 				paddle_color: { type: 'string'},
 				ball_color: { type: 'string'},
 				score_color: { type: 'string'},
+				powerup: { type: 'integer' },
 			},
 			minProperties: 1, // but should have something at least
 			additionalProperties: false

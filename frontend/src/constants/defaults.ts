@@ -5,7 +5,8 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   board_color: '#000000',
   paddle_color: '#FFFFFF',
   ball_color: '#FFFFFF',
-  score_color: '#FFFFFF'
+  score_color: '#FFFFFF',
+  powerup: false,
 };
 
 // Default achievements 
