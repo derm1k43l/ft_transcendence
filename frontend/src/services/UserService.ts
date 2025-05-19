@@ -426,8 +426,6 @@ export function setRealStatus(user: UserProfile | null) {
     const timeoutString: string = format_date(timeout);
 
 
-    console.log('last active: ', user.last_active)
-    console.log('timeout: ', timeoutString)
     if (user.last_active < timeoutString)
         user.status = 'offline';
 }

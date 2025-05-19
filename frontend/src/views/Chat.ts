@@ -118,10 +118,11 @@ export class ChatView {
             return;
         }
 
-        let newHTML: string = '';
+        // let tempHTML: string = '';
+        let tempHTML: Element = document.createElement('tempHTML');
         for (const friend of friends) {
             const {lastMessage, unreadCount} = (await getLastMessageAndUnreadCount(this.currentUser.id, friend.friend_id));
-            newHTML += `
+            tempHTML.innerHTML += `
                 <div class="chat-contact" data-id="${friend.friend_id}">
                     <div class="chat-contact-avatar">
                         <img src="${friend.friend_avatar_url}" alt="${friend.friend_display_name}">
@@ -140,7 +141,20 @@ export class ChatView {
                 </div>
             `;
         }
-        contactsContainer.innerHTML = newHTML;
+        // filter contacts
+        const searchInput = this.element?.querySelector('#chat-search') as HTMLInputElement;
+        const contacts = tempHTML.querySelectorAll('.chat-contact');
+        if (searchInput.value) contacts?.forEach(contact => {
+            const userName = contact.querySelector('h4')?.textContent?.toLowerCase() || '';
+            if (userName.includes(searchInput.value.toLowerCase())) {
+                (contact as HTMLElement).style.display = '';
+            } else {
+                (contact as HTMLElement).style.display = 'none';
+            }
+        });
+
+        contactsContainer.innerHTML = tempHTML.innerHTML;
+        tempHTML.remove();
         this.setupContactListeners();
     }
 
@@ -207,11 +221,6 @@ export class ChatView {
             const contactId = Number(contact.getAttribute('data-id'));
             if (contactId === this.activeChatPartnerId)
                 contact.classList.add('active');
-            // // Update URL without full navigation
-            // const newUrl = `#/chat/${contactId}`;
-            // if (window.location.hash !== newUrl) {
-            //     history.pushState(null, '', newUrl);
-            // }
         }
     }
 
@@ -237,7 +246,6 @@ export class ChatView {
                 return;
             }
             setRealStatus(partner);
-            console.log("renderActiveChat: parner status: ", partner.status);
 
             // Get chat mesasges
             const messages = await getChatMessages(this.currentUser.id, partner.id);
@@ -249,7 +257,6 @@ export class ChatView {
             // Render header
             const statusClass = partner.status ? partner.status : 'offline';
             const statusText = partner.status ? partner.status.charAt(0).toUpperCase() + partner.status.slice(1) : "Offline";
-            console.log("renderActiveChat: parner status: ", partner.status);
             
             headerContainer.innerHTML = `
                 <div class="chat-panel-user">
@@ -301,6 +308,7 @@ export class ChatView {
                 messageInput.focus();
                 // Update contact list to show new last message
                 await this.renderContacts();
+                this.activateContact();
             }
         } catch (error) {
             console.error("Error sending message:", error);
