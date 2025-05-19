@@ -558,7 +558,8 @@ const uploadAvatar = async (req, reply) => {
 		const filePath = path.join(AVATAR_UPLOAD_DIR, uniqueFilename);
 		// const fileUrl = `/uploads/avatars/${uniqueFilename}`; // Public URL path relative to static root
 	
-		const fileUrl = `http://localhost:3000/uploads/avatars/${uniqueFilename}`; // Full URL.
+		// const fileUrl = `http://localhost:3000/uploads/avatars/${uniqueFilename}`; // Full URL.
+		const fileUrl = `/uploads/avatars/${uniqueFilename}`; // Full URL.
 		// not clean but the only way that will work with our current setup
 		// CHANGE TO HTTPS ONCE WE HAVE HTTPS!
 
@@ -635,7 +636,8 @@ const uploadCover = async (req, reply) => {
 		const filePath = path.join(COVER_UPLOAD_DIR, uniqueFilename);
 		// const fileUrl = `/uploads/covers/${uniqueFilename}`; // Public URL path relative to static root
 	
-		const fileUrl = `http://localhost:3000/uploads/covers/${uniqueFilename}`; // Full URL.
+		// const fileUrl = `http://localhost:3000/uploads/covers/${uniqueFilename}`; // Full URL.
+		const fileUrl = `/uploads/covers/${uniqueFilename}`; // Full URL.
 		// not clean but the only way that will work with our current setup
 		// CHANGE TO HTTPS ONCE WE HAVE HTTPS!
 

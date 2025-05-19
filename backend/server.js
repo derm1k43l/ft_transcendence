@@ -9,7 +9,8 @@ TODO:
 	Look into simplifying match history, no longer needs tournament
 */
 
-const fastify = require('fastify')( {logger: true} );
+// const fastify = require('fastify')( {logger: true} );
+const fastify = require('fastify')( {logger: true, trustProxy: true } );
 const fs = require('fs'); //optional
 const path = require('path'); //optional
 const Database = require('better-sqlite3');
@@ -79,19 +80,29 @@ fastify.register(jwt, {
 
 const cors = require('@fastify/cors');
 
+fastify.register(require('@fastify/cors'), {
+	origin: ['https://localhost', 'https://127.0.0.1'],
+	credentials: true,
+	methods: ['GET','POST','PUT','PATCH','DELETE'],
+	allowedHeaders: [
+	  'Origin','X-Requested-With','Accept',
+	  'Content-Type','Authorization'
+	],
+  });
+
 // register CORS
-fastify.register(cors, {
-	origin: ['http://127.0.0.1:8080', 'http://localhost:8080', 'http://10.12.5.1:8080'], //temporary solution. we might have to setup a proxy in frontend to forwards api requests through the docker network
-	// origin: 'http://localhost:8080',
-	// origin: 'http://localhost:3000 //dev
+// fastify.register(cors, {
+// 	origin: ['http://127.0.0.1:8080', 'http://localhost:8080', 'http://10.12.5.1:8080'], //temporary solution. we might have to setup a proxy in frontend to forwards api requests through the docker network
+// 	// origin: 'http://localhost:8080',
+// 	// origin: 'http://localhost:3000 //dev
 
-	// Optionally allow requests from multiple specific origins
-	// origin: ['http://localhost:8080', 'https://your-production-frontend.com'],
+// 	// Optionally allow requests from multiple specific origins
+// 	// origin: ['http://localhost:8080', 'https://your-production-frontend.com'],
 
-	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Specify allowed methods
-	allowedHeaders: ['Origin', 'X-Requested-With', 'Accept', 'Content-Type', 'Authorization'], // Specify allowed headers
-	credentials: true //for authorization headers
-});
+// 	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Specify allowed methods
+// 	allowedHeaders: ['Origin', 'X-Requested-With', 'Accept', 'Content-Type', 'Authorization'], // Specify allowed headers
+// 	credentials: true //for authorization headers
+// });
 
 fastify.register(require('./routes/userRoutes'), { prefix: '/api/users' });
 fastify.register(require('./routes/userStatsRoutes'), { prefix: 'api/users/stats' });

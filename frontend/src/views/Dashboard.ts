@@ -400,13 +400,35 @@ private renderLeaderboard(containerId: string, players: UserProfile[], type: 'wi
             const winRate = player.stats?.winrate;
             
             const isCurrentUser = player.id === this.currentUserID;
-            
+
+			let avatarUrl = player.avatar_url 
+			? (() => {
+				try {
+					const urlObj = new URL(player.avatar_url);
+					// Only rewrite if hostname is localhost or 127.0.0.1
+					if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+						// Return path only, so browser loads from your HTTPS domain + path
+						return urlObj.pathname;
+					} else {
+						// External URLs, keep as-is
+						return player.avatar_url;
+					}
+				} catch {
+					return player.avatar_url;  // fallback
+				}
+			})()
+			: 'https://placehold.co/30x30/1d1f21/ffffff?text=User';
+
+			// <a href="#/profile/${player.id}" class="player-link">
+			// 	<img src="${player.avatar_url || 'https://placehold.co/30x30/1d1f21/ffffff?text=User'}" alt="${player.display_name}" class="player-avatar">
+			// 	<span>${player.display_name}</span>
+			// </a>
             html += `
                 <tr class="${isCurrentUser ? 'current-user' : ''}">
                     <td class="rank">${index + 1}</td>
                     <td class="player">
                         <a href="#/profile/${player.id}" class="player-link">
-                            <img src="${player.avatar_url || 'https://placehold.co/30x30/1d1f21/ffffff?text=User'}" alt="${player.display_name}" class="player-avatar">
+                            <img src="${avatarUrl}" alt="${player.display_name}" class="player-avatar">
                             <span>${player.display_name}</span>
                         </a>
                     </td>

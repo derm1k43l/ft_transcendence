@@ -1,4 +1,17 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: ft_proxy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./backend/uploads:/uploads:ro          # host ./uploads → /uploads in nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
   backend:
     build:
       context: ./backend
@@ -6,8 +19,9 @@ services:
     container_name: ft_transcendence_backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
-      - "3443:3443" # HTTPS port
+      - "3000"
+      # - "3000:3000"
+      # - "3443:3443" # HTTPS port
     volumes:
       - backend_data:/app/db
       - ./certs:/app/certs
@@ -24,8 +38,9 @@ services:
     container_name: ft_transcendence_frontend
     restart: unless-stopped
     ports:
-      - "8080:8080"
-      - "8443:8443" # HTTPS port
+      - "8080"
+      # - "8080:8080"
+      # - "8443:8443" # HTTPS port
     volumes:
       - frontend_data:/app/public
       - ./certs:/app/certs
