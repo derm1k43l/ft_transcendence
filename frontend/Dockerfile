@@ -18,4 +18,4 @@ EXPOSE 8080
 EXPOSE 8443
 
 # Start the server
-CMD ["npm", "run", "serve:local"]
+CMD ["npm", "run", "start"]
