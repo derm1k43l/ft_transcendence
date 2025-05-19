@@ -29,32 +29,14 @@ const { User, loginBody, loginResponse, updatePasswordBody } = require('../schem
 
 const authPreHandler = require('./authPreHandlerRoutes');
 
+const updateOnlineStatusPreHandler = require('./updateOnlineStatusPreHandlerRoutes');
+
 const normalizeEmail = async (req, reply) => {
 	if (req.body && req.body.email) {
 		req.body.email = req.body.email.toLowerCase();
 	}
 	if (req.params && req.params.email) {
 		req.params.email = req.params.email.toLowerCase();
-	}
-};
-
-const updateOnlineStatusPreHandler = async (req, reply) => {
-	const authenticatedUserId = req.user.id;
-	try {
-		const db = req.server.betterSqlite3;
-		const result = db.prepare(`
-			UPDATE users
-			SET status = 'online', last_active = CURRENT_TIMESTAMP
-			WHERE id = ? AND status != 'ingame'
-		`).run(authenticatedUserId);
-
-		if (result.changes > 0) {
-			req.log.debug(`User ${authenticatedUserId} status updated to online and last_active.`);
-		} else {
-			req.log.debug(`User ${authenticatedUserId} status not updated (already ingame or not found).`);
-		}
-	} catch (error) {
-		req.log.error('Error updating online status in pre-handler:', error);
 	}
 };
 

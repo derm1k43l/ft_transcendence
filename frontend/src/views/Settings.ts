@@ -94,6 +94,22 @@ export class SettingsView {
                                             <span class="color-value">${this.gameSettings.score_color}</span>
                                         </div>
                                     </div>
+                                    <div class="toggle-setting">
+                                        <div>
+                                            <h5>Power-Up</h5>
+                                        </div>
+                                        <label class="toggle">
+                                            <input type="checkbox" id="powerup" ${this.gameSettings.powerup ? 'checked' : ''}>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="keybind-hint">
+                                        <span class="key">D</span> (Left Player)
+                                        <br>
+                                        <br>
+                                        <span class="key">←</span> (Right Player)
+                                    </div>
+
                                     
                                     <div class="game-preview">
                                         <h5>Preview</h5>
@@ -314,6 +330,14 @@ export class SettingsView {
                 this.renderGamePreview();
             });
         });
+        
+        // Power-Up checkbox
+        const powerUpCheckbox = this.element.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        powerUpCheckbox?.addEventListener('input', () => {
+            if (!this.element || !powerUpCheckbox)
+                return;
+            this.gameSettings.powerup = powerUpCheckbox.checked;
+        });
 
         // Save game settings
         const saveGameSettingsBtn = this.element.querySelector('#save-game-settings');
@@ -383,8 +407,6 @@ export class SettingsView {
         const previewContainer = this.element.querySelector('#game-preview');
         if (!previewContainer) return;
 
-        console.log("rendering game preview");
-        
         // Create a canvas for preview
         previewContainer.innerHTML = '';
     

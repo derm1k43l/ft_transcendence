@@ -19,8 +19,8 @@ export interface UserProfile {
     friend_requests?: FriendRequest[];
     game_settings?: GameSettings;
     notifications?: AppNotification[];
-    status?: 'online' | 'offline' | 'in-game';
-    last_active?: Date;
+    status: 'online' | 'offline' | 'in-game';
+    last_active: string;
 }
 
 // maybe need more
@@ -45,6 +45,7 @@ export interface GameSettings {
     paddle_color: string;
     ball_color: string;
     score_color: string;
+    powerup: boolean;
 }
 
 export interface MatchRecord {
@@ -66,7 +67,7 @@ export interface GameInvite {
     from: number;
     to: number;
     status: 'pending' | 'accepted' | 'rejected' | 'expired';
-    timestamp: Date;
+    timestamp: string;
     gameMode?: string;
 }
 
@@ -109,7 +110,7 @@ export interface ChatMessage {
     sender_id: number;
     receiver_id: number;
     content: string;
-    timestamp: Date;
+    timestamp: string;
     read: boolean;
 }
 
@@ -118,7 +119,7 @@ export interface ChatMessageDetail {
     sender_id: number;
     receiver_id: number;
     content: string;
-    timestamp: Date;
+    timestamp: string;
     read: boolean;
 
     sender_username: string;

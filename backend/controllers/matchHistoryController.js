@@ -72,13 +72,12 @@ const addMatchHistoryItem = async (req, reply) => {
 		}
 
 		try {
-			const resultRun = db.prepare('INSERT INTO match_history (user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+			const resultRun = db.prepare('INSERT INTO match_history (user_id, opponent_id, opponent_name, result, score, date, duration, game_mode, status) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)').run(
 				authenticatedUserId,
 				opponent_id || null,
 				opponent_name,
 				result,
 				score,
-				date,
 				duration || null,
 				game_mode,
 				status

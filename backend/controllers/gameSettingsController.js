@@ -12,7 +12,7 @@ const getUserGameSettings = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
 		const settings = db.prepare('SELECT user_id, board_color, paddle_color, ball_color, score_color, powerup FROM game_settings WHERE user_id = ?').get(authenticatedUserId);
-
+		console.log("\n\nhello\n\n");
 		if (!settings) {
 			reply.code(404).send({ message: 'Game settings not found' });
 		} else {

@@ -6,7 +6,9 @@ import {
     getChatMessages, 
     markMessagesAsRead,
     getFriendsList,
-    getLastMessageAndUnreadCount
+    getLastMessageAndUnreadCount,
+    setRealStatus,
+    format_date
 } from '../services/UserService.js';
 import { ChatMessage, UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
@@ -132,7 +134,7 @@ export class ChatView {
                         </p>
                     </div>
                     <div class="chat-contact-meta">
-                        <span class="chat-time">${lastMessage ? this.formatMessageTime(new Date(lastMessage.timestamp)) : ''}</span>
+                        <span class="chat-time">${lastMessage ? this.formatMessageTime(lastMessage.timestamp) : ''}</span>
                         ${unreadCount > 0 ? `<span class="chat-unread">${unreadCount}</span>` : ''}
                     </div>
                 </div>
@@ -187,6 +189,8 @@ export class ChatView {
                 handler: () => {
                     this.activeChatPartnerId = Number(contact.getAttribute('data-id'));
                     this.renderActiveChat();
+                    const messageInput = this.element?.querySelector('#message-input') as HTMLInputElement;
+                    messageInput?.focus();
                 }
             });
         }
@@ -232,6 +236,8 @@ export class ChatView {
                 messagesContainer.innerHTML = '<div class="chat-no-messages">User not found</div>';
                 return;
             }
+            setRealStatus(partner);
+            console.log("renderActiveChat: parner status: ", partner.status);
 
             // Get chat mesasges
             const messages = await getChatMessages(this.currentUser.id, partner.id);
@@ -243,6 +249,7 @@ export class ChatView {
             // Render header
             const statusClass = partner.status ? partner.status : 'offline';
             const statusText = partner.status ? partner.status.charAt(0).toUpperCase() + partner.status.slice(1) : "Offline";
+            console.log("renderActiveChat: parner status: ", partner.status);
             
             headerContainer.innerHTML = `
                 <div class="chat-panel-user">
@@ -264,8 +271,6 @@ export class ChatView {
             this.renderAllMessages(messages);
 
             // Mark messages as read
-            const messageInput = this.element?.querySelector('#message-input') as HTMLInputElement;
-            messageInput?.focus();
             await markMessagesAsRead(messages);
             await this.renderContacts();
             this.activateContact();
@@ -311,7 +316,7 @@ export class ChatView {
         const messagesContainer = this.element?.querySelector('#chat-messages');
         if (!messagesContainer) return;
         const isFromCurrentUser = message.sender_id === this.currentUser.id;
-        const time = this.formatMessageTime(new Date(message.timestamp));
+        const time = this.formatMessageTime(message.timestamp);
         
         messagesContainer.innerHTML += `
             <div class="chat-message ${isFromCurrentUser ? 'sent' : 'received'}">
@@ -333,7 +338,7 @@ export class ChatView {
         let newHTML: string = '';
         for (const msg of messages) {
             const isFromCurrentUser = msg.sender_id === this.currentUser.id;
-            const time = this.formatMessageTime(new Date(msg.timestamp));
+            const time = this.formatMessageTime(msg.timestamp);
             
             newHTML += `
                 <div class="chat-message ${isFromCurrentUser ? 'sent' : 'received'}">
@@ -383,18 +388,33 @@ export class ChatView {
         });
     }
 
-    private formatMessageTime(date: Date): string {
+    private formatMessageTime(date: string): string {
+        const utcDate = new Date(date.replace(' ', 'T') + 'Z');
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        if (date >= today) {
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else if (date >= yesterday) {
+
+        const utcNow = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate()
+        ));
+
+        const utcYesterday = new Date(utcNow);
+        utcYesterday.setUTCDate(utcYesterday.getUTCDate() - 1);
+
+        const messageDate = new Date(Date.UTC(
+            utcDate.getUTCFullYear(),
+            utcDate.getUTCMonth(),
+            utcDate.getUTCDate()
+        ));
+
+        if (messageDate.getTime() === utcNow.getTime()) {
+            return utcDate.toISOString().substring(11, 16); // "HH:mm"
+        } else if (messageDate.getTime() === utcYesterday.getTime()) {
             return 'Yesterday';
         } else {
-            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            const month = utcDate.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+            const day = utcDate.getUTCDate();
+            return `${month} ${day}`;
         }
     }
 

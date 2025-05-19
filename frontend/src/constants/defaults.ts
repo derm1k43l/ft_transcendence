@@ -5,7 +5,8 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   board_color: '#000000',
   paddle_color: '#FFFFFF',
   ball_color: '#FFFFFF',
-  score_color: '#FFFFFF'
+  score_color: '#FFFFFF',
+  powerup: false,
 };
 
 // Default achievements 
@@ -52,8 +53,8 @@ export const NULL_USER: UserProfile = {
   friend_requests: undefined,
   game_settings: undefined,
   notifications: undefined,
-  status: undefined,
-  last_active: undefined,
+  status: 'offline',
+  last_active: '',
 };
 
 // Default user stats 

@@ -166,6 +166,7 @@ export class RegisterView {
             setTimeout(function() {
                 window.location.hash = '#/';
             }, 4000);
+            // window.location.hash = '#/';
 
         } catch(error: any) {
             if (errorElement) {
