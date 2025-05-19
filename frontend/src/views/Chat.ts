@@ -8,7 +8,8 @@ import {
     getFriendsList,
     getLastMessageAndUnreadCount,
     setRealStatus,
-    format_date
+    format_date,
+    removeFriend
 } from '../services/UserService.js';
 import { ChatMessage, UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
@@ -27,6 +28,9 @@ export class ChatView {
     private boundContactListeners: Listener[] = [];
     private addContactListener(l: Listener) { addListener(l, this.boundContactListeners); }
     private removeContactListeners() { removeListeners(this.boundContactListeners); this.boundContactListeners = []; }
+    private boundPanelListeners: Listener[] = [];
+    private addPanelListener(l: Listener) { addListener(l, this.boundPanelListeners); }
+    private removePanelListeners() { removeListeners(this.boundPanelListeners); this.boundPanelListeners = []; }
 
     private intervalId: number | null = null;
 
@@ -210,6 +214,61 @@ export class ChatView {
         }
     }
 
+    private setupPanelListeners() {
+        this.removePanelListeners();
+        const inviteButton = this.element?.querySelector('.invite-button');
+        this.addPanelListener({
+            element: inviteButton,
+            event: 'click',
+            handler: async () => {
+                const friendId = this.activeChatPartnerId;
+                const friend = friendId ? await getUserById(friendId) : null;
+                if (!friendId || !friend || !(await sendMessage(friendId, "Hey, let's play a game!"))) {
+                    NotificationManager.show({
+                        title: 'Game Invitation',
+                        message: `Failed to send invitation ${friend ? `to ${friend.display_name}` : ``}`,
+                        type: 'error',
+                        duration: 3000
+                    });
+                } else {
+                    NotificationManager.show({
+                        title: 'Game Invitation',
+                        message: `Invitation sent to ${friend.display_name}`,
+                        type: 'success',
+                        duration: 3000
+                    });
+                    this.renderActiveChat();
+                }
+            }
+        });
+        const blockButton = this.element?.querySelector('.block-button');
+        this.addPanelListener({
+            element: blockButton,
+            event: 'click',
+            handler: async () => {
+                const friendId = this.activeChatPartnerId;
+                const friend = friendId ? await getUserById(friendId) : null;
+                if (!friendId || !friend || !(await removeFriend(this.currentUser.id, friendId))) {
+                    NotificationManager.show({
+                        title: 'Block user',
+                        message: `Failed to block ${friend ? `${friend.display_name}` : ``}`,
+                        type: 'error',
+                        duration: 3000
+                    });
+                } else {
+                    NotificationManager.show({
+                        title: `Blocked ${friend.display_name}`,
+                        message: `${friend.display_name} was removed from your friends list`,
+                        type: 'success',
+                        duration: 3000
+                    });
+                    this.activeChatPartnerId = null;
+                    this.router.reload();
+                }
+            }
+        });
+    }
+
     private activateContact() {
         if (!this.activeChatPartnerId) return;
         const contacts = this.element?.querySelectorAll('.chat-contact');
@@ -217,10 +276,11 @@ export class ChatView {
         for (const contact of contacts)
         {
             // Update active contact
-            contact.classList.remove('active');
             const contactId = Number(contact.getAttribute('data-id'));
             if (contactId === this.activeChatPartnerId)
                 contact.classList.add('active');
+            else
+                contact.classList.remove('active');
         }
     }
 
@@ -247,13 +307,6 @@ export class ChatView {
             }
             setRealStatus(partner);
 
-            // Get chat mesasges
-            const messages = await getChatMessages(this.currentUser.id, partner.id);
-            if (messages.length === 0) {
-                messagesContainer.innerHTML = '<div class="chat-no-messages"><p>No messages yet. Start a conversation!</p></div>';
-                return;
-            }
-
             // Render header
             const statusClass = partner.status ? partner.status : 'offline';
             const statusText = partner.status ? partner.status.charAt(0).toUpperCase() + partner.status.slice(1) : "Offline";
@@ -267,20 +320,23 @@ export class ChatView {
                     </div>
                 </div>
                 <div class="chat-panel-actions">
-                    <button title="Video Call"><i class="fas fa-video"></i></button>
-                    <button title="Invite to Game"><i class="fas fa-gamepad"></i></button>
-                    <button title="More Options"><i class="fas fa-ellipsis-v"></i></button>
+                    <button class="invite-button" title="Invite to Game"><i class="fas fa-gamepad"></i></button>
+                    <button class="block-button" title="Block User"><i class="fas fa-ban"></i></button>
                 </div>
             `;
 
-            // Render messages
-            // messagesContainer.innerHTML = messages.map((msg: ChatMessage) => this.renderMessage(msg)).join('');
-            this.renderAllMessages(messages);
+            // Get chat mesasges
+            const messages = await getChatMessages(this.currentUser.id, partner.id);
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = '<div class="chat-no-messages"><p>No messages yet. Start a conversation!</p></div>';
+            } else {
+                this.renderAllMessages(messages);
+                await markMessagesAsRead(messages);
+            }
 
-            // Mark messages as read
-            await markMessagesAsRead(messages);
             await this.renderContacts();
             this.activateContact();
+            this.setupPanelListeners();
         } catch (error) {
             console.error("Error loading chat:", error);
             messagesContainer.innerHTML = '<div class="error">Failed to load messages. Please try again.</div>';
@@ -430,6 +486,7 @@ export class ChatView {
         console.log("--- DESTROYING CHAT VIEW ---");
         if (this.intervalId) clearInterval(this.intervalId);
         this.removeListeners();
+        this.removePanelListeners();
         this.removeContactListeners();
         this.element?.remove();
         this.element = null; 
