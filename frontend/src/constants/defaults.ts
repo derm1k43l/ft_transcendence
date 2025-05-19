@@ -53,8 +53,8 @@ export const NULL_USER: UserProfile = {
   friend_requests: undefined,
   game_settings: undefined,
   notifications: undefined,
-  status: undefined,
-  last_active: undefined,
+  status: 'offline',
+  last_active: '',
 };
 
 // Default user stats 

@@ -202,7 +202,7 @@ const addUser = async (req, reply) => {
 			INSERT INTO users (
 				username, password, display_name, email, bio, avatar_url, cover_photo_url,
 				join_date, created_at
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 			`).run(
 				username,
 				paswordHash,
@@ -211,8 +211,6 @@ const addUser = async (req, reply) => {
 				bio || null,
 				avatar_url,
 				cover_photo_url,
-				new Date().toISOString(),
-				new Date().toISOString()
 			);
 
 			const newUserId = userResult.lastInsertRowid;

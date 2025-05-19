@@ -1,4 +1,5 @@
 import { api } from './api.js';
+import { format } from 'date-fns';
 
 import { 
     UserProfile,
@@ -407,18 +408,27 @@ export async function setUserStats(user: UserProfile): Promise<UserStats> {
     return user.stats;
 }
 
+export function format_date(date: Date): string {
+    return date.toISOString().replace('T', ' ').substring(0, 19);
+}
+
 export function setRealStatus(user: UserProfile | null) {
     if (!user) return;
-    if (!user.status || !user.last_active) {
-        user.status = 'offline';
-        return;
-    }
+    // if (!user.status || !user.last_active) {
+    //     user.status = 'offline';
+    //     return;
+    // }
 
     // check for timeout
     const timeout = new Date();
-    timeout.setMinutes(timeout.getMinutes() + 3);
+    timeout.setMinutes(timeout.getMinutes() - 3);
 
-    if (new Date(user.last_active) < timeout)
+    const timeoutString: string = format_date(timeout);
+
+
+    console.log('last active: ', user.last_active)
+    console.log('timeout: ', timeoutString)
+    if (user.last_active < timeoutString)
         user.status = 'offline';
 }
 
