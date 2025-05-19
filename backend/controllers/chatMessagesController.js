@@ -34,7 +34,7 @@ const getChatMessagesBetweenUsers = async (req, reply) => {
 			ORDER BY timestamp
 		`).all(userId1, userId2, userId2, userId1);
 
-		reply.send(messages);
+		reply.code(200).send(messages);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving chat messages' });

@@ -20,7 +20,7 @@ const getFriendRequests = async (req, reply) => {
 			JOIN users ut ON fr.to_user_id = ut.id
 		`).all();
 
-		reply.send(requests);
+		reply.code(200).send(requests);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving friend requests' });
