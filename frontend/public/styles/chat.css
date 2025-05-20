@@ -254,9 +254,14 @@
     justify-content: center;
 }
 
-.chat-panel-actions button:hover {
+.invite-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
+}
+
+.block-button:hover {
+    background-color: rgba(222, 87, 87, 0.25);
+    color: #c00000;
 }
 
 /* Messages area */

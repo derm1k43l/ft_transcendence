@@ -11,6 +11,7 @@ import { GameSettings } from '../types/index.js';
 import { currentUser } from '../main.js';
 import * as Auth from '../services/auth.js';
 import { DEFAULT_ACHIEVEMENTS, DEFAULT_GAME_SETTINGS } from '../constants/defaults.js';
+import { translations, Language, isLanguage, applyTranslations } from "./i18n.js";
 
 export class SettingsView {
     private element: HTMLElement | null = null;
@@ -54,6 +55,7 @@ export class SettingsView {
                         <ul class="settings-nav">
                             <li><a href="#game" class="active">Game Preferences</a></li>
                             <li><a href="#security">Security & Privacy</a></li>
+                            <li><a href="#language">Language</a></li>
                         </ul>
                     </div>
                     
@@ -158,6 +160,17 @@ export class SettingsView {
                                     <button type="submit" class="app-button">Change Password</button>
                                 </form>
                             </div>
+                        </div>
+
+                        <!-- Language Panel -->
+                        <div id="language" class="settings-panel">
+                            <h3 data-i18n="language">Language</h3>
+                            <label for="language-options">Choose a language:</label>
+                            <select id="language-options" name="language">
+                                <option value="english">English</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="german">German</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -362,6 +375,43 @@ export class SettingsView {
                 confirmModal.classList.remove('active');
             }
         });
+          
+        /* Language handler */
+        const languageSelect = document.querySelector("#language-options") as HTMLSelectElement;
+
+        if (languageSelect) {
+            const savedLanguage = localStorage.getItem("language");
+        
+            if (savedLanguage && isLanguage(savedLanguage)) {
+                languageSelect.value = savedLanguage;
+                applyTranslations(savedLanguage);
+            } else {
+                applyTranslations("english");
+            }
+        
+            languageSelect.addEventListener("change", () => {
+                const selectedLanguage = languageSelect.value;
+                if (isLanguage(selectedLanguage)) {
+                    localStorage.setItem("language", selectedLanguage);
+                    applyTranslations(selectedLanguage);
+        
+                    switch (selectedLanguage) {
+                        case "spanish":
+                            alert("Idioma cambiado a Español");
+                            break;
+                        case "german":
+                            alert("Sprache auf Deutsch umgestellt");
+                            break;
+                        default:
+                            alert("Language changed to English");
+                            break;
+                    }
+                } else {
+                    alert("Unsupported language");
+                    applyTranslations("english");
+                }
+            });
+        }        
     }
     
     private async updateGameSettings(): Promise<void> {

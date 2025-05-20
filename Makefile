@@ -102,7 +102,7 @@ logs_frontend: start_docker
 logs_backend: start_docker
 	@docker-compose -f $(NAME) logs backend
 
-logs_database: start_docker
-	@docker-compose -f $(NAME) logs database
+logs_nginx: start_docker
+	@docker-compose -f $(NAME) logs nginx
 
 .PHONY: all setup_env setup_ssl start_docker docker_goinfre start_containers frontend_dev backend_dev down fclean re ps db logs_frontend logs_backend logs_database

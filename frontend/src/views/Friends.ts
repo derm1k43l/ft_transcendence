@@ -8,7 +8,8 @@ import {
     getIncomingFriendRequests,
     getOutgoingFriendRequests,
     acceptFriendRequest,
-    rejectFriendRequest
+    rejectFriendRequest,
+    sendMessage
 } from '../services/UserService.js';
 import { currentUser } from '../main.js';
 
@@ -219,15 +220,23 @@ export class FriendsView {
             const inviteButtons = this.element?.querySelectorAll('.friend-button.invite');
             inviteButtons?.forEach(button => {
                 button.addEventListener('click', async () => {
-                    const friendId = button.getAttribute('data-id');
-                    const friend = await getUserById(Number(friendId));
-                    if (friend) {
+                    const friendId = Number(button.getAttribute('data-id'));
+                    const friend = await getUserById(friendId);
+                    if (!friend || !(await sendMessage(friendId, "Hey, let's play a game!"))) {
+                        NotificationManager.show({
+                            title: 'Game Invitation',
+                            message: `Failed to send invitation ${friend ? `to ${friend.display_name}` : ``}`,
+                            type: 'error',
+                            duration: 3000
+                        });
+                    } else {
                         NotificationManager.show({
                             title: 'Game Invitation',
                             message: `Invitation sent to ${friend.display_name}`,
                             type: 'success',
                             duration: 3000
                         });
+                        this.router.navigate(`/chat/${friendId}`);
                     }
                 });
             });

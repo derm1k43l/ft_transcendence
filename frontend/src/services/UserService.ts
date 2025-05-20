@@ -225,9 +225,18 @@ export async function rejectFriendRequest(userId: number, requestId: number): Pr
     }
 }
 
+export async function removeFriend(userId: number, friendId: number): Promise<boolean> {
+    try {
+        await api.delete(`/friends/users/${userId}/${friendId}`);
+        return true;
+    } catch (error: any) {
+        console.error(`Failed to remove friend with ID: ${friendId}`, error?.response?.data?.message || error);
+        return false;
+    }
+}
+
 export async function updateUserProfile(userId: number, updates: Partial<UserProfile>): Promise<boolean> {
     try {
-        // some security concern here
         const { id, username, password, ...allowedUpdates } = updates;
         allowedUpdates.avatar_url = undefined; // dont overwrite avatar
         allowedUpdates.cover_photo_url = undefined; // dont overwrite cover photo
@@ -425,9 +434,6 @@ export function setRealStatus(user: UserProfile | null) {
 
     const timeoutString: string = format_date(timeout);
 
-
-    console.log('last active: ', user.last_active)
-    console.log('timeout: ', timeoutString)
     if (user.last_active < timeoutString)
         user.status = 'offline';
 }

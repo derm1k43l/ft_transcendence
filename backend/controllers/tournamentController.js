@@ -194,7 +194,7 @@ const getTournamentsWonByUser = async (req, reply) => {
 			delete tournament.matches_data;
 		}
 
-		reply.send(wonTournaments);
+		reply.code(200).send(wonTournaments);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving won tournaments' });

@@ -3,7 +3,7 @@ const getAchievements = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
 		const achievements = db.prepare('SELECT * FROM achievements').all();
-		reply.send(achievements);
+		reply.code(200).send(achievements);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving achievements' });
@@ -28,7 +28,7 @@ const getAchievement = async (req, reply) => {
 			reply.code(403).send({ message: 'Forbidden: You can only view your own achievements.' });
 			return; // Stop processing
 		}
-		reply.send(achievement);
+		reply.code(200).send(achievement);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving achievement' });
@@ -49,7 +49,7 @@ const getUserAchievements = async (req, reply) => {
 	try {
 		const db = req.server.betterSqlite3;
 		const achievements = db.prepare('SELECT * FROM achievements WHERE user_id = ?').all(authenticatedUserId);
-		reply.send(achievements);
+		reply.code(200).send(achievements);
 	} catch (error) {
 		req.log.error(error);
 		reply.code(500).send({ message: 'Error retrieving user achievements' });

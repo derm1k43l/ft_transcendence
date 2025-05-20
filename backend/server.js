@@ -1,14 +1,3 @@
-/*
-TODO: 
-	add authentication to many schemas (add forbidden(when in controllers) and unauth errors(ALWAYS) to protected schemas)
-			general rule of thumb: Any route that deals with user-specific data or
-				performs an action on behalf of a specific authenticated user should require authentication.
-	so far achievements, chatMessages, friends & friend requests, game settings done
-	figure out how to make http into https (reverse proxy container, Caddy or Nginx?)
-	change tournament as requested (done?)
-	Look into simplifying match history, no longer needs tournament
-*/
-
 // const fastify = require('fastify')( {logger: true} );
 const fastify = require('fastify')( {logger: true, trustProxy: true } );
 const fs = require('fs'); //optional
@@ -17,6 +6,9 @@ const Database = require('better-sqlite3');
 const jwt = require('@fastify/jwt');
 const fastifyMultipart = require('@fastify/multipart');
 const fastifyStatic = require('@fastify/static');
+
+// const envPath = path.resolve(__dirname, '../.env'); // uncomment
+// require('dotenv').config({ path: envPath }); // load env vars
 
 const dbDir = path.resolve(__dirname, './db');
 
@@ -67,15 +59,24 @@ fastify.register(fastifyStatic, {
 	immutable: true,
 });
 
+// Retrieve the JWT secret from environment variables
+// const jwtSecret = process.env.JWT_SECRET; // uncomment
+
+// Check if the secret is set // uncomment
+// if (!jwtSecret) {
+// 	console.error("FATAL ERROR: JWT_SECRET environment variable is not set!");
+// 	process.exit(1);
+// }
+
 // create secret key (only need to run it once and copy the output and it's useable as the secret)
-const crypto = require('crypto'); // built into node.js
-const jwtSecret = crypto.randomBytes(32).toString('hex');
-console.log("Generated JWT Secret:", jwtSecret); //not used yet
+// const crypto = require('crypto'); // built into node.js
+// const jwtSecret = crypto.randomBytes(32).toString('hex');
+// console.log("Generated JWT Secret:", jwtSecret);
 
 // adding JWT registration
 fastify.register(jwt, {
 	secret: 'notsurehowthisworksyet!', // should be a secure random key (for testing for now)
-	// secret: jwtSecret, // like this?
+	// secret: jwtSecret, // uncomment
 });
 
 const cors = require('@fastify/cors');
