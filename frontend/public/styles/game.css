@@ -78,8 +78,8 @@
     border: 2px white solid;
     box-sizing: content-box;
 }
-    
-.paddle {
+
+.paddle__left, .paddle__right {
     width: 12px;
     height: 95px;
     position: absolute;
@@ -96,6 +96,24 @@
     right: 5px;
 }
 
+.paddle__top, .paddle__bottom {
+    position: absolute;
+    width: 95px;
+    height: 15px; 
+    background-color: white;
+    border-radius: 5px;
+    left: 475px;
+    transform: translateX(-50%);
+}
+
+.paddle__top {
+    top: 10px;
+}
+  
+.paddle__bottom {
+    bottom: 10px;
+}
+    
 .middle__line {
     position: absolute;
     left: 50%;
@@ -136,20 +154,20 @@
     align-items: center; /* Vertically center the content */
 }
 
-.score__left, .score__right {
+.score__left, .score__right, .score__bottom,.score__top {
     display: flex; /* Use flexbox for grouping */
     align-items: center; /* Vertically center the content */
     gap: 8px; /* Add spacing between score and player name */
 }
 
-#leftScore, #rightScore {
+#leftScore, #rightScore, #bottomScore, #topScore {
     width: 85px;
     display: inline-block;
     border: 3px solid;
     text-align: center;
 }
 
-#player1, #player2 {
+#player1, #player2, #player3, #player4 {
     font-size: 35px;
     text-align: center;
     max-width: 320px;
