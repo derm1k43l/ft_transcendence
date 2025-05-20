@@ -7,38 +7,38 @@ import { GameView } from './Game.js';
 import { PongGame } from "../game/PongGame.js";
 
 export class TournamentView {
-    private element: HTMLElement | null = null;
+	private element: HTMLElement | null = null;
 	private router: Router;
 	private game: PongGame | null = null;
 	private tournament: Tournament | null = null;
 
 	constructor(router: Router, userId?: string) {
-        this.router = router;
-    }
+		this.router = router;
+	}
 
-    async render(rootElement: HTMLElement): Promise<void> {
-        this.element = document.createElement('div');
-        this.element.className = 'tournament-page';
+	async render(rootElement: HTMLElement): Promise<void> {
+		this.element = document.createElement('div');
+		this.element.className = 'tournament-page';
 		this.element.id = 'tournament-view';
 
-        this.element.innerHTML = `
+		this.element.innerHTML = `
 			<div class="tournament-header">
-			    <h2>Tournament</h2>
-			    <p>Create and play a tournament!</p>
+				<h2>Tournament</h2>
+				<p>Create and play a tournament!</p>
 			</div>
 
 			<div class="tournament-container">
-			    <div class="tournament-content">
+				<div class="tournament-content">
 
 					<div id="header-info" class="center-content">
 						Create a tournament<br>
 						Choose how many players you want to play with
 					</div>
 					<div class="create-tournament">
-					    <div id="tournament-create-buttons" class="tournament-buttons">
-					        <button type="button" tournament-size="4">4 players</button>
-					        <button type="button" tournament-size="8">8 players</button>
-					    </div>
+						<div id="tournament-create-buttons" class="tournament-buttons">
+							<button type="button" tournament-size="4">4 players</button>
+							<button type="button" tournament-size="8">8 players</button>
+						</div>
 						<div id="userinput-container"></div>
 					</div>
 
@@ -46,7 +46,7 @@ export class TournamentView {
 						<div id="tournament-bracket" class="tournament"></div>
 						<div id="tournament-manage-buttons" class="tournament-buttons"></div>
 					</div>
-			    </div>
+				</div>
 			</div>
 		`;
 
@@ -168,12 +168,12 @@ export class TournamentView {
 			inputWrapper.className = 'input-structure';
 
 			const nameLabel = document.createElement('label');
-    		nameLabel.setAttribute('for', `input_${i + 1}`);
+			nameLabel.setAttribute('for', `input_${i + 1}`);
 
-    		const nameInput = document.createElement('input');
-    		nameInput.type = 'text';
-    		nameInput.id = `input_${i + 1}`;
-    		nameInput.placeholder = `Player ${i + 1}`;
+			const nameInput = document.createElement('input');
+			nameInput.type = 'text';
+			nameInput.id = `input_${i + 1}`;
+			nameInput.placeholder = `Player ${i + 1}`;
 
 			inputWrapper.appendChild(nameLabel);
 			inputWrapper.appendChild(nameInput);
@@ -359,8 +359,11 @@ export class TournamentView {
 		this.createManageButtons();
 	}
 
-    destroy(): void {
-        this.element?.remove();
-        this.element = null;
-    }
+	destroy(): void {
+		this.game?.destroy();
+		this.game = null;
+		console.log("Tournament game destroyed");
+		this.element?.remove();
+		this.element = null;
+	}
 }
