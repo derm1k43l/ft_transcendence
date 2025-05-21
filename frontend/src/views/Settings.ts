@@ -107,12 +107,11 @@ export class SettingsView {
                                         </label>
                                     </div>
                                     <div class="keybind-hint">
-                                        <span class="key">D</span> (Left Player)
+                                        <span class="key">D </span><span data-i18n="leftPlayer"></span>
                                         <br>
                                         <br>
-                                        <span class="key">←</span> (Right Player)
+                                        <span class="key">← </span><span data-i18n="rightPlayer"></span>
                                     </div>
-
                                     
                                     <div class="game-preview">
                                         <h5 data-i18n="preview">Preview</h5>

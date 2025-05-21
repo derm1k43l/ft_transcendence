@@ -104,7 +104,20 @@ export const translations: Record<Language, Record<string, string>> = {
         welcomeToChat: "Welcome to Chat",
         selectContact: "Select a contact to start chatting.",
         typeMessage: "Type a message...",
-        sendMessage: "Send"
+        sendMessage: "Send",
+        emailText: "No email provided",
+        noContacts: "No contacts",
+        noFriends: "You don't have any friends yet. Use the search to find other players.",
+        leftPlayer: " Left Player",
+        rightPlayer: " Right Player",
+        displayName: "Display Name",
+        editProfile: "Edit Profile",
+        saveChanges: "Submit Changes",
+        noFriendRequest: "You don't have any friend requests",
+        noMessage: "No messages yet. Start a conversation!",
+        noMessageYet: "No messages yet",
+        inviteToGame: "Invite to Game",
+        blockUser: "Block User",
     },
     spanish: {
         language: "Idioma",
@@ -212,7 +225,19 @@ export const translations: Record<Language, Record<string, string>> = {
         welcomeToChat: "Bienvenido al Chat",
         selectContact: "Selecciona un contacto para comenzar a chatear.",
         typeMessage: "Escribe un mensaje...",
-        sendMessage: "Enviar"
+        sendMessage: "Enviar",
+        emailText: "Correo electrónico no proporcionado",
+        noContacts: "Sin contactos",
+        noFriends: "Aún no tienes amigos. Usa la búsqueda para encontrar otros jugadores.",
+        leftPlayer: " Jugador Izquierdo",
+        rightPlayer: " Jugador Derecho",
+        displayName: "Nombre para mostrar",
+        saveChanges: "Guardar cambios",
+        noFriendRequest: "No tienes solicitudes de amistad",
+        noMessage: "¡Aún no hay mensajes. ¡Inicia una conversación!",
+        noMessageYet: "Aún no hay mensajes",
+        inviteToGame: "Invitar a Juego",
+        blockUser: "Bloquear usuario",
     },
     german: {
         language: "Sprache",
@@ -311,6 +336,7 @@ export const translations: Record<Language, Record<string, string>> = {
         bio: "Noch keine Biografie",
         editProfile: "Profil bearbeiten",
         achievementDesc: "Erfolgsbeschreibung",
+        achievementName: "Name der Leistung",
         gameResult: "Gewonnen/Verloren",
         loadMoreMatches: "Weitere Spiele laden",
         chatDescription: "Chaten Sie mit Ihren Freunden und anderen Spielern",
@@ -319,7 +345,19 @@ export const translations: Record<Language, Record<string, string>> = {
         welcomeToChat: "Willkommen im Chat",
         selectContact: "Wählen Sie einen Kontakt, um zu chatten.",
         typeMessage: "Nachricht eingeben...",
-        sendMessage: "Senden"
+        sendMessage: "Senden",
+        emailText: "Keine E-Mail-Adresse angegeben",
+        noContacts: "Keine Kontakte",
+        noFriends: "Du hast noch keine Freunde. Benutze die Suche, um andere Spieler zu finden.",
+        leftPlayer: " Linker Spieler",
+        rightPlayer: " Rechter Spieler",
+        displayName: "Anzeigename",
+        saveChanges: "Änderungen speichern",
+        noFriendRequest: "Du hast keine Freundschaftsanfragen",
+        noMessage: "Noch keine Nachrichten. Starte ein Gespräch!",
+        noMessageYet: "Noch keine Nachrichten",
+        inviteToGame: "Zum Spiel einladen",
+        blockUser: "Benutzer blockieren",
     }
 };
 
@@ -332,6 +370,13 @@ export function applyTranslations(language: Language) {
     elements.forEach(el => {
         const key = el.dataset.i18n!;
         const translatedText = translations[language][key] || translations["english"][key] || key;
-        el.textContent = translatedText;
+
+        // Update placeholder for input/textarea, otherwise set textContent
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
+            el.placeholder = translatedText;
+        if (el.hasAttribute('title'))
+            el.setAttribute('title', translatedText);
+        else
+            el.textContent = translatedText;
     });
 }

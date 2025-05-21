@@ -71,12 +71,12 @@ export class ProfileView {
                     </div>
                     <div class="profile-info">
                         <div class="profile-info-main">
-                            <h2 data-i18n="userName">${user.display_name}</h2>
+                            <h2>${user.display_name}</h2>
                             <p class="username">@${user.username}</p>
                             <p class="bio" ${user.bio ? `` : `data-i18n="bioEmpty"`}>${user.bio || 'No bio yet'}</p>
                             <div class="profile-meta">
                                 <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span> ${user.join_date || 'Unknown'}</span>
-                                <span><i class="fas fa-envelope"></i> ${user.email || 'No email provided'}</span>
+                                <span><i class="fas fa-envelope"></i>    <span data-i18n="emailText">${user.email || 'No email provided'}</span></span>
                             </div>
                         </div>
                         ${isOwnProfile ? 
@@ -165,8 +165,8 @@ export class ProfileView {
                                             <i class="${achievement.icon}"></i>
                                         </div>
                                         <div class="achievement-info">
-                                            <h4 data-i18n="achievementName">${achievement.name}</h4>
-                                            <p data-i18n="achievementDesc">${achievement.description}</p>
+                                            <h4">${achievement.name}</h4>
+                                             <p>${achievement.translations?.[this.currentUser!.language]?.description || achievement.description}</p>
                                             ${achievement.dateCompleted ? 
                                                 `<small data-i18n="completedOn">Completed on ${achievement.dateCompleted}</small>` : ''}
                                         </div>
@@ -339,7 +339,7 @@ export class ProfileView {
         this.modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Edit Profile</h3>
+                    <h3 data-i18n="editProfile">Edit Profile</h3>
                     <button class="modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -369,7 +369,7 @@ export class ProfileView {
                         
                         <!-- User Info -->
                         <div class="form-group">
-                            <label for="displayName">Display Name</label>
+                            <label for="displayName" data-i18n="displayName">Display Name</label>
                             <input type="text" id="displayName" name="displayName" value="${user.display_name}" required>
                         </div>
                         
@@ -379,14 +379,15 @@ export class ProfileView {
                         </div>
                         
                         <div class="form-actions">
-                            <button type="button" class="app-button secondary" id="cancel-edit">Cancel</button>
-                            <button type="submit" class="app-button" id="save-profile">Save Changes</button>
+                            <button type="button" class="app-button secondary" id="cancel-edit" data-i18n="cancel">Cancel</button>
+                            <button type="submit" class="app-button" id="save-profile" data-i18n="saveChanges">Save Changes</button>
                         </div>
                     </form>
                 </div>
             </div>
         `;
         document.body.appendChild(this.modal);
+        applyTranslations(this.currentUser!.language);
 
         // set up modal event listeners only once
 

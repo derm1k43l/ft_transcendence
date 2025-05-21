@@ -11,13 +11,14 @@ import {
     rejectFriendRequest,
     sendMessage
 } from '../services/UserService.js';
-import { currentUser } from '../main.js';
 import { applyTranslations } from './Translate.js';
+import { UserProfile } from '../types/index.js';
 
 export class FriendsView {
     private element: HTMLElement | null = null;
     private router: Router;
-    private currentUserId: number = currentUser?.id || -1; // get real user session
+    private currentUserId: number = -1;
+    private currentUser: UserProfile | null = null;
 
     constructor(router: Router) {
         this.router = router;
@@ -28,12 +29,13 @@ export class FriendsView {
         this.element.className = 'friends-view';
 
         try {
-            const currentUser = await Auth.getCurrentUser();
-            if (!currentUser) {
+            this.currentUser = await Auth.getCurrentUser();
+            if (!this.currentUser) {
                 this.element.innerHTML = '<p>User not found</p>';
                 rootElement.appendChild(this.element);
                 return;
             }
+            this.currentUserId = this.currentUser.id;
 
             // Create the UI with layout matching Settings style
             this.element.innerHTML = `
@@ -45,7 +47,7 @@ export class FriendsView {
                 <div class="friends-container">
                     <div class="friends-sidebar">
                         <div class="friends-search">
-                            <input type="text" id="friend-search" placeholder="Search for users..." data-i18n="searchForUsers">
+                            <input type="text" id="friend-search" data-i18n="searchForUsers" placeholder="Search for users...">
                             <button id="search-button" class="app-button" data-i18n="search">Search</button>
                         </div>
 
@@ -84,7 +86,7 @@ export class FriendsView {
             `;
 
             rootElement.appendChild(this.element);
-            applyTranslations(currentUser.language);
+            applyTranslations(this.currentUser.language);
 
             // Setup event handlers
             this.setupEventListeners();
@@ -166,7 +168,7 @@ export class FriendsView {
             const friendsGrid = this.element?.querySelector('#friends-grid');
             const friendsCount = this.element?.querySelector('#friends-count');
             
-            if (!friendsGrid || !currentUser) return;
+            if (!friendsGrid || !this.currentUser) return;
         
             const friends = await getFriendsList(this.currentUserId);
         
@@ -176,7 +178,8 @@ export class FriendsView {
             }
 
             if (!friends || friends.length === 0) {
-                friendsGrid.innerHTML = '<p class="chat-welcome">You don\'t have any friends yet. Use the search to find other players.</p>';
+                friendsGrid.innerHTML = '<p class="chat-welcome" data-i18n="noFriends">You don\'t have any friends yet. Use the search to find other players.</p>';
+                applyTranslations(this.currentUser.language);
                 return;
             }
 
@@ -268,7 +271,8 @@ export class FriendsView {
             }
             
             if (pendingRequests.length === 0) {
-                requestsList.innerHTML = '<p class="chat-welcome">You don\'t have any friend requests.</p>';
+                requestsList.innerHTML = '<p class="chat-welcome" data-i18n="noFriendRequest">You don\'t have any friend requests.</p>';
+                applyTranslations(this.currentUser!.language);
                 return;
             }
             
