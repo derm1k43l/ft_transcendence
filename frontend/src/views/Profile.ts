@@ -5,6 +5,7 @@ import { UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
 import { DEFAULT_ACHIEVEMENTS } from '../constants/defaults.js';
+import { applyTranslations } from './Translate.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;
@@ -66,21 +67,21 @@ export class ProfileView {
                     </div>
                     <div class="profile-info">
                         <div class="profile-info-main">
-                            <h2>${user.display_name}</h2>
+                            <h2 data-i18n="userName">${user.display_name}</h2>
                             <p class="username">@${user.username}</p>
-                            <p class="bio">${user.bio || 'No bio yet'}</p>
+                            <p class="bio" data-i18n="bio">${user.bio || 'No bio yet'}</p>
                             <div class="profile-meta">
-                                <span><i class="fas fa-calendar-alt"></i> Member since: ${user.join_date || 'Unknown'}</span>
+                                <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span> ${user.join_date || 'Unknown'}</span>
                                 <span><i class="fas fa-envelope"></i> ${user.email || 'No email provided'}</span>
                             </div>
                         </div>
                         ${isOwnProfile ? 
                             `<button class="app-button" id="profile-edit-btn">
-                                <i class="fas fa-edit"></i> Edit Profile
+                                <i class="fas fa-edit"></i> <span data-i18n="editProfile">Edit Profile</span>
                             </button>` :
                             `${isFriend?
                                 `` : `<button class="app-button" id="add-friend-btn">
-                                    <i class="fas fa-user-plus"></i> Add Friend
+                                    <i class="fas fa-user-plus"></i> <span data-i18n="addFriend">Add Friend</span>
                                 </button>`
                             }`
                         }
@@ -107,7 +108,7 @@ export class ProfileView {
                                     <i class="fas fa-medal"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h4>Rank</h4>
+                                    <h4 data-i18n="rank">Rank</h4>
                                     <div class="stat-value">${user.stats?.rank || '-'}</div>
                                 </div>
                             </div>
@@ -116,7 +117,7 @@ export class ProfileView {
                                     <i class="fas fa-level-up-alt"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h4>Level</h4>
+                                    <h4 data-i18n="level">Level</h4>
                                     <div class="stat-value">${user.stats?.level || 1}</div>
                                 </div>
                             </div>
@@ -125,7 +126,7 @@ export class ProfileView {
                                     <i class="fas fa-gamepad"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h4>Games</h4>
+                                    <h4 data-i18n="games">Games</h4>
                                     <div class="stat-value">${user.stats.played}</div>
                                 </div>
                             </div>
@@ -134,7 +135,7 @@ export class ProfileView {
                                     <i class="fas fa-percentage"></i>
                                 </div>
                                 <div class="stat-info">
-                                    <h4>Win Rate</h4>
+                                    <h4 data-i18n="winRate">Win Rate</h4>
                                     <div class="stat-value">${user.stats.winrate}%</div>
                                 </div>
                             </div>
@@ -144,7 +145,7 @@ export class ProfileView {
                     <!-- Achievements (right column) -->
                     <div class="profile-achievements card" style="grid-column: span 6;">
                         <div class="card-header">
-                            <h3>Achievements</h3>
+                            <h3 data-i18n="achievements">Achievements</h3>
                             <div class="card-actions">
                                 <span class="progress-text">
                                     ${user.achievements ? 
@@ -160,17 +161,17 @@ export class ProfileView {
                                             <i class="${achievement.icon}"></i>
                                         </div>
                                         <div class="achievement-info">
-                                            <h4>${achievement.name}</h4>
-                                            <p>${achievement.description}</p>
+                                            <h4 data-i18n="achievementName">${achievement.name}</h4>
+                                            <p data-i18n="achievementDesc">${achievement.description}</p>
                                             ${achievement.dateCompleted ? 
-                                                `<small>Completed on ${achievement.dateCompleted}</small>` : ''}
+                                                `<small data-i18n="completedOn">Completed on ${achievement.dateCompleted}</small>` : ''}
                                         </div>
                                         <div class="achievement-status ${achievement.completed ? 'completed' : 'incomplete'}">
                                             <i class="fas ${achievement.completed ? 'fa-check-circle' : 'fa-clock'}"></i>
                                         </div>
                                     </div>
                                 `).join('') :
-                                '<p class="no-achievements">No achievements yet</p>'
+                                '<p class="no-achievements" data-i18n="noAchievements">No achievements yet</p>'
                             }
                         </div>
                     </div>
@@ -178,7 +179,7 @@ export class ProfileView {
                     <!-- Match History (full width below) -->
                     <div class="profile-match-history card recent-activity" style="grid-column: span 12;">
                         <div class="card-header">
-                            <h3>Match History</h3>
+                            <h3 data-i18n="matchHistory">Match History</h3>
                         </div>
                         <div class="activity-list" id="match-list">
                             ${user.match_history && user.match_history.length > 0 ? 
@@ -189,7 +190,7 @@ export class ProfileView {
                                         </div>
                                         <div class="activity-details">
                                             <div class="activity-primary">
-                                                <span class="game-result">${match.result === 'win' ? 'Won' : 'Lost'} against ${match.opponent_name}</span>
+                                                <span class="game-result" data-i18n="gameResult">${match.result === 'win' ? 'Won' : 'Lost'} against ${match.opponent_name}</span>
                                                 <span class="game-score">${match.score}</span>
                                             </div>
                                             <div class="activity-meta">
@@ -199,16 +200,17 @@ export class ProfileView {
                                         </div>
                                     </div>
                                 `).join('') : 
-                                '<p class="no-activity">No matches played yet</p>'
+                                '<p class="no-activity" data-i18n="noMatches">No matches played yet</p>'
                             }
                         </div>
                         ${user.match_history && user.match_history.length > 5 ? 
-                            `<a href="#" class="view-all-link" id="load-more-matches">Load More Matches</a>` : ''}
+                            `<a href="#" class="view-all-link" id="load-more-matches" data-i18n="loadMoreMatches">Load More Matches</a>` : ''}
                     </div>
                 </div>
             </div>
             `;
-
+        
+        applyTranslations(window.currentLanguage || "english");
         // Setup event listeners
         this.setupEventListeners(isOwnProfile, user);
         } catch (error) {

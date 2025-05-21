@@ -4,6 +4,7 @@ import { getAllUsers } from '../services/UserService.js';
 import { UserProfile } from '../types/index.js';
 import { getCurrentUser } from '../services/auth.js';
 import { DEFAULT_ACHIEVEMENTS, DEFAULT_STATS } from '../constants/defaults.js';
+import { applyTranslations } from './Translate.js';
 
 export class DashboardView {
     private element: HTMLElement | null = null;
@@ -34,8 +35,8 @@ export class DashboardView {
 
             this.element.innerHTML = `
                 <div class="dashboard-header">
-                    <h2>Welcome back, ${user.display_name}!</h2>
-                    <p class="last-login">Last login: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                    <h2 data-i18n="welcomeBack">Welcome back, ${user.display_name}!</h2>
+                    <p class="last-login" data-i18n="lastLogin">Last login: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
                 </div>
                 
                 <div class="dashboard-content">
@@ -57,7 +58,7 @@ export class DashboardView {
                                 <i class="fas fa-medal"></i>
                             </div>
                             <div class="stat-info">
-                                <h4>Rank</h4>
+                                <h4 data-i18n="rank">Rank</h4>
                                 <div class="stat-value">${user.stats.rank}</div>
                             </div>
                         </div>
@@ -66,7 +67,7 @@ export class DashboardView {
                                 <i class="fas fa-trophy"></i>
                             </div>
                             <div class="stat-info">
-                                <h4>Wins</h4>
+                                <h4 data-i18n="wins">Wins</h4>
                                 <div class="stat-value">${user.stats.wins}</div>
                             </div>
                         </div>
@@ -75,7 +76,7 @@ export class DashboardView {
                                 <i class="fas fa-times-circle"></i>
                             </div>
                             <div class="stat-info">
-                                <h4>Losses</h4>
+                                <h4 data-i18n="losses">Losses</h4>
                                 <div class="stat-value">${user.stats.losses}</div>
                             </div>
                         </div>
@@ -84,7 +85,7 @@ export class DashboardView {
                                 <i class="fas fa-percentage"></i>
                             </div>
                             <div class="stat-info">
-                                <h4>Win Rate</h4>
+                                <h4 data-i18n="winrate">Win Rate</h4>
                                 <div class="stat-value">${user.stats.winrate}%</div>
                             </div>
                         </div>
@@ -92,11 +93,11 @@ export class DashboardView {
                     
                     <!-- Game Statistics with Pie Chart -->
                     <div class="game-stats card">
-                        <h3>Game Statistics</h3>
+                        <h3 data-i18n="gameStatistics">Game Statistics</h3>
                         ${user.stats.wins + user.stats.losses > 0 ? `
                         <div class="stats-charts-container">
                             <div class="donut-chart-container">
-                                <h4>Game Results</h4>
+                                <h4 data-i18n="gameResults">Game Results</h4>
                                 <canvas id="results-chart" width="100" height="100"></canvas>
                                 <div class="chart-legend">
                                     <span class="legend-item"><span class="color-box win"></span> Wins (${user.stats?.wins || 0})</span>
@@ -104,21 +105,21 @@ export class DashboardView {
                                 </div>
                             </div>
                             <div class="progress-chart-container">
-                                <h4>Win Rate</h4>
+                                <h4 data-i18n="winRate">Win Rate</h4>
                                 <div class="progress-container">
                                     <div class="progress-bar" style="width: ${user.stats.winrate}%">
                                         <span class="progress-text">${user.stats.winrate}%</span>
                                     </div>
                                 </div>
-                                <p class="progress-label">Based on ${user.stats.played} games played</p>
+                                <p class="progress-label" data-i18n="basedOn">Based on ${user.stats.played} games played</p>
                             </div>
                         </div>
-                        ` : '<p class="no-activity">No matches played yet</p>'}
+                        ` : '<p class="no-activity" data-i18n="noActivity">No matches played yet</p>'}
                     </div>
                     
                     <!-- Performance Overview with Bar Chart -->
                     <div class="activity-chart card">
-                        <h3>Performance Overview</h3>
+                        <h3 data-i18n="performanceOverview">Performance Overview</h3>
                         ${user.stats.wins + user.stats.losses > 0 ? `
                         <div class="chart-container">
                             <canvas id="performance-chart" width="100%" height="250"></canvas>
@@ -126,19 +127,19 @@ export class DashboardView {
                         <div class="stat-cards">
                             <div class="stat-card">
                                 <div class="stat-card-value">${user.stats.level}</div>
-                                <div class="stat-card-label">Level</div>
+                                <div class="stat-card-label" data-i18n="level">Level</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-card-value">${user.stats.played}</div>
-                                <div class="stat-card-label">Total Games</div>
+                                <div class="stat-card-label" data-i18n="totalGames">Total Games</div>
                             </div>
                         </div>
-                        ` : '<p class="no-activity">No matches played yet</p>'}
+                        ` : '<p class="no-activity" data-i18n="noActivity">No matches played yet</p>'}
                     </div>
                     
                     <!-- Recent Activity -->
                     <div class="recent-activity card">
-                        <h3>Recent Activity</h3>
+                        <h3 data-i18n="recentActivity">Recent Activity</h3>
                         <div class="activity-list">
                             ${user.match_history && user.match_history.length > 0 ? 
                                 user.match_history.slice(0, 5).map(match => `
@@ -148,7 +149,7 @@ export class DashboardView {
                                         </div>
                                         <div class="activity-details">
                                             <div class="activity-primary">
-                                                <span class="game-result">${match.result === 'win' ? 'Won' : 'Lost'} against ${match.opponent_name}</span>
+                                                <span class="game-result" data-i18n="${match.result === 'win' ? 'won' : 'lost'}">${match.result === 'win' ? 'Won' : 'Lost'} against ${match.opponent_name}</span>
                                                 <span class="game-score">${match.score}</span>
                                             </div>
                                             <div class="activity-meta">
@@ -158,25 +159,25 @@ export class DashboardView {
                                         </div>
                                     </div>
                                 `).join('') : 
-                                '<p class="no-activity">No recent matches</p>'
+                                '<p class="no-activity" data-i18n="noActivity">No recent matches</p>'
                             }
                         </div>
-                        <a href="#/profile" class="view-all-link">View all activity</a>
+                        <a href="#/profile" class="view-all-link" data-i18n="viewAllActivity">View all activity</a>
                     </div>
                     
                     <!-- Top Players -->
                     <div class="top-players card">
-                        <h3>Top Players</h3>
+                        <h3 data-i18n="topPlayers">Top Players</h3>
                         <div class="tabs">
-                            <button class="tab active" data-tab="wins">By Wins</button>
-                            <button class="tab" data-tab="winrate">By Win Rate</button>
+                            <button class="tab active" data-tab="wins" data-i18n="byWins">By Wins</button>
+                            <button class="tab" data-tab="winrate" data-i18n="byWinrate">By Win Rate</button>
                         </div>
                         <div class="tab-content" id="leaderboard-tab-content">
                             <div class="tab-pane active" id="wins-leaderboard">
-                                <div class="leaderboard-loading">Loading leaderboard...</div>
+                                <div class="leaderboard-loading" data-i18n="loadingLeaderboard">Loading leaderboard...</div>
                             </div>
                             <div class="tab-pane" id="winrate-leaderboard">
-                                <div class="leaderboard-loading">Loading leaderboard...</div>
+                                <div class="leaderboard-loading" data-i18n="loadingLeaderboard">Loading leaderboard...</div>
                             </div>
                         </div>
                     </div>
@@ -184,7 +185,7 @@ export class DashboardView {
             `;
 
             rootElement.appendChild(this.element);
-
+            applyTranslations(window.currentLanguage || "english");
             // Load Chart.js and initialize charts
             this.loadChartJS().then(() => {
                 this.initializeCharts(user);

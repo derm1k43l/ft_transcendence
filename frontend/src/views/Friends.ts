@@ -12,6 +12,7 @@ import {
     sendMessage
 } from '../services/UserService.js';
 import { currentUser } from '../main.js';
+import { applyTranslations } from './Translate.js';
 
 export class FriendsView {
     private element: HTMLElement | null = null;
@@ -37,45 +38,45 @@ export class FriendsView {
             // Create the UI with layout matching Settings style
             this.element.innerHTML = `
                 <div class="friends-header">
-                    <h2>Friends</h2>
-                    <p>Connect with other players and manage your friend list</p>
+                    <h2 data-i18n="friends">Friends</h2>
+                    <p data-i18n="connectWithPlayers">Connect with other players and manage your friend list</p>
                 </div>
-                
+
                 <div class="friends-container">
                     <div class="friends-sidebar">
                         <div class="friends-search">
-                            <input type="text" id="friend-search" placeholder="Search for users...">
-                            <button id="search-button" class="app-button">Search</button>
+                            <input type="text" id="friend-search" placeholder="Search for users..." data-i18n="searchForUsers">
+                            <button id="search-button" class="app-button" data-i18n="search">Search</button>
                         </div>
-                        
+
                         <ul class="friends-nav">
-                            <li><a href="#all-friends" class="active" data-tab="friends-list">My Friends <span class="friends-count" id="friends-count"></span></a></li>
-                            <li><a href="#requests" data-tab="requests">Friend Requests <span class="friends-count" id="request-count"></span></a></li>
+                            <li><a href="#all-friends" class="active" data-tab="friends-list" data-i18n="myFriends">My Friends <span class="friends-count" id="friends-count"></span></a></li>
+                            <li><a href="#requests" data-tab="requests" data-i18n="friendRequests">Friend Requests <span class="friends-count" id="request-count"></span></a></li>
                         </ul>
                     </div>
-                    
+
                     <div class="friends-content">
                         <div id="friends-list" class="friends-panel active">
-                            <h3>My Friends</h3>
+                            <h3 data-i18n="myFriends">My Friends</h3>
                             <div class="friends-grid" id="friends-grid">
                                 <!-- Friends will be loaded here -->
-                                <div class="loading-spinner">Loading friends...</div>
+                                <div class="loading-spinner" data-i18n="loadingFriends">Loading friends...</div>
                             </div>
                         </div>
-                        
+
                         <div id="requests" class="friends-panel">
-                            <h3>Incoming Friend Requests</h3>
+                            <h3 data-i18n="incomingFriendRequests">Incoming Friend Requests</h3>
                             <div class="requests-list" id="requests-list">
                                 <!-- Friend requests will be loaded here -->
-                                <div class="loading-spinner">Loading requests...</div>
+                                <div class="loading-spinner" data-i18n="loadingRequests">Loading requests...</div>
                             </div>
                         </div>
-                        
+
                         <div id="search-results" class="friends-panel search-results-panel">
-                            <h3>Search Results</h3>
+                            <h3 data-i18n="searchResults">Search Results</h3>
                             <div class="search-results-container" id="search-results-container">
                                 <!-- Search results will appear here -->
-                                <p>Search for users to add them as friends</p>
+                                <p data-i18n="searchForAddFriends">Search for users to add them as friends</p>
                             </div>
                         </div>
                     </div>
@@ -83,7 +84,8 @@ export class FriendsView {
             `;
 
             rootElement.appendChild(this.element);
-            
+            applyTranslations(window.currentLanguage || "english");
+
             // Setup event handlers
             this.setupEventListeners();
             

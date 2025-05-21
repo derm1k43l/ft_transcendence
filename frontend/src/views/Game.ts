@@ -2,6 +2,7 @@ import { Router } from "../core/router";
 import { PongGame } from "../game/PongGame.js";
 import { SquareGame } from "../game/SquareGame.js";
 import { NotificationManager } from '../components/Notification.js';
+import { applyTranslations } from './Translate.js';
 
 // The GameView class is responsible for rendering the game view and handling user input to start the game
 export class GameView {
@@ -17,19 +18,21 @@ export class GameView {
     render(container: HTMLElement) {
         container.innerHTML = `
             <div id="modeContainer">
-                <button id="singleplayerButton">Play Against AI</button>
-                <button id="multiplayerButton">Multiplayer</button>
+                <button id="singleplayerButton" data-i18n="playAgainstAI">Play Against AI</button>
+                <button id="multiplayerButton" data-i18n="multiplayer">Multiplayer</button>
             </div>
             <div id="playerInputModal" style="display: none;">
                 <div id="playerCountSelection" style="display: none;">
-                    <p>Select number of players:</p>
-                    <button id="twoPlayerButton">2 Players</button>
-                    <button id="fourPlayerButton">4 Players</button>
+                    <p data-i18n="selectPlayers">Select number of players:</p>
+                    <button id="twoPlayerButton" data-i18n="twoPlayers">2 Players</button>
+                    <button id="fourPlayerButton" data-i18n="fourPlayers">4 Players</button>
                 </div>
             </div>
             <div id="game-container"></div>
         `;
-    
+        
+        applyTranslations(window.currentLanguage || "english");
+        
         // Querying DOM elements
         const modeContainer = container.querySelector('#modeContainer') as HTMLElement;
         const singleplayerButton = container.querySelector('#singleplayerButton') as HTMLButtonElement;

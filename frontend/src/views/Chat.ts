@@ -15,6 +15,7 @@ import { ChatMessage, UserProfile } from '../types/index.js';
 import { NotificationManager } from '../components/Notification.js';
 import { getCurrentUser } from '../services/auth.js';
 import { NULL_USER } from '../constants/defaults.js';
+import { applyTranslations } from './Translate.js';
 
 export class ChatView {
     private element: HTMLElement | null = null;
@@ -50,19 +51,19 @@ export class ChatView {
         // Create the UI with a style similar to Settings view
         this.element.innerHTML = `
             <div class="chat-header">
-                <h2>Chat</h2>
-                <p>Chat with your friends and other players</p>
+                <h2 data-i18n="chat">Chat</h2>
+                <p data-i18n="chatDescription">Chat with your friends and other players</p>
             </div>
             
             <div class="chat-container">
                 <div class="chat-sidebar">
                     <div class="chat-search">
-                        <input type="text" placeholder="Filter contacts..." id="chat-search">
+                        <input type="text" placeholder="Filter contacts..." id="chat-search" data-i18n="filterContacts">
                     </div>
                     
                     <div class="chat-contacts" id="chat-contacts">
                         <!-- Contacts will be loaded here -->
-                        <div class="loading-spinner">Loading conversations...</div>
+                        <div class="loading-spinner" data-i18n="loadingConversations">Loading conversations...</div>
                     </div>
                 </div>
                 
@@ -71,8 +72,8 @@ export class ChatView {
                     <div class="chat-panel welcome-panel active" id="welcome-panel">
                         <div class="chat-welcome">
                             <i class="fas fa-comments"></i>
-                            <h3>Welcome to Chat</h3>
-                            <p>Select a contact to start chatting.</p>
+                            <h3 data-i18n="welcomeToChat">Welcome to Chat</h3>
+                            <p data-i18n="selectContact">Select a contact to start chatting.</p>
                         </div>
                     </div>
                     
@@ -87,8 +88,8 @@ export class ChatView {
                         </div>
                         
                         <div class="chat-input">
-                            <input type="text" placeholder="Type a message..." id="message-input">
-                            <button id="send-button" class="app-button">
+                            <input type="text" placeholder="Type a message..." id="message-input" data-i18n="typeMessage">
+                            <button id="send-button" class="app-button" data-i18n="sendMessage">
                                 <i class="fas fa-paper-plane"></i> Send
                             </button>
                         </div>
@@ -98,7 +99,8 @@ export class ChatView {
         `;
 
         rootElement.appendChild(this.element);
-        
+        applyTranslations(window.currentLanguage || "english");
+
         await this.renderContacts();
         await this.setupEventListeners();
         await this.renderActiveChat();
