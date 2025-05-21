@@ -109,7 +109,10 @@ export const translations: Record<Language, Record<string, string>> = {
         noContacts: "No contacts",
         noFriends: "You don't have any friends yet. Use the search to find other players.",
         leftPlayer: " Left Player",
-        rightPlayer: " Right Player"
+        rightPlayer: " Right Player",
+        displayName: "Display Name",
+        editProfile: "Edit Profile",
+        saveChanges: "Submit Changes",
     },
     spanish: {
         language: "Idioma",
@@ -222,7 +225,9 @@ export const translations: Record<Language, Record<string, string>> = {
         noContacts: "Sin contactos",
         noFriends: "Aún no tienes amigos. Usa la búsqueda para encontrar otros jugadores.",
         leftPlayer: " Jugador Izquierdo",
-        rightPlayer: " Jugador Derecho"
+        rightPlayer: " Jugador Derecho",
+        displayName: "Nombre para mostrar",
+        saveChanges: "Guardar cambios",
     },
     german: {
         language: "Sprache",
@@ -335,7 +340,9 @@ export const translations: Record<Language, Record<string, string>> = {
         noContacts: "Keine Kontakte",
         noFriends: "Du hast noch keine Freunde. Benutze die Suche, um andere Spieler zu finden.",
         leftPlayer: " Linker Spieler",
-        rightPlayer: " Rechter Spieler"
+        rightPlayer: " Rechter Spieler",
+        displayName: "Anzeigename",
+        saveChanges: "Änderungen speichern"
     }
 };
 
