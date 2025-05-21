@@ -30,12 +30,15 @@ export class ProfileView {
 
     async render(rootElement: HTMLElement): Promise<void> {
         try {
+        console.log("--- RENDERING PROFILE VIEW ---");
             this.element = document.createElement('div');
             this.element.className = 'profile-view';
 
             this.currentUser = await getCurrentUser();
             if (!this.currentUser) return;
             this.currentUserId = this.currentUser.id;
+            if (this.profileUserId <= 0)
+                this.profileUserId = this.currentUser?.id;
 
             // Show loading state
             this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
