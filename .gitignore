@@ -42,8 +42,5 @@ coverage/
 # Typescript cache
 *.tsbuildinfo
 
-# .json package
-package-lock.json
-
 # ssl 
 /certs/

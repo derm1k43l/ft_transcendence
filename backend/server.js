@@ -7,8 +7,8 @@ const jwt = require('@fastify/jwt');
 const fastifyMultipart = require('@fastify/multipart');
 const fastifyStatic = require('@fastify/static');
 
-// const envPath = path.resolve(__dirname, '../.env'); // uncomment
-// require('dotenv').config({ path: envPath }); // load env vars
+const envPath = path.resolve(__dirname, '../.env'); // uncomment
+require('dotenv').config({ path: envPath }); // load env vars
 
 const dbDir = path.resolve(__dirname, './db');
 
@@ -60,23 +60,18 @@ fastify.register(fastifyStatic, {
 });
 
 // Retrieve the JWT secret from environment variables
-// const jwtSecret = process.env.JWT_SECRET; // uncomment
+const jwtSecret = process.env.JWT_SECRET; // uncomment
 
 // Check if the secret is set // uncomment
-// if (!jwtSecret) {
-// 	console.error("FATAL ERROR: JWT_SECRET environment variable is not set!");
-// 	process.exit(1);
-// }
-
-// create secret key (only need to run it once and copy the output and it's useable as the secret)
-// const crypto = require('crypto'); // built into node.js
-// const jwtSecret = crypto.randomBytes(32).toString('hex');
-// console.log("Generated JWT Secret:", jwtSecret);
+if (!jwtSecret) {
+	console.error("FATAL ERROR: JWT_SECRET environment variable is not set!");
+	process.exit(1);
+}
 
 // adding JWT registration
 fastify.register(jwt, {
-	secret: 'notsurehowthisworksyet!', // should be a secure random key (for testing for now)
-	// secret: jwtSecret, // uncomment
+	// secret: 'notsurehowthisworksyet!', // should be a secure random key (for testing for now)
+	secret: jwtSecret, // uncomment
 });
 
 const cors = require('@fastify/cors');
@@ -116,7 +111,7 @@ fastify.register(require('./routes/chatMessagesRoutes'), { prefix: 'api/chat-mes
 fastify.register(require('./routes/notificationsRoutes'), { prefix: '/api/notifications' });
 fastify.register(require('./routes/tournamentRoutes'), { prefix: '/api/tournament' });
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // This hook runs after plugins are registered
 fastify.after((err) => {

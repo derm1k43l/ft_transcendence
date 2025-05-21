@@ -20,11 +20,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000"
-      # - "3000:3000"
-      # - "3443:3443" # HTTPS port
     volumes:
       - backend_data:/app/db
-      - ./certs:/app/certs
       - ./.env:/app/.env
     environment:
       - NODE_ENV=production
@@ -39,11 +36,8 @@ services:
     restart: unless-stopped
     ports:
       - "8080"
-      # - "8080:8080"
-      # - "8443:8443" # HTTPS port
     volumes:
       - frontend_data:/app/public
-      - ./certs:/app/certs
       - ./.env:/app/.env
     env_file:
       - ./.env

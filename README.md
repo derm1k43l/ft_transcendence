@@ -9,7 +9,6 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 
 ### User Management:
 - **Major**: Standard user management (registration, profiles, avatars, stats)
-- **Major**: Google Sign-in authentication
 
 ### Gameplay:
 - **Major**: Multiplayer (more than 2 players in the same game).
@@ -21,10 +20,8 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 - **Minor**: User and game statistics dashboards
 
 ### Accessibility:
-- **Minor**: Cross-device compatibility
 - **Minor**: Multi-browser support
-
-8,5 > 7
+- **Minor**: Supports multiple languages.
 
 ## Table of Contents
 - [Technologies](#technologies)
@@ -46,7 +43,7 @@ A real-time multiplayer Pong game with chat features, user profiles, authenticat
 ### Backend 
 - **Framework**: Fastify with Node.js
 - **Database**: SQLite
-- **Authentication**: JWT, Google OAuth 2.0, 2FA
+- **Authentication**: JWT
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
@@ -58,13 +55,11 @@ Our chat implementation allows users to:
 - Block unwanted communications from specific users
 - Invite friends to play games directly from the chat interface
 - Receive tournament notifications and updates
-- Access player profiles through convenient links in the chat
 
 ## Features
 
 ### Core
 - Single-page application with browser navigation support
-- Responsive design for all devices
 - Cross-browser compatibility
 
 ### User Experience
@@ -74,7 +69,6 @@ Our chat implementation allows users to:
 - Friend management system
 
 ### Gameplay
-- AI opponents with varying difficulty levels
 - Tournament system with rankings
 - Game customization options
 - Match history and statistics
@@ -87,7 +81,6 @@ Our chat implementation allows users to:
 
 ### Security
 - JWT authentication
-- CSRF protection
 - Input validation and sanitization
 
 ## Getting Started
@@ -100,7 +93,7 @@ Our chat implementation allows users to:
 - git clone https://github.com/derm1k43l/ft_transcendence
 - cd ft_transcendence
 - make
-- visit http://localhost:8080
+- visit https://localhost
 
 ## Commits format
 - \+ | Added something 
