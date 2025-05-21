@@ -54,8 +54,6 @@ export class ProfileView {
             // Check if viewing own profile
             const isOwnProfile = this.profileUserId === this.currentUserId;
             const isFriend = await getFriendStatus(this.currentUserId, this.profileUserId);
-            console.log('own profile: ', isOwnProfile);
-            console.log('is friend: ', isFriend);
 
             this.element.innerHTML = `
             <div class="profile-view">
@@ -69,7 +67,7 @@ export class ProfileView {
                         <div class="profile-info-main">
                             <h2 data-i18n="userName">${user.display_name}</h2>
                             <p class="username">@${user.username}</p>
-                            <p class="bio" data-i18n="bio">${user.bio || 'No bio yet'}</p>
+                            <p class="bio" ${user.bio ? `` : `data-i18n="bioEmpty"`}>${user.bio || 'No bio yet'}</p>
                             <div class="profile-meta">
                                 <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span> ${user.join_date || 'Unknown'}</span>
                                 <span><i class="fas fa-envelope"></i>    <span data-i18n="emailText">${user.email || 'No email provided'}</span></span>
@@ -209,7 +207,6 @@ export class ProfileView {
                 </div>
             </div>
             `;
-        
         applyTranslations(window.currentLanguage || "english");
         // Setup event listeners
         this.setupEventListeners(isOwnProfile, user);
@@ -328,6 +325,7 @@ export class ProfileView {
     }
 
     private initEditProfileModal(user: any): void {
+        console.log("INIT MODAL");
         this.modal = document.createElement('div');
         this.modal.id = 'profile-edit-modal';
         this.modal.className = 'modal';
@@ -395,6 +393,10 @@ export class ProfileView {
         const closeButton = this.modal.querySelector('.modal-close') as HTMLButtonElement;
         const cancelButton = document.getElementById('cancel-edit') as HTMLButtonElement;
 
+        if (coverUpload)
+            console.log(' add listener: coverUpload');
+        else
+            console.log('not exist: coverUpload');
         this.addListener({
             element: coverUpload,
             event: 'change',
@@ -404,10 +406,14 @@ export class ProfileView {
                 const file = fileInput?.files[0];
                 const url = await uploadCover(user.id, file);
                 document.querySelector('.cover-preview')?.setAttribute('style', `background-image: url(${url})`);
-                document.querySelector('.profile-cover')?.setAttribute('style', `background-image: url(${url})`);
+                document.querySelector('.profile-cover')?.setAttribute('style', `background-image: url(${url})`); console.log('called listener: coverUpload');
             }
         });
 
+        if (avatarUpload)
+            console.log(' add listener: avatarUpload');
+        else
+            console.log('not exist: avatarUpload');
         this.addListener({
             element: avatarUpload,
             event: 'change',
@@ -418,10 +424,14 @@ export class ProfileView {
                 const url = await uploadAvatar(user.id, file);
                 document.querySelector('.avatar')?.setAttribute('src', url);
                 document.querySelector('.profile-avatar')?.setAttribute('src', url);
-                document.querySelector('.edit-avatar-preview')?.setAttribute('src', url);
+                document.querySelector('.edit-avatar-preview')?.setAttribute('src', url); console.log('called listener: avatarUpload');
             }
         });
 
+        if (form)
+            console.log(' add listener: form');
+        else
+            console.log('not exist: form');
         this.addListener({
             element: form,
             event: 'submit',
@@ -444,9 +454,15 @@ export class ProfileView {
                     });
                     if (this.modal) this.modal.style.display = 'none';
                     // this.router.reload();
-                    document.querySelector('.bio')!.innerHTML = bio ? bio : 'No bio yet';
+                    const bioElement = document.querySelector('.bio')!;
+                    bioElement.innerHTML = bio ? bio : 'No bio yet';
+                    if (bio)
+                        bioElement.removeAttribute('data-i18n');
+                    else
+                        bioElement.setAttribute('data-i18n', 'bioEmpty');
                     document.querySelector('.user-profile > .username')!.innerHTML = displayName;
                     document.querySelector('.profile-info-main > h2')!.innerHTML = displayName;
+                    applyTranslations(window.currentLanguage || "english");
                 } else {
                     NotificationManager.show({
                         title: 'Error',
@@ -460,25 +476,37 @@ export class ProfileView {
                     saveButton.innerHTML = 'Save Changes';
                     saveButton.removeAttribute('disabled');
                 }
-            }
+             console.log('called listener: form');}
         });
 
+        if (closeButton)
+            console.log(' add listener: closeButton');
+        else
+            console.log('not exist: closeButton');
         this.addListener({
             element: closeButton,
             event: 'click',
-            handler: async () => {this.modal!.style.display = 'none';}
+            handler: async () => {this.modal!.style.display = 'none'; console.log('called listener: closeButton');}
         });
 
+        if (cancelButton)
+            console.log(' add listener: cancelButton');
+        else
+            console.log('not exist: cancelButton');
         this.addListener({
             element: cancelButton,
             event: 'click',
-            handler: async () => {this.modal!.style.display = 'none';}
+            handler: async () => {this.modal!.style.display = 'none'; console.log('called listener: cancelButton');}
         });
 
+        if (window)
+            console.log(' add listener: window');
+        else
+            console.log('not exist: window');
         this.addListener({
             element: window,
             event: 'click',
-            handler: async (e) => {if (e.target === this.modal) {this.modal!.style.display = 'none';}}
+            handler: async (e) => {if (e.target === this.modal) {this.modal!.style.display = 'none'; console.log('called listener: window');}}
         });
     }
 
@@ -501,6 +529,8 @@ export class ProfileView {
     destroy(): void {
         console.log("--- DESTROYING PROFILE VIEW ---");
         this.removeListeners();
+        this.modal?.remove();
+        this.modal = null;
         this.element?.remove();
         this.element = null;
     }
