@@ -164,10 +164,11 @@ export class RegisterView {
                 duration: 4000
             });
 
-            setTimeout(function() {
-                window.location.hash = '#/';
-            }, 4000);
-            // window.location.hash = '#/';
+            if (this.element) this.element.innerHTML = `
+                <form id="login-form" class="auth-form" onsubmit="return false;" method="post">
+                    <button type="submit" class="button login-button" onclick="window.location.href='#'">Login</button>
+                </form>
+            `;
 
         } catch(error: any) {
             if (errorElement) {

@@ -296,25 +296,20 @@ export class SettingsView {
                 return;
             }
             
-            try {
-                // API call to update password
-                const success = await Auth.updateUserPassword(this.currentUserId, oldPassword, newPassword);
+            // API call to update password
+            const success = await Auth.updateUserPassword(this.currentUserId, oldPassword, newPassword);
+            
+            if (success) {
+                NotificationManager.show({
+                    title: 'Password Updated',
+                    message: 'Your password has been changed successfully.',
+                    type: 'success',
+                    duration: 3000
+                });
                 
-                if (success) {
-                    NotificationManager.show({
-                        title: 'Password Updated',
-                        message: 'Your password has been changed successfully.',
-                        type: 'success',
-                        duration: 3000
-                    });
-                    
-                    // Clear form
-                    (passwordForm as HTMLFormElement).reset();
-                } else {
-                    throw new Error('Password update failed');
-                }
-            } catch (error) {
-                console.error("Error updating password:", error);
+                // Clear form
+                (passwordForm as HTMLFormElement).reset();
+            } else {
                 NotificationManager.show({
                     title: 'Password Error',
                     message: 'Failed to update password. Current password may be incorrect.',

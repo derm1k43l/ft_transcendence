@@ -30,12 +30,15 @@ export class ProfileView {
 
     async render(rootElement: HTMLElement): Promise<void> {
         try {
+        console.log("--- RENDERING PROFILE VIEW ---");
             this.element = document.createElement('div');
             this.element.className = 'profile-view';
 
             this.currentUser = await getCurrentUser();
             if (!this.currentUser) return;
             this.currentUserId = this.currentUser.id;
+            if (this.profileUserId <= 0)
+                this.profileUserId = this.currentUser?.id;
 
             // Show loading state
             this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
@@ -75,8 +78,8 @@ export class ProfileView {
                             <p class="username">@${user.username}</p>
                             <p class="bio" ${user.bio ? `` : `data-i18n="bioEmpty"`}>${user.bio || 'No bio yet'}</p>
                             <div class="profile-meta">
-                                <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span> ${user.join_date || 'Unknown'}</span>
-                                <span><i class="fas fa-envelope"></i>    <span data-i18n="emailText">${user.email || 'No email provided'}</span></span>
+                                <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span>&nbsp${user.join_date || 'Unknown'}</span>
+                                <span><i class="fas fa-envelope"></i> <span ${user.email ? '' : 'data-i18n="emailText"'}>${user.email || 'No email provided'}</span>
                             </div>
                         </div>
                         ${isOwnProfile ? 
