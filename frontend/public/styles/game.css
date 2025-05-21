@@ -97,21 +97,19 @@
 }
 
 .paddle__top, .paddle__bottom {
+	width: 95px;
+    height: 12px; 
     position: absolute;
-    width: 95px;
-    height: 15px; 
-    background-color: white;
-    border-radius: 5px;
-    left: 475px;
+    border-radius: 2px;
     transform: translateX(-50%);
 }
 
 .paddle__top {
-    top: 10px;
+    top: 5px;
 }
   
 .paddle__bottom {
-    bottom: 10px;
+    bottom: 5px;
 }
     
 .middle__line {

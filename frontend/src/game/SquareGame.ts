@@ -277,6 +277,7 @@ export class SquareGame {
             if (this.solidWalls.left) {
                 this.ballSpeedX *= -1;
                 this.ballX = 9;
+				this.accelerateBall();
             } else {
                 this.leftScore--;
                 this.resetBall();
@@ -288,6 +289,7 @@ export class SquareGame {
             if (this.solidWalls.right) {
                 this.ballSpeedX *= -1;
                 this.ballX = BOARD_WIDTH - 9;
+				this.accelerateBall();
             } else {
                 this.rightScore--;
                 this.resetBall();
@@ -299,6 +301,7 @@ export class SquareGame {
             if (this.solidWalls.top) {
                 this.ballSpeedY *= -1;
                 this.ballY = 9;
+				this.accelerateBall();
             } else {
                 this.topScore--;
                 this.resetBall();
@@ -310,6 +313,7 @@ export class SquareGame {
             if (this.solidWalls.bottom) {
                 this.ballSpeedY *= -1;
                 this.ballY = BOARD_HEIGHT - 9;
+				this.accelerateBall();
             } else {
                 this.bottomScore--;
                 this.resetBall();

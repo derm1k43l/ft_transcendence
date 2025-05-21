@@ -368,9 +368,11 @@ export class TournamentView {
 	}
 
 	destroy(): void {
-		this.game?.destroy();
-		this.game = null;
-		console.log("Tournament game destroyed");
+		if (this.game) {
+			this.game.destroy();
+			this.game = null;
+			console.log("Tournament game destroyed");
+		}
 		this.element?.remove();
 		this.element = null;
 	}
