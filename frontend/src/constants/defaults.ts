@@ -16,23 +16,48 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
     name: "First Victory",
     description: "Win your first game",
     icon: "fas fa-trophy",
-    completed: false
+    completed: false,
+    translations: {
+      spanish: {
+        description: "Gana tu primera partida"
+      },
+      german: {
+        description: "Gewinne dein erstes Spiel"
+      }
+    }
   },
   {
     id: 2,
     name: "On Fire",
     description: "Win 3 games in a row",
     icon: "fas fa-fire",
-    completed: false
+    completed: false,
+    translations: {
+      spanish: {
+        description: "Gana 3 partidas seguidas"
+      },
+      german: {
+        description: "Gewinne 3 Spiele in Folge"
+      }
+    }
   },
   {
     id: 3,
     name: "Social Butterfly",
     description: "Add 3 friends",
     icon: "fas fa-users",
-    completed: false
+    completed: false,
+    translations: {
+      spanish: {
+        description: "Agrega 3 amigos"
+      },
+      german: {
+        description: "Füge 3 Freunde hinzu"
+      }
+    }
   },
 ];
+
 
 // NULL_USER to be used for default initialization
 export const NULL_USER: UserProfile = {

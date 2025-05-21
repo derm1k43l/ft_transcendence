@@ -65,7 +65,7 @@ export class ProfileView {
                     </div>
                     <div class="profile-info">
                         <div class="profile-info-main">
-                            <h2 data-i18n="userName">${user.display_name}</h2>
+                            <h2>${user.display_name}</h2>
                             <p class="username">@${user.username}</p>
                             <p class="bio" ${user.bio ? `` : `data-i18n="bioEmpty"`}>${user.bio || 'No bio yet'}</p>
                             <div class="profile-meta">
@@ -159,8 +159,8 @@ export class ProfileView {
                                             <i class="${achievement.icon}"></i>
                                         </div>
                                         <div class="achievement-info">
-                                            <h4 data-i18n="achievementName">${achievement.name}</h4>
-                                            <p data-i18n="achievementDesc">${achievement.description}</p>
+                                            <h4">${achievement.name}</h4>
+                                             <p>${achievement.translations?.[window.currentLanguage]?.description || achievement.description}</p>
                                             ${achievement.dateCompleted ? 
                                                 `<small data-i18n="completedOn">Completed on ${achievement.dateCompleted}</small>` : ''}
                                         </div>

@@ -78,6 +78,11 @@ export interface Achievement {
     icon: string;
     completed: boolean;
     dateCompleted?: string;
+    translations?: {
+        [lang: string]: {
+          description: string;
+        }
+    };
 }
 
 export interface Friend {

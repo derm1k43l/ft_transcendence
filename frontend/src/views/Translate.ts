@@ -117,7 +117,7 @@ export const translations: Record<Language, Record<string, string>> = {
         noMessage: "No messages yet. Start a conversation!",
         noMessageYet: "No messages yet",
         inviteToGame: "Invite to Game",
-        blockUser: "Block User"
+        blockUser: "Block User",
     },
     spanish: {
         language: "Idioma",
@@ -237,7 +237,7 @@ export const translations: Record<Language, Record<string, string>> = {
         noMessage: "¡Aún no hay mensajes. ¡Inicia una conversación!",
         noMessageYet: "Aún no hay mensajes",
         inviteToGame: "Invitar a Juego",
-        blockUser: "Bloquear usuario"
+        blockUser: "Bloquear usuario",
     },
     german: {
         language: "Sprache",
@@ -357,7 +357,7 @@ export const translations: Record<Language, Record<string, string>> = {
         noMessage: "Noch keine Nachrichten. Starte ein Gespräch!",
         noMessageYet: "Noch keine Nachrichten",
         inviteToGame: "Zum Spiel einladen",
-        blockUser: "Benutzer blockieren"
+        blockUser: "Benutzer blockieren",
     }
 };
 
