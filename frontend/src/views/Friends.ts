@@ -269,7 +269,8 @@ export class FriendsView {
             }
             
             if (pendingRequests.length === 0) {
-                requestsList.innerHTML = '<p class="chat-welcome">You don\'t have any friend requests.</p>';
+                requestsList.innerHTML = '<p class="chat-welcome" data-i18n="noFriendRequest">You don\'t have any friend requests.</p>';
+                applyTranslations(window.currentLanguage || "english");
                 return;
             }
             

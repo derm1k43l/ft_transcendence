@@ -113,6 +113,11 @@ export const translations: Record<Language, Record<string, string>> = {
         displayName: "Display Name",
         editProfile: "Edit Profile",
         saveChanges: "Submit Changes",
+        noFriendRequest: "You don't have any friend requests",
+        noMessage: "No messages yet. Start a conversation!",
+        noMessageYet: "No messages yet",
+        inviteToGame: "Invite to Game",
+        blockUser: "Block User"
     },
     spanish: {
         language: "Idioma",
@@ -228,6 +233,11 @@ export const translations: Record<Language, Record<string, string>> = {
         rightPlayer: " Jugador Derecho",
         displayName: "Nombre para mostrar",
         saveChanges: "Guardar cambios",
+        noFriendRequest: "No tienes solicitudes de amistad",
+        noMessage: "¡Aún no hay mensajes. ¡Inicia una conversación!",
+        noMessageYet: "Aún no hay mensajes",
+        inviteToGame: "Invitar a Juego",
+        blockUser: "Bloquear usuario"
     },
     german: {
         language: "Sprache",
@@ -342,7 +352,12 @@ export const translations: Record<Language, Record<string, string>> = {
         leftPlayer: " Linker Spieler",
         rightPlayer: " Rechter Spieler",
         displayName: "Anzeigename",
-        saveChanges: "Änderungen speichern"
+        saveChanges: "Änderungen speichern",
+        noFriendRequest: "Du hast keine Freundschaftsanfragen",
+        noMessage: "Noch keine Nachrichten. Starte ein Gespräch!",
+        noMessageYet: "Noch keine Nachrichten",
+        inviteToGame: "Zum Spiel einladen",
+        blockUser: "Benutzer blockieren"
     }
 };
 
@@ -362,10 +377,11 @@ export function applyTranslations(language: Language) {
         const translatedText = translations[language][key] || translations["english"][key] || key;
 
         // Update placeholder for input/textarea, otherwise set textContent
-        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
             el.placeholder = translatedText;
-        } else {
+        if (el.hasAttribute('title'))
+            el.setAttribute('title', translatedText);
+        else
             el.textContent = translatedText;
-        }
     });
 }

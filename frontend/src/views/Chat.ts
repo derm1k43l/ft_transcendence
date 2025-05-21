@@ -121,6 +121,7 @@ export class ChatView {
         const friends = await getFriendsList(this.currentUser.id);
         if (friends.length === 0) {
             contactsContainer.innerHTML = '<span data-i18n="noContacts">No contacts</span>';
+            applyTranslations(window.currentLanguage || "english");
             return;
         }
 
@@ -136,7 +137,7 @@ export class ChatView {
                     </div>
                     <div class="chat-contact-info">
                         <h4>${friend.friend_display_name}</h4>
-                        <p class="chat-last-message">
+                        <p class="chat-last-message" data-i18n="noMessageYet">
                             ${lastMessage ? lastMessage.content.slice(0, 30) : 'No messages yet'}
                         </p>
                     </div>
@@ -158,10 +159,11 @@ export class ChatView {
                 (contact as HTMLElement).style.display = 'none';
             }
         });
-
+        
         contactsContainer.innerHTML = tempHTML.innerHTML;
         tempHTML.remove();
         this.setupContactListeners();
+        applyTranslations(window.currentLanguage || "english");
     }
 
     private setupEventListeners() {
@@ -322,15 +324,16 @@ export class ChatView {
                     </div>
                 </div>
                 <div class="chat-panel-actions">
-                    <button class="invite-button" title="Invite to Game"><i class="fas fa-gamepad"></i></button>
-                    <button class="block-button" title="Block User"><i class="fas fa-ban"></i></button>
+                    <button class="invite-button" data-i18n="inviteToGame" title="Invite to Game"><i class="fas fa-gamepad"></i></button>
+                    <button class="block-button" data-i18n="blockUser" title="Block User"><i class="fas fa-ban"></i></button>
                 </div>
             `;
 
             // Get chat mesasges
             const messages = await getChatMessages(this.currentUser.id, partner.id);
             if (messages.length === 0) {
-                messagesContainer.innerHTML = '<div class="chat-no-messages"><p>No messages yet. Start a conversation!</p></div>';
+                messagesContainer.innerHTML = '<div class="chat-no-messages"><p data-i18n="noMessage">No messages yet. Start a conversation!</p></div>';
+                applyTranslations(window.currentLanguage || "english");
             } else {
                 this.renderAllMessages(messages);
                 await markMessagesAsRead(messages);
