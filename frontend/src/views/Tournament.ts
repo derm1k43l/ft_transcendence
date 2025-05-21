@@ -5,6 +5,7 @@ import { Tournament, TournamentMatch } from '../types/index.js';
 import { addTournament, deleteTournament, getAllTournaments, updateTournament } from '../services/UserService.js';
 import { GameView } from './Game.js';
 import { PongGame } from "../game/PongGame.js";
+import { applyTranslations } from './Translate.js';
 
 export class TournamentView {
 	private element: HTMLElement | null = null;
@@ -23,25 +24,25 @@ export class TournamentView {
 
 		this.element.innerHTML = `
 			<div class="tournament-header">
-				<h2>Tournament</h2>
-				<p>Create and play a tournament!</p>
+				<h2 data-i18n="tournament">Tournament</h2>
+				<p data-i18n="createPlayTournament">Create and play a tournament!</p>
 			</div>
-
+		
 			<div class="tournament-container">
 				<div class="tournament-content">
-
+		
 					<div id="header-info" class="center-content">
-						Create a tournament<br>
-						Choose how many players you want to play with
+						<span data-i18n="createTournament">Create a tournament. Choose how many players you want to play with.</span>
 					</div>
+		
 					<div class="create-tournament">
 						<div id="tournament-create-buttons" class="tournament-buttons">
-							<button type="button" tournament-size="4">4 players</button>
-							<button type="button" tournament-size="8">8 players</button>
+							<button type="button" tournament-size="4" data-i18n="fourPlayers">4 players</button>
+							<button type="button" tournament-size="8" data-i18n="eightPlayers">8 players</button>
 						</div>
 						<div id="userinput-container"></div>
 					</div>
-
+		
 					<div class="play-tournament">
 						<div id="tournament-bracket" class="tournament"></div>
 						<div id="tournament-manage-buttons" class="tournament-buttons"></div>
@@ -49,8 +50,9 @@ export class TournamentView {
 				</div>
 			</div>
 		`;
-
+	
 		rootElement.appendChild(this.element);
+		applyTranslations(window.currentLanguage || "english");
 
 		// append game-container
 		const gameViewContainer = document.createElement('div');

@@ -12,10 +12,13 @@ import { NotificationManager } from './components/Notification.js';
 import { LoginView } from './views/Login.js';
 import { UserProfile } from './types/index.js';
 import * as Auth from './services/auth.js';
+import { Language } from './views/Translate.js';
 
 // --- State ---
 let isLoggedIn = false;
 export let currentUser: UserProfile | null = null; // Store logged-in user details
+export let currentLanguage = (localStorage.getItem("language") as Language) || "english";
+
 
 // --- DOM Elements ---
 let loginViewElement: HTMLElement | null;
@@ -436,38 +439,39 @@ function createAppView(): void {
   appViewElement.innerHTML = '';
   
   const appHTML = `
-      <div class="app-layout-container">
-          <div class="app-layout">
-              <aside class="sidebar">
-                  <div class="user-profile">
-                    <img src="${currentUser.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'}" 
-                           alt="${sanitizeInput(currentUser.display_name)}'s avatar" 
-                           class="avatar">
-                      <span class="username">${sanitizeInput(currentUser.display_name)}</span>
-                  </div>
-                  <nav class="sidebar-nav">
-                      <ul>
-                          <li><a href="#/" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-                          <li><a href="#/profile" data-view="profile"><i class="fas fa-user"></i> Profile</a></li>
-                          <li><a href="#/chat" data-view="chat"><i class="fas fa-comments"></i> Chat</a></li>
-                          <li><a href="#/friends" data-view="friends"><i class="fas fa-user-friends"></i> Friends</a></li>
-                          <li><a href="#/game" data-view="game"><i class="fas fa-gamepad"></i> Game</a></li>
-                          <li><a href="#/tournament" data-view="tournament"><i class="fas fa-trophy"></i> Tournament</a></li>
-                          <li><a href="#/settings" data-view="settings"><i class="fas fa-cog"></i> Settings</a></li>
-                          <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                      </ul>
-                  </nav>
-              </aside>
-              <main class="main-content" id="app-content-root"> 
-                  <!-- Dynamic content will go here -->
-              </main>
-          </div>
+  <div class="app-layout-container">
+      <div class="app-layout">
+          <aside class="sidebar">
+              <div class="user-profile">
+                <img src="${currentUser.avatar_url || 'https://placehold.co/80x80/1d1f21/ffffff?text=User'}" 
+                     alt="${sanitizeInput(currentUser.display_name)}'s avatar" 
+                     class="avatar">
+                <span class="username">${sanitizeInput(currentUser.display_name)}</span>
+              </div>
+              <nav class="sidebar-nav">
+                  <ul>
+                      <li><a href="#/" data-view="dashboard"><i class="fas fa-chart-line"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
+                      <li><a href="#/profile" data-view="profile"><i class="fas fa-user"></i> <span data-i18n="profile">Profile</span></a></li>
+                      <li><a href="#/chat" data-view="chat"><i class="fas fa-comments"></i> <span data-i18n="chat">Chat</span></a></li>
+                      <li><a href="#/friends" data-view="friends"><i class="fas fa-user-friends"></i> <span data-i18n="friends">Friends</span></a></li>
+                      <li><a href="#/game" data-view="game"><i class="fas fa-gamepad"></i> <span data-i18n="game">Game</span></a></li>
+                      <li><a href="#/tournament" data-view="tournament"><i class="fas fa-trophy"></i> <span data-i18n="tournament">Tournament</span></a></li>
+                      <li><a href="#/settings" data-view="settings"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
+                      <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
+                  </ul>
+              </nav>
+          </aside>
+          <main class="main-content" id="app-content-root"> 
+              <!-- Dynamic content will go here -->
+          </main>
       </div>
-      <button class="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">
-          <i class="fas fa-bars"></i>
-      </button>
-      <div class="sidebar-overlay"></div>
-  `;
+  </div>
+  <button class="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">
+      <i class="fas fa-bars"></i>
+  </button>
+  <div class="sidebar-overlay"></div>
+`;
+
   
   // Set the HTML
   appViewElement.innerHTML = appHTML;

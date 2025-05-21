@@ -11,7 +11,7 @@ import { GameSettings } from '../types/index.js';
 import { currentUser } from '../main.js';
 import * as Auth from '../services/auth.js';
 import { DEFAULT_ACHIEVEMENTS, DEFAULT_GAME_SETTINGS } from '../constants/defaults.js';
-import { translations, Language, isLanguage, applyTranslations } from "./i18n.js";
+import { isLanguage, applyTranslations } from "./Translate.js";
 
 export class SettingsView {
     private element: HTMLElement | null = null;
@@ -46,16 +46,16 @@ export class SettingsView {
     
             this.element.innerHTML = `
                 <div class="settings-header">
-                    <h2>Settings</h2>
-                    <p>Customize your experience and manage account settings</p>
+                    <h2 data-i18n="settings">Settings</h2>
+                    <p data-i18n="customizeExperience">Customize your experience and manage account settings</p>
                 </div>
                 
                 <div class="settings-container">
                     <div class="settings-sidebar">
                         <ul class="settings-nav">
-                            <li><a href="#game" class="active">Game Preferences</a></li>
-                            <li><a href="#security">Security & Privacy</a></li>
-                            <li><a href="#language">Language</a></li>
+                            <li><a href="#game" class="active" data-i18n="gamePreferences">Game Preferences</a></li>
+                            <li><a href="#security" data-i18n="securityPrivacy">Security & Privacy</a></li>
+                            <li><a href="#language" data-i18n="language">Language</a></li>
                         </ul>
                     </div>
                     
@@ -63,34 +63,34 @@ export class SettingsView {
                         
                         <!-- Game Preferences Panel -->
                         <div id="game" class="settings-panel active">
-                            <h3>Game Preferences</h3>
+                            <h3 data-i18n="gamePreferences">Game Preferences</h3>
                             
                             <div class="settings-section">
-                                <h4>Visual Settings</h4>
+                                <h4 data-i18n="visualSettings">Visual Settings</h4>
                                 <div class="settings-form">
                                     <div class="form-group color-picker">
-                                        <label for="board-color">Board Color</label>
+                                        <label for="board-color" data-i18n="boardColor">Board Color</label>
                                         <div class="color-preview">
                                             <input type="color" id="board-color" value="${this.gameSettings.board_color}">
                                             <span class="color-value">${this.gameSettings.board_color}</span>
                                         </div>
                                     </div>
                                     <div class="form-group color-picker">
-                                        <label for="paddle-color">Paddle Color</label>
+                                        <label for="paddle-color" data-i18n="paddleColor">Paddle Color</label>
                                         <div class="color-preview">
                                             <input type="color" id="paddle-color" value="${this.gameSettings.paddle_color}">
                                             <span class="color-value">${this.gameSettings.paddle_color}</span>
                                         </div>
                                     </div>
                                     <div class="form-group color-picker">
-                                        <label for="ball-color">Ball Color</label>
+                                        <label for="ball-color" data-i18n="ballColor">Ball Color</label>
                                         <div class="color-preview">
                                             <input type="color" id="ball-color" value="${this.gameSettings.ball_color}">
                                             <span class="color-value">${this.gameSettings.ball_color}</span>
                                         </div>
                                     </div>
                                     <div class="form-group color-picker">
-                                        <label for="score-color">Score Color</label>
+                                        <label for="score-color" data-i18n="scoreColor">Score Color</label>
                                         <div class="color-preview">
                                             <input type="color" id="score-color" value="${this.gameSettings.score_color}">
                                             <span class="color-value">${this.gameSettings.score_color}</span>
@@ -98,7 +98,7 @@ export class SettingsView {
                                     </div>
                                     <div class="toggle-setting">
                                         <div>
-                                            <h5>Power-Up</h5>
+                                            <h5 data-i18n="powerUp">Power-Up</h5>
                                         </div>
                                         <label class="toggle">
                                             <input type="checkbox" id="powerup" ${this.gameSettings.powerup ? 'checked' : ''}>
@@ -114,50 +114,50 @@ export class SettingsView {
 
                                     
                                     <div class="game-preview">
-                                        <h5>Preview</h5>
+                                        <h5 data-i18n="preview">Preview</h5>
                                         <div class="game-preview-container" id="game-preview">
                                             <!-- Game preview will be rendered here -->
                                         </div>
                                     </div>
                                     
-                                    <button type="button" class="app-button" id="save-game-settings">Save Game Settings</button>
+                                    <button type="button" class="app-button" id="save-game-settings" data-i18n="saveGameSettings">Save Game Settings</button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Security Panel -->
                         <div id="security" class="settings-panel">
-                            <h3>Security & Privacy</h3>
+                            <h3 data-i18n="securityPrivacy">Security & Privacy</h3>
 
                             <div class="settings-section">
-                                <h4>Email Address</h4>
+                                <h4 data-i18n="emailAddress">Email Address</h4>
                                 <form id="email-form" class="settings-form">
                                     <div class="form-group">
-                                        <label for="settings-email">Email</label>
+                                        <label for="settings-email" data-i18n="email">Email</label>
                                         <input type="email" id="settings-email" value="${user.email || ''}">
-                                        <small>Your email is used for important account notifications and security features</small>
+                                        <small data-i18n="emailDescription">Your email is used for important account notifications and security features</small>
                                     </div>
-                                    <button type="submit" class="app-button">Update Email</button>
+                                    <button type="submit" class="app-button" data-i18n="updateEmail">Update Email</button>
                                 </form>
                             </div>
                             
                             <div class="settings-section">
-                                <h4>Password</h4>
+                                <h4 data-i18n="password">Password</h4>
                                 <form id="password-form" class="settings-form">
                                     <div class="form-group">
-                                        <label for="current-password">Current Password</label>
+                                        <label for="current-password" data-i18n="currentPassword">Current Password</label>
                                         <input type="password" id="current-password" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="new-password">New Password</label>
+                                        <label for="new-password" data-i18n="newPassword">New Password</label>
                                         <input type="password" id="new-password" required>
-                                        <small class="form-hint">Use at least 8 characters</small>
+                                        <small class="form-hint" data-i18n="passwordHint">Use at least 8 characters</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="confirm-password">Confirm New Password</label>
+                                        <label for="confirm-password" data-i18n="confirmNewPassword">Confirm New Password</label>
                                         <input type="password" id="confirm-password" required>
                                     </div>
-                                    <button type="submit" class="app-button">Change Password</button>
+                                    <button type="submit" class="app-button" data-i18n="changePassword">Change Password</button>
                                 </form>
                             </div>
                         </div>
@@ -165,11 +165,11 @@ export class SettingsView {
                         <!-- Language Panel -->
                         <div id="language" class="settings-panel">
                             <h3 data-i18n="language">Language</h3>
-                            <label for="language-options">Choose a language:</label>
+                            <label for="language-options" data-i18n="chooseLanguage">Choose a language:</label>
                             <select id="language-options" name="language">
-                                <option value="english">English</option>
-                                <option value="spanish">Spanish</option>
-                                <option value="german">German</option>
+                                <option value="english" data-i18n="english">English</option>
+                                <option value="spanish" data-i18n="spanish">Spanish</option>
+                                <option value="german" data-i18n="german">German</option>
                             </select>
                         </div>
                     </div>
@@ -179,15 +179,15 @@ export class SettingsView {
                 <div class="settings-modal" id="confirm-modal">
                     <div class="settings-modal-content">
                         <div class="settings-modal-header">
-                            <h3 id="confirm-modal-title">Confirmation</h3>
+                            <h3 id="confirm-modal-title" data-i18n="confirmation">Confirmation</h3>
                             <button class="settings-modal-close">&times;</button>
                         </div>
                         <div class="settings-modal-body">
-                            <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+                            <p id="confirm-modal-message" data-i18n="confirmMessage">Are you sure you want to proceed?</p>
                         </div>
                         <div class="settings-modal-footer">
-                            <button class="app-button" id="confirm-modal-cancel">Cancel</button>
-                            <button class="app-button danger" id="confirm-modal-confirm">Confirm</button>
+                            <button class="app-button" id="confirm-modal-cancel" data-i18n="cancel">Cancel</button>
+                            <button class="app-button danger" id="confirm-modal-confirm" data-i18n="confirm">Confirm</button>
                         </div>
                     </div>
                 </div>
@@ -378,7 +378,7 @@ export class SettingsView {
           
         /* Language handler */
         const languageSelect = document.querySelector("#language-options") as HTMLSelectElement;
-
+        
         if (languageSelect) {
             const savedLanguage = localStorage.getItem("language");
         
@@ -393,25 +393,11 @@ export class SettingsView {
                 const selectedLanguage = languageSelect.value;
                 if (isLanguage(selectedLanguage)) {
                     localStorage.setItem("language", selectedLanguage);
+                    window.currentLanguage = selectedLanguage; // update global
                     applyTranslations(selectedLanguage);
-        
-                    switch (selectedLanguage) {
-                        case "spanish":
-                            alert("Idioma cambiado a Español");
-                            break;
-                        case "german":
-                            alert("Sprache auf Deutsch umgestellt");
-                            break;
-                        default:
-                            alert("Language changed to English");
-                            break;
-                    }
-                } else {
-                    alert("Unsupported language");
-                    applyTranslations("english");
                 }
             });
-        }        
+        }                
     }
     
     private async updateGameSettings(): Promise<void> {
