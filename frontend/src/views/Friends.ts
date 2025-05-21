@@ -45,7 +45,7 @@ export class FriendsView {
                 <div class="friends-container">
                     <div class="friends-sidebar">
                         <div class="friends-search">
-                            <input type="text" id="friend-search" placeholder="Search for users..." data-i18n="searchForUsers">
+                            <input type="text" id="friend-search" data-i18n="searchForUsers" placeholder="Search for users...">
                             <button id="search-button" class="app-button" data-i18n="search">Search</button>
                         </div>
 
@@ -176,7 +176,8 @@ export class FriendsView {
             }
 
             if (!friends || friends.length === 0) {
-                friendsGrid.innerHTML = '<p class="chat-welcome">You don\'t have any friends yet. Use the search to find other players.</p>';
+                friendsGrid.innerHTML = '<p class="chat-welcome" data-i18n="noFriends">You don\'t have any friends yet. Use the search to find other players.</p>';
+                applyTranslations(window.currentLanguage || "english");
                 return;
             }
 

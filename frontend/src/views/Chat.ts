@@ -120,7 +120,7 @@ export class ChatView {
         if (!contactsContainer) return;
         const friends = await getFriendsList(this.currentUser.id);
         if (friends.length === 0) {
-            contactsContainer.innerHTML = 'No contacts';
+            contactsContainer.innerHTML = '<span data-i18n="noContacts">No contacts</span>';
             return;
         }
 
