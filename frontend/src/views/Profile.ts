@@ -78,8 +78,8 @@ export class ProfileView {
                             <p class="username">@${user.username}</p>
                             <p class="bio" ${user.bio ? `` : `data-i18n="bioEmpty"`}>${user.bio || 'No bio yet'}</p>
                             <div class="profile-meta">
-                                <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span> ${user.join_date || 'Unknown'}</span>
-                                <span><i class="fas fa-envelope"></i>    <span data-i18n="emailText">${user.email || 'No email provided'}</span></span>
+                                <span><i class="fas fa-calendar-alt"></i> <span data-i18n="memberSince">Member since:</span>&nbsp${user.join_date || 'Unknown'}</span>
+                                <span><i class="fas fa-envelope"></i> <span ${user.email ? '' : 'data-i18n="emailText"'}>${user.email || 'No email provided'}</span>
                             </div>
                         </div>
                         ${isOwnProfile ? 

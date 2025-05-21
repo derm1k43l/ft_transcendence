@@ -326,7 +326,7 @@ export const translations: Record<Language, Record<string, string>> = {
         searchForUsers: "Benutzer suchen...",
         search: "Suchen",
         myFriends: "Meine Freunde",
-        friendRequests: "Freundschaftsanfragen",
+        friendRequests: "Anfragen",
         loadingFriends: "Freunde werden geladen...",
         incomingFriendRequests: "Eingehende Freundschaftsanfragen",
         loadingRequests: "Anfragen werden geladen...",
@@ -366,6 +366,7 @@ export type Language = "english" | "spanish" | "german";
 
 // Applies translations to all elements with [data-i18n]
 export function applyTranslations(language: Language) {
+    if (language === 'english') return;
     const elements = document.querySelectorAll<HTMLElement>("[data-i18n]");
     elements.forEach(el => {
         const key = el.dataset.i18n!;

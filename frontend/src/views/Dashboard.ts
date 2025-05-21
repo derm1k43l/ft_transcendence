@@ -35,8 +35,8 @@ export class DashboardView {
 
             this.element.innerHTML = `
                 <div class="dashboard-header">
-                    <h2 data-i18n="welcomeBack">Welcome back </h2><h2>${user.display_name}</h2>
-                    <p class="last-login" data-i18n="lastLogin">Last login: </p><p>${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                    <h2><span data-i18n="welcomeBack">Welcome back </span><span>${user.display_name}</span></h2>
+                    <p><span class="last-login" data-i18n="lastLogin">Last login: </span><span>${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</span></p>
                 </div>
                 
                 <div class="dashboard-content">
