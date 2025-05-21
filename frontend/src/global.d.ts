@@ -4,7 +4,7 @@ import type { Language } from "./views/Translate";
 declare global {
     interface Window {
         Chart: any;
-        currentLanguage: Language;
+        currentLanguage: Language = 'english';
     }
 }
 
