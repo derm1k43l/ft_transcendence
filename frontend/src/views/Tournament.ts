@@ -1,17 +1,19 @@
 import { Router } from '../core/router.js';
 import { NotificationManager } from '../components/Notification.js';
 import { currentUser } from '../main.js';
-import { Tournament, TournamentMatch } from '../types/index.js';
+import { Tournament, TournamentMatch, UserProfile } from '../types/index.js';
 import { addTournament, deleteTournament, getAllTournaments, updateTournament } from '../services/UserService.js';
 import { GameView } from './Game.js';
 import { PongGame } from "../game/PongGame.js";
 import { applyTranslations } from './Translate.js';
+import { getCurrentUser } from '../services/auth.js';
 
 export class TournamentView {
 	private element: HTMLElement | null = null;
 	private router: Router;
 	private game: PongGame | null = null;
 	private tournament: Tournament | null = null;
+	private currentUser: UserProfile | null = null;
 
 	constructor(router: Router, userId?: string) {
 		this.router = router;
@@ -21,6 +23,10 @@ export class TournamentView {
 		this.element = document.createElement('div');
 		this.element.className = 'tournament-page';
 		this.element.id = 'tournament-view';
+
+		this.currentUser = await getCurrentUser();
+		if (!this.currentUser)
+			return;
 
 		this.element.innerHTML = `
 			<div class="tournament-header">
@@ -52,7 +58,7 @@ export class TournamentView {
 		`;
 	
 		rootElement.appendChild(this.element);
-		applyTranslations(window.currentLanguage || "english");
+		applyTranslations(this.currentUser.language);
 
 		// append game-container
 		const gameViewContainer = document.createElement('div');

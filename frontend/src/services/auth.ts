@@ -30,6 +30,7 @@ export async function register(userData: {
     display_name: string;
     avatar_url: string;
     cover_photo_url: string;
+    language: 'english' | 'german' | 'spanish';
 }): Promise<UserProfile> {
     try {
         const user = (await api.post('/users', userData)).data as UserProfile;
@@ -62,6 +63,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
             return null;
         }
         const user = (await api.get(`/users/current`)).data as UserProfile;
+        console.log(`current user language: ${user.language}`);
         await completeUser(user);
         return user;
     } catch (error) {

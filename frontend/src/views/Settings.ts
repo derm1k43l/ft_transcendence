@@ -7,11 +7,11 @@ import {
     resetUserStats,
 } from '../services/UserService.js';
 import { NotificationManager } from '../components/Notification.js';
-import { GameSettings } from '../types/index.js';
+import { GameSettings, UserProfile } from '../types/index.js';
 import { currentUser } from '../main.js';
 import * as Auth from '../services/auth.js';
 import { DEFAULT_ACHIEVEMENTS, DEFAULT_GAME_SETTINGS } from '../constants/defaults.js';
-import { isLanguage, applyTranslations } from "./Translate.js";
+import { applyTranslations, Language } from "./Translate.js";
 
 export class SettingsView {
     private element: HTMLElement | null = null;
@@ -27,7 +27,6 @@ export class SettingsView {
     async render(rootElement: HTMLElement): Promise<void> {
         this.element = document.createElement('div');
         this.element.className = 'settings-view';
-        this.gameSettings = await getUserGameSettings(this.currentUserId);
         
         // Show loading state
         if (!this.element)
@@ -42,7 +41,9 @@ export class SettingsView {
                 this.element.innerHTML = '<div class="error">User not found</div>';
                 return;
             }
+            this.currentUserId = user.id;
             await this.updateGameSettings();
+            this.gameSettings = await getUserGameSettings(this.currentUserId);
     
             this.element.innerHTML = `
                 <div class="settings-header">
@@ -167,9 +168,9 @@ export class SettingsView {
                             <h3 data-i18n="language">Language</h3>
                             <label for="language-options" data-i18n="chooseLanguage">Choose a language:</label>
                             <select id="language-options" name="language">
-                                <option value="english" data-i18n="english">English</option>
-                                <option value="spanish" data-i18n="spanish">Spanish</option>
-                                <option value="german" data-i18n="german">German</option>
+                                <option value="english" data-i18n="english" ${user.language === 'english' ? 'selected' : ''}>English</option>
+                                <option value="spanish" data-i18n="spanish" ${user.language === 'spanish' ? 'selected' : ''}>Spanish</option>
+                                <option value="german" data-i18n="german" ${user.language === 'german' ? 'selected' : ''}>German</option>
                             </select>
                         </div>
                     </div>
@@ -193,7 +194,7 @@ export class SettingsView {
                 </div>
             `;
             // Set up event listeners
-            this.setupEventListeners();
+            this.setupEventListeners(user);
             await this.updateGameSettings();
         } catch (error) {
             console.error("Error rendering settings:", error);
@@ -201,7 +202,7 @@ export class SettingsView {
         }
     }
     
-    private setupEventListeners(): void {
+    private setupEventListeners(user: UserProfile): void {
         if (!this.element) return;
         
         // Tab navigation
@@ -380,26 +381,16 @@ export class SettingsView {
         const languageSelect = document.querySelector("#language-options") as HTMLSelectElement;
         
         if (languageSelect) {
-            const savedLanguage = localStorage.getItem("language");
+            applyTranslations(user.language);
         
-            if (savedLanguage && isLanguage(savedLanguage)) {
-                languageSelect.value = savedLanguage;
-                applyTranslations(savedLanguage);
-            } else {
-                applyTranslations("english");
-            }
-        
-            languageSelect.addEventListener("change", () => {
-                const selectedLanguage = languageSelect.value;
-                if (isLanguage(selectedLanguage)) {
-                    localStorage.setItem("language", selectedLanguage);
-                    window.currentLanguage = selectedLanguage; // update global
-                    applyTranslations(selectedLanguage);
-                }
+            languageSelect.addEventListener("change", async () => {
+                const selectedLanguage = languageSelect.value as Language;
+                await updateUserProfile(this.currentUserId, { language: selectedLanguage });
+                applyTranslations(selectedLanguage);
             });
         }                
     }
-    
+
     private async updateGameSettings(): Promise<void> {
         if (!this.element) return;
         

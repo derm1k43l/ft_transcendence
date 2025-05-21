@@ -240,7 +240,7 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
         const { id, username, password, ...allowedUpdates } = updates;
         allowedUpdates.avatar_url = undefined; // dont overwrite avatar
         allowedUpdates.cover_photo_url = undefined; // dont overwrite cover photo
-        await api.put(`/users/${userId}`, allowedUpdates);
+        await api.patch(`/users/${userId}/profile`, allowedUpdates);
         return true;
     } catch (error: any) {
         console.error(`Failed to update user profile for ID: ${userId}`, error?.response?.data?.message || error);

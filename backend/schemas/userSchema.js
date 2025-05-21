@@ -15,6 +15,7 @@ const User = {
 		status: { type: 'string', enum: ['online', 'offline', 'ingame', 'invisible'] },
 		last_active: { type: 'string', format: 'date-time', nullable: true },
 		created_at: { type: 'string', format: 'date-time' },
+		language: { type: 'string', enum: ['english', 'german', 'spanish']},
 	},
 	required: ['id', 'username', 'display_name' ], // could be less or more strict, not sure yet
 };

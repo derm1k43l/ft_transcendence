@@ -326,11 +326,6 @@ export const translations: Record<Language, Record<string, string>> = {
 
 export type Language = "english" | "spanish" | "german";
 
-// Type guard to ensure selected value is a valid Language
-export function isLanguage(value: string): value is Language {    
-    return ["english", "spanish", "german"].includes(value);
-} 
-
 // Applies translations to all elements with [data-i18n]
 export function applyTranslations(language: Language) {
     const elements = document.querySelectorAll<HTMLElement>("[data-i18n]");

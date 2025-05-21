@@ -99,7 +99,7 @@ export class ChatView {
         `;
 
         rootElement.appendChild(this.element);
-        applyTranslations(window.currentLanguage || "english");
+        applyTranslations(this.currentUser.language);
 
         await this.renderContacts();
         await this.setupEventListeners();

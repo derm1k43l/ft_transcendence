@@ -48,7 +48,7 @@ const getCurrentUser = async (req, reply) => {
 			SELECT 
 			id, username, display_name, email, bio,
 			avatar_url, cover_photo_url, join_date,
-			has_two_factor_auth, status, last_active, created_at
+			has_two_factor_auth, status, last_active, created_at, language
 			FROM users 
 			WHERE id = ?
 		`).get(authenticatedUserId);
@@ -77,7 +77,7 @@ const getUser = async (req, reply) => {
 			SELECT 
 			id, username, display_name, bio,
 			avatar_url, cover_photo_url, join_date,
-			status, last_active
+			status, last_active, language
 			FROM users 
 			WHERE id = ?
 		`).get(targetUserId);
@@ -190,7 +190,8 @@ const addUser = async (req, reply) => {
 			email,
 			bio,
 			avatar_url,
-			cover_photo_url
+			cover_photo_url,
+			language,
 		} = req.body;
 
 		const db = req.server.betterSqlite3;
@@ -201,8 +202,8 @@ const addUser = async (req, reply) => {
 			const userResult = db.prepare(`
 			INSERT INTO users (
 				username, password, display_name, email, bio, avatar_url, cover_photo_url,
-				join_date, created_at
-			) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+				join_date, created_at, language
+			) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
 			`).run(
 				username,
 				paswordHash,
@@ -211,6 +212,7 @@ const addUser = async (req, reply) => {
 				bio || null,
 				avatar_url,
 				cover_photo_url,
+				language,
 			);
 
 			const newUserId = userResult.lastInsertRowid;
@@ -229,7 +231,7 @@ const addUser = async (req, reply) => {
 			SELECT
 				id, username, display_name, email, bio,
 				avatar_url, cover_photo_url, join_date,
-				has_two_factor_auth, status, last_active, created_at
+				has_two_factor_auth, status, last_active, created_at, language
 			FROM users
 			WHERE id = ?
 			`).get(newUserId);
@@ -386,7 +388,7 @@ const updateUserProfile = async (req, reply) => {
 	const setClauses = [];
 	const params = [];
 
-	const allowedFields = ['display_name', 'bio', 'avatar_url', 'cover_photo_url'];
+	const allowedFields = ['display_name', 'bio', 'avatar_url', 'cover_photo_url', 'language'];
 
 	Object.entries(updates).forEach(([key, value]) => {
 		const dbKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
@@ -418,7 +420,7 @@ const updateUserProfile = async (req, reply) => {
 			SELECT 
 			id, username, display_name, email, bio,
 			avatar_url, cover_photo_url, join_date,
-			status, last_active
+			status, last_active, language
 			FROM users 
 			WHERE id = ?
 		`).get(authenticatedUserId);

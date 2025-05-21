@@ -28,7 +28,7 @@ export class FriendsView {
         this.element.className = 'friends-view';
 
         try {
-            const currentUser = getUserById(this.currentUserId);
+            const currentUser = await Auth.getCurrentUser();
             if (!currentUser) {
                 this.element.innerHTML = '<p>User not found</p>';
                 rootElement.appendChild(this.element);
@@ -84,7 +84,7 @@ export class FriendsView {
             `;
 
             rootElement.appendChild(this.element);
-            applyTranslations(window.currentLanguage || "english");
+            applyTranslations(currentUser.language);
 
             // Setup event handlers
             this.setupEventListeners();

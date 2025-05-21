@@ -21,6 +21,7 @@ export interface UserProfile {
     notifications?: AppNotification[];
     status: 'online' | 'offline' | 'in-game';
     last_active: string;
+    language: 'english' | 'german' | 'spanish';
 }
 
 // maybe need more

@@ -3,6 +3,7 @@ import { PongGame } from "../game/PongGame.js";
 import { SquareGame } from "../game/SquareGame.js";
 import { NotificationManager } from '../components/Notification.js';
 import { applyTranslations } from './Translate.js';
+import { getCurrentUser } from "../services/auth.js";
 
 // The GameView class is responsible for rendering the game view and handling user input to start the game
 export class GameView {
@@ -15,7 +16,7 @@ export class GameView {
         this.router = router;
     }
     
-    render(container: HTMLElement) {
+    async render(container: HTMLElement) {
         container.innerHTML = `
             <div id="modeContainer">
                 <button id="singleplayerButton" data-i18n="playAgainstAI">Play Against AI</button>
@@ -31,7 +32,8 @@ export class GameView {
             <div id="game-container"></div>
         `;
         
-        applyTranslations(window.currentLanguage || "english");
+        const user = await getCurrentUser();
+        if (user) applyTranslations(user.language);
         
         // Querying DOM elements
         const modeContainer = container.querySelector('#modeContainer') as HTMLElement;

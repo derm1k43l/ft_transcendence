@@ -17,8 +17,6 @@ import { Language } from './views/Translate.js';
 // --- State ---
 let isLoggedIn = false;
 export let currentUser: UserProfile | null = null; // Store logged-in user details
-export let currentLanguage = (localStorage.getItem("language") as Language) || "english";
-
 
 // --- DOM Elements ---
 let loginViewElement: HTMLElement | null;

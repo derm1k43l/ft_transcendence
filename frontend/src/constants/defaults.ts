@@ -55,6 +55,7 @@ export const NULL_USER: UserProfile = {
   notifications: undefined,
   status: 'offline',
   last_active: '',
+  language: 'english',
 };
 
 // Default user stats 

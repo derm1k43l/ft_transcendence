@@ -185,7 +185,7 @@ export class DashboardView {
             `;
 
             rootElement.appendChild(this.element);
-            applyTranslations(window.currentLanguage || "english");
+            applyTranslations(user.language);
             // Load Chart.js and initialize charts
             this.loadChartJS().then(() => {
                 this.initializeCharts(user);

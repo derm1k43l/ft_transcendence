@@ -152,6 +152,7 @@ export class RegisterView {
                 display_name,
                 avatar_url,
                 cover_photo_url,
+                language: 'english',
             });
 
             console.log("User registered:", newUser);

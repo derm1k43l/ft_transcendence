@@ -137,7 +137,8 @@ fastify.after((err) => {
 			has_two_factor_auth INTEGER DEFAULT 0,
 			status TEXT DEFAULT 'offline',
 			last_active TEXT,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			language TEXT
 			);
 
 			CREATE TABLE IF NOT EXISTS user_stats (

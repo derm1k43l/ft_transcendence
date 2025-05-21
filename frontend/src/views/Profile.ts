@@ -6,12 +6,14 @@ import { NotificationManager } from '../components/Notification.js';
 import { currentUser} from '../main.js';
 import { DEFAULT_ACHIEVEMENTS } from '../constants/defaults.js';
 import { applyTranslations } from './Translate.js';
+import { getCurrentUser } from '../services/auth.js';
 
 export class ProfileView {
     private element: HTMLElement | null = null;
     private modal: HTMLElement | null = null;
     private router: Router;
     private currentUserId: number = currentUser?.id || -1;
+    private currentUser: UserProfile | null = null;
     private profileUserId: number;
 
     private boundListeners: Listener[] = [];
@@ -30,7 +32,11 @@ export class ProfileView {
         try {
             this.element = document.createElement('div');
             this.element.className = 'profile-view';
-            
+
+            this.currentUser = await getCurrentUser();
+            if (!this.currentUser) return;
+            this.currentUserId = this.currentUser.id;
+
             // Show loading state
             this.element.innerHTML = '<div class="loading-spinner">Loading profile...</div>';
             rootElement.appendChild(this.element);
@@ -207,7 +213,7 @@ export class ProfileView {
                 </div>
             </div>
             `;
-        applyTranslations(window.currentLanguage || "english");
+        applyTranslations(this.currentUser.language);
         // Setup event listeners
         this.setupEventListeners(isOwnProfile, user);
         } catch (error) {
@@ -462,7 +468,7 @@ export class ProfileView {
                         bioElement.setAttribute('data-i18n', 'bioEmpty');
                     document.querySelector('.user-profile > .username')!.innerHTML = displayName;
                     document.querySelector('.profile-info-main > h2')!.innerHTML = displayName;
-                    applyTranslations(window.currentLanguage || "english");
+                    applyTranslations(this.currentUser!.language);
                 } else {
                     NotificationManager.show({
                         title: 'Error',

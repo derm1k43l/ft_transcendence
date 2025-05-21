@@ -166,7 +166,8 @@ const postUserOpts = {
 				email: { type: 'string', format: 'email' },
 				bio: { type: 'string', nullable: true },
 				avatar_url: { type: 'string' },
-				cover_photo_url: { type: 'string' }
+				cover_photo_url: { type: 'string' },
+				language: { type: 'string', enum: ['english', 'german', 'spanish']},
 			},
 			additionalProperties: false
 		},
@@ -236,7 +237,8 @@ const updateUserProfileOpts = {
 				display_name: { type: 'string', minLength: 1 },
 				bio: { type: 'string', nullable: true },
 				avatar_url: { type: 'string', nullable: true, format: 'uri-reference' },
-				cover_photo_url: { type: 'string', nullable: true, format: 'uri-reference' }
+				cover_photo_url: { type: 'string', nullable: true, format: 'uri-reference' },
+				language: { type: 'string', enum: ['english', 'german', 'spanish']},
 			},
 			minProperties: 1, // at least 1
 			additionalProperties: false
