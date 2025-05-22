@@ -20,7 +20,7 @@ setup_env:
 		echo "Creating .env file from .env.example..."; \
 		cp .env.example .env; \
 		echo "Generated random JWT secret..."; \
-		echo "JWT_SECRET=$$(openssl rand -hex 32)" >> .env; \
+		echo "\nJWT_SECRET=$$(openssl rand -hex 32)" >> .env; \
 		echo "Please update any other values in .env with your own credentials"; \
 	fi
 
