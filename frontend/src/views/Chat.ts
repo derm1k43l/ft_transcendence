@@ -271,6 +271,14 @@ export class ChatView {
                 }
             }
         });
+        const userButton = this.element?.querySelector('.chat-panel-user');
+        this.addPanelListener({
+            element: userButton,
+            event: 'click',
+            handler: async () => {
+                this.router.navigate(`/profile/${this.activeChatPartnerId}`);
+            }
+        });
     }
 
     private activateContact() {

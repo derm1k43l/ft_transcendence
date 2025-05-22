@@ -197,6 +197,10 @@
     gap: 0.8rem;
 }
 
+.chat-panel-user:hover {
+    cursor: pointer;
+}
+
 .chat-panel-user img {
     width: 40px;
     height: 40px;

@@ -380,7 +380,7 @@ export class SettingsView {
             languageSelect.addEventListener("change", async () => {
                 const selectedLanguage = languageSelect.value as Language;
                 await updateUserProfile(this.currentUserId, { language: selectedLanguage });
-                applyTranslations(selectedLanguage);
+                applyTranslations(selectedLanguage, true);
             });
         }                
     }
