@@ -281,7 +281,7 @@ private initializeCharts(user: UserProfile): void {
         });
 
         // Calculate win rate over time
-        const winRates = matchResults.map((_, index) => {
+        const winRates = matchResults.reverse().map((_, index) => {
             // Get games played so far from index 0 to index (inclusive)
             const gamesSoFar = matchResults.slice(0, index + 1);
             const winsSoFar = gamesSoFar.reduce((sum, result) => sum + result, 0);
@@ -290,7 +290,7 @@ private initializeCharts(user: UserProfile): void {
           });
 
         // Calculate point difference percentage
-        const pointPerformance = scores.map(score => score.pointRatio * 100);
+        const pointPerformance = scores.reverse().map(score => score.pointRatio * 100);
 
         const performanceChart = new window.Chart(performanceChartCanvas, {
             type: 'line',
@@ -303,7 +303,7 @@ private initializeCharts(user: UserProfile): void {
                         backgroundColor: 'rgba(76, 175, 80, 0.1)',
                         borderColor: 'rgba(76, 175, 80, 0.8)',
                         borderWidth: 2,
-                        pointBackgroundColor: matchResults.map(result => result === 1 ? '#4CAF50' : '#F44336'), // Green for wins, red for losses
+                        pointBackgroundColor: matchResults.reverse().map(result => result === 1 ? '#4CAF50' : '#F44336'), // Green for wins, red for losses
                         pointBorderColor: '#fff',
                         pointRadius: 5,
                         pointHoverRadius: 7,
