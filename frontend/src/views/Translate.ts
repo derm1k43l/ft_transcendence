@@ -366,7 +366,6 @@ export type Language = "english" | "spanish" | "german";
 
 // Applies translations to all elements with [data-i18n]
 export function applyTranslations(language: Language) {
-    if (language === 'english') return;
     const elements = document.querySelectorAll<HTMLElement>("[data-i18n]");
     elements.forEach(el => {
         const key = el.dataset.i18n!;
