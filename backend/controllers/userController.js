@@ -1,5 +1,5 @@
-const argon2 = require('argon2');
-const { pipeline } = require('stream/promises');
+const argon2 = require('argon2'); // library for securely hashing passwords using the Argon2 algorithm.
+const { pipeline } = require('stream/promises'); // Utility function from Node.js's built-in stream/promises module, to handle stream piping
 const path = require('path');
 const fs = require('fs');
 

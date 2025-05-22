@@ -58,14 +58,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hb
 	"username": "Sexy Cool Updated user"
 }
 
-### UPDATE USER PARTIAL (maybe shouldn't allow username updates)
+### UPDATE USER PARTIAL (XSS Attack test)
 PATCH http://localhost:3000/api/users/2/profile HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc0NjYxMzQwN30.uu6R4sAwdOkz1JVMYLac9Y5GO35ff-mBf8bMLf61U1M
 
 {
-	"display_name": "New Name Joe",
-	"bio": "YOŒO%%OO% WEOOWOAWOE WOOOIWWIIIWEEE"
+	"display_name": "spanishdisplay",
+	"bio": null
+	# "display_name": "User <script>alert('XSS')</script>",
+	# "bio": "My bio with <img src=x onerror=alert('image_xss')>"
 }
 
 ### TEST AVATAR UPLOAD WITH CURL in terminal
