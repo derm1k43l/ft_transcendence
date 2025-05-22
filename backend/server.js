@@ -1,13 +1,12 @@
-// const fastify = require('fastify')( {logger: true} );
 const fastify = require('fastify')( {logger: true, trustProxy: true } );
-const fs = require('fs'); //optional
-const path = require('path'); //optional
+const fs = require('fs');
+const path = require('path');
 const Database = require('better-sqlite3');
 const jwt = require('@fastify/jwt');
 const fastifyMultipart = require('@fastify/multipart');
 const fastifyStatic = require('@fastify/static');
 
-const envPath = path.resolve(__dirname, '../.env'); // uncomment
+const envPath = path.resolve(__dirname, '../.env');
 require('dotenv').config({ path: envPath }); // load env vars
 
 const dbDir = path.resolve(__dirname, './db');
@@ -30,7 +29,7 @@ try {
 		process.exit(1); // Exit if it's unexpectedly in-memory
 	}
 
-	db.exec('PRAGMA foreign_keys = ON;'); // should be on by default
+	db.exec('PRAGMA foreign_keys = ON;'); // should be on by default, but just in case
 	db.exec('PRAGMA journal_mode = DELETE;');
 	db.exec('PRAGMA synchronous = FULL;');
 } catch (err) {
@@ -60,9 +59,9 @@ fastify.register(fastifyStatic, {
 });
 
 // Retrieve the JWT secret from environment variables
-const jwtSecret = process.env.JWT_SECRET; // uncomment
+const jwtSecret = process.env.JWT_SECRET;
 
-// Check if the secret is set // uncomment
+// Check if the secret is set
 if (!jwtSecret) {
 	console.error("FATAL ERROR: JWT_SECRET environment variable is not set!");
 	process.exit(1);
@@ -71,20 +70,20 @@ if (!jwtSecret) {
 // adding JWT registration
 fastify.register(jwt, {
 	// secret: 'notsurehowthisworksyet!', // should be a secure random key (for testing for now)
-	secret: jwtSecret, // uncomment
+	secret: jwtSecret,
 });
 
-const cors = require('@fastify/cors');
+// const cors = require('@fastify/cors');
 
 fastify.register(require('@fastify/cors'), {
 	origin: ['https://localhost', 'https://127.0.0.1'],
 	credentials: true,
 	methods: ['GET','POST','PUT','PATCH','DELETE'],
 	allowedHeaders: [
-	  'Origin','X-Requested-With','Accept',
-	  'Content-Type','Authorization'
+		'Origin','X-Requested-With','Accept',
+		'Content-Type','Authorization'
 	],
-  });
+});
 
 // register CORS
 // fastify.register(cors, {
@@ -243,11 +242,43 @@ fastify.after((err) => {
 	}
 });
 
+function sanitizeInput(str) {
+	return str
+		.replace(/&/g, '&amp;') // escape &
+		.replace(/</g, '&lt;') // escape <
+		.replace(/>/g, '&gt;') // escape >
+		.replace(/"/g, '&quot;') // escape "
+		.replace(/'/g, '&#x27;') // escape '
+		.replace(/\//g, '&#x2F;'); // escape /
+}
+
+fastify.addHook('preHandler', async (request, reply) => { // gets called before every single HTTP request, kinda like an interceptor
+	const sanitizeObject = (obj) => {
+		for (const key in obj) {
+		if (typeof obj[key] === 'string') {
+			obj[key] = sanitizeInput(obj[key]);
+		} else if (typeof obj[key] === 'object' && obj[key] !== null) {
+			sanitizeObject(obj[key]); // Recursively sanitize nested objects
+		}
+		}
+	};
+
+	if (request.body && typeof request.body === 'object') {
+		sanitizeObject(request.body);
+	}
+	if (request.query && typeof request.query === 'object') {
+		sanitizeObject(request.query);
+	}
+	if (request.params && typeof request.params === 'object') {
+		sanitizeObject(request.params);
+	}
+});
+
 // Register the database close logic with Fastify's onClose hook
 fastify.addHook('onClose', (instance, done) => {
 	console.log('Fastify shutting down, closing database connection...');
-	const db = instance.betterSqlite3; // Access the db instance
-	if (db && typeof db.close === 'function') {
+	const db = instance.betterSqlite3;
+	if (db && typeof db.close === 'function') { // checks if we can call db.close()
 		try {
 			db.close();
 			console.log('Database connection closed cleanly.');
@@ -264,23 +295,23 @@ fastify.addHook('onClose', (instance, done) => {
 
 // These handlers will catch signals like Ctrl+C and explicitly call fastify.close()
 process.on('SIGINT', () => { // SIGINT is Ctrl+C
-	console.log('SIGINT received, ensuring database connection is closed directly...'); // Log this
-	const db = fastify.betterSqlite3; // Access the db instance
+	console.log('SIGINT received, ensuring database connection is closed directly...');
+	const db = fastify.betterSqlite3;
 	if (db && typeof db.close === 'function') {
 		try {
-			 db.close(); // Close the connection synchronously
-			 console.log('Database connection closed cleanly directly from SIGINT handler.'); // Log this
+			db.close(); // Close the connection synchronously
+			console.log('Database connection closed cleanly directly from SIGINT handler.');
 		} catch (closeErr) {
-			 console.error('Error closing database connection directly from SIGINT handler:', closeErr); // Log this
+			console.error('Error closing database connection directly from SIGINT handler:', closeErr);
 		}
 	} else {
-		console.warn('Database instance not found for final close attempt in SIGINT handler.'); // Log this
+		console.warn('Database instance not found for final close attempt in SIGINT handler.');
 	}
 	process.exit(0); // Exit cleanly
 });
 
 process.on('SIGTERM', () => { // SIGTERM is sent by process managers like Docker, PM2
-	console.log('SIGTERM received, ensuring database connection is closed directly...'); // Log this
+	console.log('SIGTERM received, ensuring database connection is closed directly...');
 	const db = fastify.betterSqlite3;
 	if (db && typeof db.close === 'function') {
 		try {
