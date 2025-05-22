@@ -249,7 +249,6 @@ function sanitizeInput(str) {
 		.replace(/>/g, '&gt;') // escape >
 		.replace(/"/g, '&quot;') // escape "
 		.replace(/'/g, '&#x27;') // escape '
-		.replace(/\//g, '&#x2F;'); // escape /
 }
 
 fastify.addHook('preHandler', async (request, reply) => { // gets called before every single HTTP request, kinda like an interceptor
