@@ -16,7 +16,7 @@ const getAchievement = async (req, reply) => {
 	const authenticatedUserId = req.user.id;
 	try {
 		const db = req.server.betterSqlite3;
-		const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(id);
+		const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(id); // id is simply treated as data, not and SQL query, thus safe from SQL injections
 
 		if (!achievement) {
 			reply.code(404).send({ message: 'Achievement not found' });

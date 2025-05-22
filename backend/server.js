@@ -1,13 +1,13 @@
-const fastify = require('fastify')( {logger: true, trustProxy: true } );
-const fs = require('fs');
-const path = require('path');
-const Database = require('better-sqlite3');
-const jwt = require('@fastify/jwt');
-const fastifyMultipart = require('@fastify/multipart');
-const fastifyStatic = require('@fastify/static');
+const fastify = require('fastify')( {logger: true, trustProxy: true } ); //subject requirement
+const fs = require('fs'); //built in Node.js module, basic utility for system interactions
+const path = require('path'); // built in Node.js module, for path manipulation
+const Database = require('better-sqlite3'); // synchronous Node.js binding for SQLite, provides an interface to interact with SQLite database, only for communication, core engine is very much SQLite
+const jwt = require('@fastify/jwt'); // Fastify plugin for signing and verifying JSON Web Tokens
+const fastifyMultipart = require('@fastify/multipart'); // Fastify plugin for parsing multipart/form-data requests, used for file uploads
+const fastifyStatic = require('@fastify/static'); // Fastify plugin for serving static files like images from a specified directory
 
 const envPath = path.resolve(__dirname, '../.env');
-require('dotenv').config({ path: envPath }); // load env vars
+require('dotenv').config({ path: envPath }); // loads env vars from .env to process.env
 
 const dbDir = path.resolve(__dirname, './db');
 
@@ -75,7 +75,7 @@ fastify.register(jwt, {
 
 // const cors = require('@fastify/cors');
 
-fastify.register(require('@fastify/cors'), {
+fastify.register(require('@fastify/cors'), { // Fastify plugin that enables Cross-Origin Resource Sharing (CORS)
 	origin: ['https://localhost', 'https://127.0.0.1'],
 	credentials: true,
 	methods: ['GET','POST','PUT','PATCH','DELETE'],
