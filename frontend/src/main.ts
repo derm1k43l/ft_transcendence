@@ -501,13 +501,34 @@ function setupRouterTarget(): void {
 }
 
 // XSS simple sanitizer 
-function sanitizeInput(input: string | null | undefined): string {
+function sanitizeInput(input: string | undefined): string {
     if (!input) return '';
-    return input
+
+    // Step 1: Replace known dangerous characters
+    let sanitized = input
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;')
-        .trim();
+        .replace(/&#x27;/g, '&#039;')
+        .replace(/&#x2F;/g, '/')
+        .replace(/&#x3B;/g, ';')
+        .replace(/\u2028/g, '&#x2028;')
+        .replace(/\u2029/g, '&#x2029;')
+        .replace(/\x00/g, '&#x00;')
+        .replace(/\t/g, '&#x09;')
+        .replace(/\n/g, '&#x0A;')
+        .replace(/\r/g, '&#x0D;');
+
+    // Step 2: Handle obfuscated script injections using Unicode and other patterns
+    sanitized = sanitized.replace(/[\u200B\u200C\u200D\u200E\u200F\u202A\u202B\u202C\u202D\u202E]/g, ''); // Zero-width characters
+
+    // Step 3: Block potentially dangerous URLs
+    sanitized = sanitized.replace(/javascript:/gi, '')
+                         .replace(/data:/gi, '')
+                         .replace(/vbscript:/gi, '')
+                         .replace(/on\w+=/gi, '');
+
+    return sanitized.trim();
 }
